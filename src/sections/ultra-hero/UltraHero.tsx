@@ -26,7 +26,7 @@ export function UltraHero() {
       slug="ultra-hero"
       alt={ALT}
       pinVh={2.2}
-      smoothing={0.14}
+      smoothing={0.7}
       fit="contain"
       mediaHeight={0.9}
       videoLayout="stacked"

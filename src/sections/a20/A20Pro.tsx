@@ -30,7 +30,7 @@ export function A20Pro() {
         slug="a20-pro"
         alt={ALT}
         pinVh={2.4}
-        smoothing={0.14}
+        smoothing={0.7}
         fit="contain"
         mediaHeight={0.92}
         videoLayout="stacked"
