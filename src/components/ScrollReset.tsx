@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useLayoutEffect } from 'react';
 
 /**
  * A reload always starts at the top.
@@ -14,15 +14,16 @@ import { useEffect } from 'react';
  * 2. The nav wrote `#colors` into the URL, so a reload then jumped to that
  *    anchor as well.
  *
- * The nav no longer writes a hash (see lib/motion/scrollTo.ts). This turns off
- * the browser's own restoration, and strips any hash that is still in the URL
- * from an older session or a shared link before it can be acted on.
+ * The nav no longer writes a hash (see lib/motion/scrollTo.ts). This component
+ * turns off the browser's own restoration and strips any hash that is still in
+ * the URL from an older session or a shared link before it can be acted on.
  *
- * Runs in a layout effect timed before paint so the visitor never sees the
- * restored position flash past.
+ * Runs in a layout effect before paint (as a backup to the blocking script in
+ * layout.tsx) and ensures scroll stays at 0 through hydration and ScrollTrigger
+ * initialization.
  */
 export function ScrollReset() {
-  useEffect(() => {
+  useLayoutEffect(() => {
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';
     }
