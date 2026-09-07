@@ -70,6 +70,7 @@ export function useScrubSequence({
   const rendererRef = useRef<FrameRenderer | null>(null);
   const targetRef = useRef(0);
   const currentRef = useRef(0);
+  const lastFrameIndexRef = useRef(-1);
 
   // Stable for the life of the hook, so subscribing components can list it as
   // a dependency without re-subscribing on every render.
@@ -216,17 +217,38 @@ export function useScrubSequence({
        * ScrollTrigger updates on. Sharing the ticker means the canvas is painted
        * in the same frame as the pin it belongs to, so the frame on screen can
        * never be one tick out of step with the scroll position that chose it.
+       * 
+       * PERFORMANCE: Only redraw canvas when the quantized frame index changes.
+       * At 60fps ticker with smoothing=0.7, the interpolated position changes
+       * every frame, but the actual frame index might not change for 2-3 ticks.
+       * Skipping redundant draw calls reduces main-thread pressure during scroll.
        */
       const tick = () => {
         const target = targetRef.current;
         const next = currentRef.current + (target - currentRef.current) * smoothing;
-        currentRef.current = Math.abs(target - next) < 0.0005 ? target : next;
+        const settled = Math.abs(target - next) < 0.0005;
+        currentRef.current = settled ? target : next;
         progressRef.current = currentRef.current;
-        rendererRef.current?.draw(currentRef.current);
+
+        // Calculate quantized frame index (matches frameRenderer QUANT logic)
+        const renderer = rendererRef.current;
+        if (renderer) {
+          const p = Math.min(1, Math.max(0, currentRef.current));
+          // QUANT = frameCount * 16, same as in frameRenderer
+          const quant = Math.round(p * frameCount * 16);
+          
+          // Only redraw when frame index actually changes
+          if (quant !== lastFrameIndexRef.current || settled) {
+            lastFrameIndexRef.current = quant;
+            renderer.draw(currentRef.current);
+          }
+        }
+
+        // Notify listeners with interpolated position (not just on redraw)
         for (const listener of listeners) listener(currentRef.current);
 
-        // Settled: stop drawing until the scroll moves again.
-        if (currentRef.current === target) {
+        // Settled: stop ticking until scroll moves again
+        if (settled) {
           running = false;
           gsap.ticker.remove(tick);
         }
@@ -235,6 +257,8 @@ export function useScrubSequence({
       const kick = () => {
         if (running) return;
         running = true;
+        // Reset frame index to force first redraw after scroll pause
+        lastFrameIndexRef.current = -1;
         gsap.ticker.add(tick);
       };
 
