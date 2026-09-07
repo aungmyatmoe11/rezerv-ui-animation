@@ -18,6 +18,54 @@ import { navLink, sectionTop, settle } from './helpers/metrics';
 test.describe('nav', () => {
   test.describe.configure({ mode: 'serial' });
 
+  /** Nav item order must match document scroll order. */
+  test('items appear in scroll order, not priority order', async ({ page }) => {
+    await page.goto('/');
+    await settle(page);
+
+    // Scroll past hero so nav becomes visible
+    await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.2));
+    await page.waitForTimeout(500);
+
+    // Debug: check how many nav elements exist
+    const navCount = await page.evaluate(() =>
+      document.querySelectorAll('nav[aria-label="Sections"]').length
+    );
+    console.log('Nav elements found:', navCount);
+
+    // Debug: get all links
+    const allLinks = await page.evaluate(() => {
+      const navs = document.querySelectorAll('nav[aria-label="Sections"]');
+      return Array.from(navs).map((nav, i) => ({
+        navIndex: i,
+        links: Array.from(nav.querySelectorAll('a[data-nav-id]')).map(el => el.getAttribute('data-nav-id'))
+      }));
+    });
+    console.log('All nav links:', JSON.stringify(allLinks, null, 2));
+
+    // Get the nav link order from the main list only (select ul > li > a within the nav)
+    const navOrder = await page.evaluate(() =>
+      Array.from(document.querySelectorAll('nav[aria-label="Sections"] ul > li > a[data-nav-id]'))
+        .map((el) => el.getAttribute('data-nav-id'))
+        .filter(Boolean),
+    );
+
+    // Expected scroll order matching page.tsx component sequence
+    const expectedOrder = [
+      'colors',
+      'design',
+      'camera',
+      'performance',
+      'battery',
+      'ultra',
+      'compare-ultra',
+      'evidence',
+      'sources',
+    ];
+
+    expect(navOrder).toEqual(expectedOrder);
+  });
+
   test('is hidden over the hero and appears past it', async ({ page }) => {
     await page.goto('/');
     await settle(page);

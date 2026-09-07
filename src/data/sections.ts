@@ -17,15 +17,15 @@ export interface NavItem {
  * Mobile nav: priority='high' anchors show always; others collapse to overflow menu.
  */
 export const NAV_ITEMS: readonly NavItem[] = [
-  { id: 'colors', label: 'Colours', priority: 'high' },
-  { id: 'design', label: 'Design', priority: 'high' },
-  { id: 'camera', label: 'Camera', priority: 'high' },
-  { id: 'performance', label: 'Performance', priority: 'normal' },
-  { id: 'battery', label: 'Battery', priority: 'normal' },
-  { id: 'ultra', label: 'Ultra', priority: 'high' },
-  { id: 'compare-ultra', label: 'Compare', priority: 'normal' },
-  { id: 'evidence', label: 'Evidence', priority: 'normal' },
-  { id: 'sources', label: 'Sources', priority: 'high' },
+  { id: 'colors', label: 'Colors' },
+  { id: 'design', label: 'Design' },
+  { id: 'camera', label: 'Camera' },
+  { id: 'performance', label: 'Performance' },
+  { id: 'battery', label: 'Battery' },
+  { id: 'ultra', label: 'Ultra' },
+  { id: 'compare-ultra', label: 'Compare' },
+  { id: 'evidence', label: 'Evidence' },
+  { id: 'sources', label: 'Sources' },
 ] as const;
 
 export const DISCLAIMER =

@@ -157,6 +157,15 @@
 }
 
 /* ---- mobile nav condensing ----------------------------------------------- */
+.highPriority {
+  /* Always visible */
+}
+
+.normalPriority {
+  /* Hidden on mobile, visible on tablet+ */
+  @media (max-width: #{$bp-tablet - 1px}) { display: none; }
+}
+
 .desktopOnly {
   @media (max-width: #{$bp-tablet - 1px}) { display: none; }
 }

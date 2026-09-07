@@ -7,8 +7,6 @@ import { NAV_ITEMS } from '@/data/sections';
 import styles from './SiteNav.module.scss';
 
 const NAV_IDS = NAV_ITEMS.map((item) => item.id);
-const PRIMARY_ITEMS = NAV_ITEMS.filter((item) => item.priority === 'high');
-const OVERFLOW_ITEMS = NAV_ITEMS.filter((item) => item.priority !== 'high');
 
 /**
  * Fixed chrome that stays out of the way of the film.
@@ -112,25 +110,9 @@ export function SiteNav() {
 
         <nav aria-label="Sections" className={styles.links}>
           <ul className={styles.list} ref={listRef}>
-            {/* Desktop: show all; Mobile: show priority only */}
-            {PRIMARY_ITEMS.map((item) => (
+            {/* Render all items in document/scroll order */}
+            {NAV_ITEMS.map((item) => (
               <li key={item.id}>
-                <a
-                  className={styles.link}
-                  href={`#${item.id}`}
-                  data-nav-id={item.id}
-                  data-active={item.id === active}
-                  aria-current={item.id === active ? 'true' : undefined}
-                  onClick={(e) => onNavClick(e, item.id)}
-                >
-                  {item.label}
-                </a>
-              </li>
-            ))}
-            
-            {/* Desktop: show overflow items inline */}
-            {OVERFLOW_ITEMS.map((item) => (
-              <li key={item.id} className={styles.desktopOnly}>
                 <a
                   className={styles.link}
                   href={`#${item.id}`}
@@ -160,23 +142,27 @@ export function SiteNav() {
             </li>
           </ul>
 
-          {/* Mobile overflow menu */}
+          {/* Mobile overflow menu - hardcode list for now */}
           {overflowOpen && (
             <div ref={overflowRef} className={styles.overflowMenu}>
-              {OVERFLOW_ITEMS.map((item) => (
-                <a
-                  key={item.id}
-                  className={styles.overflowLink}
-                  href={`#${item.id}`}
-                  data-active={item.id === active}
-                  onClick={(e) => {
-                    onNavClick(e, item.id);
-                    setOverflowOpen(false);
-                  }}
-                >
-                  {item.label}
-                </a>
-              ))}
+              {['performance', 'battery', 'compare-ultra', 'evidence'].map((id) => {
+                const item = NAV_ITEMS.find(i => i.id === id);
+                if (!item) return null;
+                return (
+                  <a
+                    key={item.id}
+                    className={styles.overflowLink}
+                    href={`#${item.id}`}
+                    data-active={item.id === active}
+                    onClick={(e) => {
+                      onNavClick(e, item.id);
+                      setOverflowOpen(false);
+                    }}
+                  >
+                    {item.label}
+                  </a>
+                );
+              })}
             </div>
           )}
         </nav>
