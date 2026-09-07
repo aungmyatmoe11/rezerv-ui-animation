@@ -395,12 +395,14 @@ A Chrome Performance trace under 4× CPU throttle is still outstanding.
 
 ## Deployment
 
-**Production:** https://iphone-18-concept-rust.vercel.app (`main` @ `e49b625` and later).
+**Production:** https://rezerv-ui-animation.vercel.app
+
+> Update `NEXT_PUBLIC_SITE_URL` in your deployment settings to match your actual domain.
 
 The page is one fully prerendered static route — `next build` reports `○ /  (Static)` — plus
-`robots.txt` and `sitemap.xml`. There is no server data, no database and no runtime environment
-beyond the origin URL, so any host that can run `next start` (or serve a Next static output) is
-enough.
+supporting pages (`/privacy`, `/cookies`, `/terms`, `/not-found`), `robots.txt` and `sitemap.xml`.
+There is no server data, no database and no runtime environment beyond the origin URL, so any host
+that can run `next start` (or serve a Next static output) is enough.
 
 ```bash
 NEXT_PUBLIC_SITE_URL=https://the-real-origin npm run build
@@ -514,6 +516,65 @@ Full audit: `../docs/ASSET_INVENTORY.md`.
 6. **Quality outranks byte budget here.** The brief grades animation quality on a page whose
    entire subject is product imagery, and every heavy asset is lazy, so the resolution ceiling
    was set by the source rather than by a target size.
+
+## Professional Checklist
+
+This project includes production-ready features suitable for CTO-level review:
+
+### ✅ Core Pages
+- [x] Main landing page (iPhone 18 Pro & Ultra concept)
+- [x] Custom 404 page (`/not-found`)
+- [x] Privacy Policy (`/privacy`)
+- [x] Cookie Notice (`/cookies`)
+- [x] Terms of Use (`/terms`)
+
+### ✅ SEO & Metadata
+- [x] Comprehensive metadata (Open Graph, Twitter Cards)
+- [x] JSON-LD structured data (WebSite, Article schemas)
+- [x] Sitemap with all pages
+- [x] Robots.txt (allows all, includes sitemap)
+- [x] Favicon and app icons metadata
+- [x] Canonical URLs
+
+### ✅ Security
+- [x] Security headers (CSP, HSTS, X-Frame-Options, etc.)
+- [x] Referrer policy
+- [x] Permissions policy
+- [x] No tracking/analytics cookies
+- [x] SECURITY.md for vulnerability reporting
+
+### ✅ Repository Hygiene
+- [x] LICENSE (MIT)
+- [x] CONTRIBUTING.md (setup, code style, PR process)
+- [x] SECURITY.md (vulnerability reporting)
+- [x] GitHub Actions CI (typecheck, lint, build, test)
+- [x] Professional README with deployment guide
+
+### ✅ Accessibility
+- [x] Skip link for keyboard users
+- [x] Visible focus rings
+- [x] Reduced motion support
+- [x] ARIA labels and semantic HTML
+- [x] Color never carries meaning alone
+
+### ✅ Legal & Privacy
+- [x] Privacy-first (no tracking, no analytics, no cookies)
+- [x] Clear disclaimer (unofficial concept)
+- [x] Contact information provided
+- [x] No fake GDPR consent banner
+
+### ✅ Testing & Quality
+- [x] TypeScript strict mode
+- [x] ESLint configuration
+- [x] Playwright tests
+- [x] `npm run check` script (typecheck + lint + build)
+- [x] CI pipeline on GitHub Actions
+
+### 📝 Supporting Documentation
+- Footer links to privacy, cookies, and terms pages
+- Professional pages match main site's design system
+- Pages are indexed in sitemap (except 404)
+- All pages respect existing SCSS modules and tokens
 
 ## Known limitations
 

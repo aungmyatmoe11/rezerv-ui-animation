@@ -1,0 +1,137 @@
+@use '@/styles/abstracts' as *;
+
+.container {
+  min-height: 100vh;
+  background: var(--ink);
+  padding: 64px 24px;
+
+  @include tablet-up {
+    padding: 80px 48px;
+  }
+}
+
+.shell {
+  @include shell;
+  max-width: $max-reading;
+  margin-inline: auto;
+}
+
+.backLink {
+  @include t-mono;
+  display: inline-block;
+  color: var(--bone-dim);
+  margin-bottom: 32px;
+  text-transform: uppercase;
+  border-bottom: 1px solid transparent;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+
+  &:hover {
+    color: var(--bone);
+    border-color: var(--bone);
+  }
+}
+
+.heading {
+  @include t-section;
+  color: var(--bone);
+  margin-bottom: 16px;
+}
+
+.updated {
+  @include t-eyebrow;
+  color: var(--bone-dim);
+  margin-bottom: 48px;
+}
+
+.section {
+  margin-bottom: 40px;
+
+  &:last-of-type {
+    margin-bottom: 64px;
+  }
+}
+
+.subheading {
+  @include t-sub;
+  color: var(--bone);
+  margin-bottom: 12px;
+}
+
+.body {
+  @include t-body;
+  color: var(--bone-faint);
+  margin-bottom: 16px;
+
+  strong {
+    color: var(--bone-dim);
+    font-weight: 500;
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.95em;
+    color: var(--bone-dim);
+    background: var(--ink-raised);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.list {
+  @include t-body;
+  color: var(--bone-faint);
+  margin: 16px 0;
+  padding-left: 24px;
+
+  li {
+    margin-bottom: 8px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.externalLink {
+  color: var(--bone-dim);
+  border-bottom: 1px solid var(--rule);
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+
+  &:hover {
+    color: var(--bone);
+    border-color: var(--bone);
+  }
+}
+
+.footer {
+  @include t-mono;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding-top: 32px;
+  border-top: 1px solid var(--rule-soft);
+  color: var(--bone-dim);
+}
+
+.footerLink {
+  color: var(--bone-dim);
+  transition: color var(--dur-fast) var(--ease-out);
+
+  &:hover {
+    color: var(--bone);
+  }
+}
+
+.divider {
+  color: var(--bone-dim);
+  opacity: 0.4;
+}
