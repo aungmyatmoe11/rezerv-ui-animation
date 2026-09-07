@@ -116,7 +116,7 @@ test.describe('scroll', () => {
     const path = await recordScrollPath(
       page,
       async () => {
-        await navLink(page, 'Colours').click();
+        await navLink(page, 'Colors').click();
       },
       1800,
     );
