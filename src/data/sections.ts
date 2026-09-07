@@ -10,23 +10,23 @@ export interface NavItem {
  * Only sections that actually exist on the page. Extended as each wave lands,
  * so the nav can never point at an anchor that is not there.
  *
- * Wave 2 adds the Pro act: the spec's nav order (§40) is Design, Camera,
- * Performance, Battery, then Compare. Ultra, Evidence and Sources arrive with
- * waves 3 and 4.
+ * Order matches document scroll order in page.tsx. Not all mounted sections
+ * have nav items (e.g., DynamicIsland, Display, Aperture, C2Modem are skipped).
  *
  * Mobile nav: priority='high' anchors show always; others collapse to overflow menu.
  */
 export const NAV_ITEMS: readonly NavItem[] = [
-  { id: 'colors', label: 'Colors' },
-  { id: 'design', label: 'Design' },
-  { id: 'camera', label: 'Camera' },
-  { id: 'performance', label: 'Performance' },
-  { id: 'battery', label: 'Battery' },
-  { id: 'ultra', label: 'Ultra' },
-  { id: 'compare-ultra', label: 'Compare' },
-  { id: 'evidence', label: 'Evidence' },
-  { id: 'sources', label: 'Sources' },
-] as const;
+  { id: 'colors', label: 'Colors', priority: 'high' },
+  { id: 'design', label: 'Design', priority: 'high' },
+  { id: 'camera', label: 'Camera', priority: 'high' },
+  { id: 'performance', label: 'Performance', priority: 'normal' },
+  { id: 'battery', label: 'Battery', priority: 'normal' },
+  { id: 'compare', label: 'Compare', priority: 'normal' },
+  { id: 'ultra', label: 'Ultra', priority: 'high' },
+  { id: 'compare-ultra', label: 'Compare', priority: 'normal' },
+  { id: 'evidence', label: 'Evidence', priority: 'normal' },
+  { id: 'sources', label: 'Sources', priority: 'high' },
+];
 
 export const DISCLAIMER =
   'Unofficial concept project. Not affiliated with, sponsored by, or endorsed by Apple Inc. ' +

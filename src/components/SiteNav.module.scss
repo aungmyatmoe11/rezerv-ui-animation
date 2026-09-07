@@ -157,12 +157,13 @@
 }
 
 /* ---- mobile nav condensing ----------------------------------------------- */
-.highPriority {
-  /* Always visible */
+/* Hide normal-priority items on mobile using data attribute selector */
+.list li[data-priority="normal"] {
+  @media (max-width: #{$bp-tablet - 1px}) { display: none; }
 }
 
 .normalPriority {
-  /* Hidden on mobile, visible on tablet+ */
+  /* Hidden on mobile (below tablet), visible on tablet+ */
   @media (max-width: #{$bp-tablet - 1px}) { display: none; }
 }
 

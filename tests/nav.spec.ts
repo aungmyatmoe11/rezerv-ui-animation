@@ -50,13 +50,14 @@ test.describe('nav', () => {
         .filter(Boolean),
     );
 
-    // Expected scroll order matching page.tsx component sequence
+    // Expected scroll order matching page.tsx component sequence with nav items
     const expectedOrder = [
       'colors',
       'design',
       'camera',
       'performance',
       'battery',
+      'compare',
       'ultra',
       'compare-ultra',
       'evidence',
@@ -92,7 +93,7 @@ test.describe('nav', () => {
     });
     await page.waitForTimeout(600);
 
-    const ids = ['colors', 'design', 'camera', 'performance', 'battery', 'ultra', 'evidence', 'sources'];
+    const ids = ['colors', 'design', 'camera', 'performance', 'battery', 'compare', 'ultra', 'compare-ultra', 'evidence', 'sources'];
 
     for (const id of ids) {
       const top = await sectionTop(page, id);

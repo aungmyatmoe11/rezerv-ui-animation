@@ -8,6 +8,11 @@ import styles from './SiteNav.module.scss';
 
 const NAV_IDS = NAV_ITEMS.map((item) => item.id);
 
+// Debug: log NAV_ITEMS order
+if (typeof window !== 'undefined') {
+  console.log('NAV_ITEMS order:', NAV_ITEMS.map(i => i.id).join(', '));
+}
+
 /**
  * Fixed chrome that stays out of the way of the film.
  *
@@ -110,21 +115,37 @@ export function SiteNav() {
 
         <nav aria-label="Sections" className={styles.links}>
           <ul className={styles.list} ref={listRef}>
-            {/* Render all items in document/scroll order */}
-            {NAV_ITEMS.map((item) => (
-              <li key={item.id}>
-                <a
-                  className={styles.link}
-                  href={`#${item.id}`}
-                  data-nav-id={item.id}
-                  data-active={item.id === active}
-                  aria-current={item.id === active ? 'true' : undefined}
-                  onClick={(e) => onNavClick(e, item.id)}
-                >
-                  {item.label}
-                </a>
-              </li>
-            ))}
+            {/* Render all items in document/scroll order - hardcoded to verify order */}
+            <li data-priority="high">
+              <a className={styles.link} href="#colors" data-nav-id="colors" data-active={'colors' === active} aria-current={'colors' === active ? 'true' : undefined} onClick={(e) => onNavClick(e, 'colors')}>Colors</a>
+            </li>
+            <li data-priority="high">
+              <a className={styles.link} href="#design" data-nav-id="design" data-active={'design' === active} aria-current={'design' === active ? 'true' : undefined} onClick={(e) => onNavClick(e, 'design')}>Design</a>
+            </li>
+            <li data-priority="high">
+              <a className={styles.link} href="#camera" data-nav-id="camera" data-active={'camera' === active} aria-current={'camera' === active ? 'true' : undefined} onClick={(e) => onNavClick(e, 'camera')}>Camera</a>
+            </li>
+            <li data-priority="normal">
+              <a className={styles.link} href="#performance" data-nav-id="performance" data-active={'performance' === active} aria-current={'performance' === active ? 'true' : undefined} onClick={(e) => onNavClick(e, 'performance')}>Performance</a>
+            </li>
+            <li data-priority="normal">
+              <a className={styles.link} href="#battery" data-nav-id="battery" data-active={'battery' === active} aria-current={'battery' === active ? 'true' : undefined} onClick={(e) => onNavClick(e, 'battery')}>Battery</a>
+            </li>
+            <li data-priority="normal">
+              <a className={styles.link} href="#compare" data-nav-id="compare" data-active={'compare' === active} aria-current={'compare' === active ? 'true' : undefined} onClick={(e) => onNavClick(e, 'compare')}>Compare</a>
+            </li>
+            <li data-priority="high">
+              <a className={styles.link} href="#ultra" data-nav-id="ultra" data-active={'ultra' === active} aria-current={'ultra' === active ? 'true' : undefined} onClick={(e) => onNavClick(e, 'ultra')}>Ultra</a>
+            </li>
+            <li data-priority="normal">
+              <a className={styles.link} href="#compare-ultra" data-nav-id="compare-ultra" data-active={'compare-ultra' === active} aria-current={'compare-ultra' === active ? 'true' : undefined} onClick={(e) => onNavClick(e, 'compare-ultra')}>Compare</a>
+            </li>
+            <li data-priority="normal">
+              <a className={styles.link} href="#evidence" data-nav-id="evidence" data-active={'evidence' === active} aria-current={'evidence' === active ? 'true' : undefined} onClick={(e) => onNavClick(e, 'evidence')}>Evidence</a>
+            </li>
+            <li data-priority="high">
+              <a className={styles.link} href="#sources" data-nav-id="sources" data-active={'sources' === active} aria-current={'sources' === active ? 'true' : undefined} onClick={(e) => onNavClick(e, 'sources')}>Sources</a>
+            </li>
 
             {/* Mobile: overflow menu button */}
             <li className={styles.mobileOnly}>
@@ -142,27 +163,23 @@ export function SiteNav() {
             </li>
           </ul>
 
-          {/* Mobile overflow menu - hardcode list for now */}
+          {/* Mobile overflow menu - normal priority items in scroll order */}
           {overflowOpen && (
             <div ref={overflowRef} className={styles.overflowMenu}>
-              {['performance', 'battery', 'compare-ultra', 'evidence'].map((id) => {
-                const item = NAV_ITEMS.find(i => i.id === id);
-                if (!item) return null;
-                return (
-                  <a
-                    key={item.id}
-                    className={styles.overflowLink}
-                    href={`#${item.id}`}
-                    data-active={item.id === active}
-                    onClick={(e) => {
-                      onNavClick(e, item.id);
-                      setOverflowOpen(false);
-                    }}
-                  >
-                    {item.label}
-                  </a>
-                );
-              })}
+              {NAV_ITEMS.filter((item) => item.priority === 'normal').map((item) => (
+                <a
+                  key={item.id}
+                  className={styles.overflowLink}
+                  href={`#${item.id}`}
+                  data-active={item.id === active}
+                  onClick={(e) => {
+                    onNavClick(e, item.id);
+                    setOverflowOpen(false);
+                  }}
+                >
+                  {item.label}
+                </a>
+              ))}
             </div>
           )}
         </nav>
