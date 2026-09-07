@@ -55,7 +55,7 @@ export function useScrubSequence({
   frameCount,
   eager = false,
   pinVh = 2,
-  smoothing = 0.18,
+  smoothing = 0.7,
   fit = 'cover',
 }: UseScrubSequenceOptions): UseScrubSequenceResult {
   const sectionRef = useRef<HTMLElement | null>(null);
