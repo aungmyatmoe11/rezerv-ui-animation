@@ -16,17 +16,16 @@ const MAX_DPR = 2;
  *
  * Two decisions carry the performance of this whole page:
  *
- * 1. ADJACENT-FRAME BLENDING. We cross-dissolve frame N and N+1 by the
- *    fractional part of the position. That makes a sparse sequence read as
- *    continuous motion, which is what lets the hero work at all — only 1.25s of
- *    that clip is usable before a baked-in wordmark fades in, so there are just
- *    38 frames to play with. It also let every sequence drop ~35% of its frames
- *    (and bytes) with no visible stepping.
+ * 1. NEAREST FRAME. We paint one still at a time. Adjacent-frame cross-dissolve
+ *    made sparse JPEG sets look continuous, but on a rotating product (especially
+ *    a thin edge-on phone) it stacked two poses and read as a coloured ghost.
+ *    Every scrub section uses the same rule so Display, Colors, Camera, Fold,
+ *    and the rest stay consistent.
  *
- * 2. REPAINT GATING. The canvas is only touched when the quantised position
- *    actually moves. Scroll events fire far more often than the image changes,
- *    and an ungated drawImage per event is the usual reason these scrubs drop
- *    frames on a trackpad fling.
+ * 2. REPAINT GATING. The canvas is only touched when the nearest frame actually
+ *    changes. Scroll events fire far more often than the image changes, and an
+ *    ungated drawImage per event is the usual reason these scrubs drop frames
+ *    on a trackpad fling.
  */
 export interface FrameRendererOptions {
   /**
@@ -55,11 +54,9 @@ export function createFrameRenderer(
   ctx.imageSmoothingQuality = 'low';
 
   const count = frames.images.length;
-  // Sub-steps per frame for the blend. 16 is far beyond perceptual need and
-  // still skips the vast majority of repaints.
-  const QUANT = count * 16;
+  const lastIndex = Math.max(1, count - 1);
 
-  let lastQuant = -1;
+  let lastFrame = -1;
   let cssW = 0;
   let cssH = 0;
 
@@ -82,28 +79,17 @@ export function createFrameRenderer(
     if (count === 0 || cssW === 0) return;
 
     const p = Math.min(1, Math.max(0, progress));
-    const quant = Math.round(p * QUANT);
-    if (!force && quant === lastQuant) return;
-    lastQuant = quant;
-
-    const exact = (quant / QUANT) * (count - 1);
-    const i = Math.min(count - 1, Math.floor(exact));
-    const frac = exact - i;
-
-    const a = frames.images[i];
-    const b = frames.images[i + 1];
+    const i = Math.min(count - 1, Math.max(0, Math.round(p * lastIndex)));
+    if (!force && i === lastFrame) return;
+    lastFrame = i;
 
     // Under 'cover' the opaque first draw always repaints the whole canvas, so no
     // clear is needed - that saves a full-surface fill on every repaint. Under
     // 'contain' the letterbox bars fall outside the image, so the previous frame
     // would smear there; the context is alpha:false, so clearRect paints black.
     if (fit === 'contain') ctx!.clearRect(0, 0, cssW, cssH);
-    if (a) paintCover(a, 1);
-    // The blend threshold is the difference between drawing one native-resolution
-    // image per paint and drawing two. At ~17fps sequences the sequence is dense
-    // enough that skipping a barely-visible 6% cross-dissolve is invisible, and
-    // it removes the second full-frame downscale from most paints.
-    if (b && frac > 0.06) paintCover(b, frac);
+    const img = frames.images[i];
+    if (img) paintCover(img, 1);
     ctx!.globalAlpha = 1;
   }
 
@@ -119,11 +105,10 @@ export function createFrameRenderer(
      *
      * The frames are 1600px wide. On a 1440px stage at DPR 2 the old cap gave a
      * 2880px backing store, into which `cover`/`contain` then drew the frame at
-     * roughly 3600px — a 2.25x upscale of a 1600px JPEG, twice per painted frame
-     * for the cross-dissolve. That is ~13 megapixels of fill per frame spent
-     * inventing detail that is not in the source, and it was the largest single
-     * cost on the page: measured median frame time through the pinned run was
-     * 50ms, i.e. 20fps.
+     * roughly 3600px — a 2.25x upscale of a 1600px JPEG. That is ~13 megapixels
+     * of fill spent inventing detail that is not in the source, and it was the
+     * largest single cost on the page: measured median frame time through the
+     * pinned run was 50ms, i.e. 20fps.
      *
      * Capping the ratio at the point where the frame lands 1:1 removes the
      * upscale entirely. Nothing is lost — there is no detail above native
@@ -159,9 +144,9 @@ export function createFrameRenderer(
     style.setProperty('--pic-x', `${Math.max(0, (cssW - drawnW) / 2)}px`);
     style.setProperty('--pic-y', `${Math.max(0, (cssH - drawnH) / 2)}px`);
 
-    const previous = lastQuant;
-    lastQuant = -1;
-    draw(previous <= 0 ? 0 : previous / QUANT, true);
+    const previous = lastFrame;
+    lastFrame = -1;
+    draw(previous <= 0 ? 0 : previous / lastIndex, true);
   }
 
   function destroy() {

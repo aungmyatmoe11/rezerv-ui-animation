@@ -1,5 +1,7 @@
 'use client';
 
+import { MEDIA_REV } from '@/data/media';
+
 export interface FrameSet {
   images: HTMLImageElement[];
   width: number;
@@ -17,7 +19,7 @@ export interface LoadFramesOptions {
 }
 
 export function framePath(slug: string, index: number): string {
-  return `/frames/${slug}/frame_${String(index + 1).padStart(4, '0')}.jpg`;
+  return `/frames/${slug}/frame_${String(index + 1).padStart(4, '0')}.jpg?v=${MEDIA_REV}`;
 }
 
 function loadOne(src: string, signal?: AbortSignal): Promise<HTMLImageElement> {

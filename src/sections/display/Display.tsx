@@ -45,11 +45,8 @@ function DisplayPanel() {
   /**
    * Cue positions က ဖလင်နှင့်ချိန်ထားသည်၊ နာရီနှင့်မဟုတ်။
    *
-   * ယခင်က 0.5 / 0.68 ဖြစ်ခဲ့သည် — အကြောင်းမှာ ဖလင်၏ရှေ့ပိုင်းထက်ဝက်သည်
-   * colors sequence ကို ထပ်ဖွင့်နေခြင်းဖြစ်၍ ဤ section ၏ကိုယ်ပိုင်အကြောင်းအရာ
-   * သည် တစ်ဝက်ပြီးမှစခဲ့သည်။ ထိုအထပ်ကို FRAME_STARTS ဖြင့်ဖြတ်လိုက်ပြီဖြစ်၍
-   * cue များကို ဖလင်အသစ်၏ အချိုးအစားနှင့်ပြန်ချိန်ထားသည် — display သည်
-   * ~0.41 တွင် ရှေ့သို့ရောက်လာသဖြင့် stat များက ထိုအချိန်တွင်ဝင်လာသည်။
+   * Sequence တစ်ခုလုံးသည် unique Display window (three-up → 6.9″ panel)။
+   * 6.9″ က ~0.45 တွင်ရှေ့ရောက်သဖြင့် stats ကို ထိုအနီးတွင်ဝင်စေသည်။
    */
   const mode = useScrubTimeline(ref, (tl, root) => {
     const stats = root.querySelectorAll<HTMLElement>('[data-stat]');
@@ -59,7 +56,7 @@ function DisplayPanel() {
         stats,
         { opacity: 0, y: 14 },
         { opacity: 1, y: 0, duration: 0.12, stagger: 0.03 },
-        0.34,
+        0.42,
       );
     }
     if (note) tl.fromTo(note, { opacity: 0 }, { opacity: 1, duration: 0.1 }, 0.62);
