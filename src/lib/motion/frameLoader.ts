@@ -8,6 +8,8 @@ export interface FrameSet {
 
 export interface LoadFramesOptions {
   signal?: AbortSignal;
+  /** ဖိုင်များထဲမှ စတင်ဖတ်မည့် ဖရိမ် (0-based). See FRAME_STARTS in data/media. */
+  startFrame?: number;
   onProgress?: (loaded: number, total: number) => void;
   /** Parallel requests. HTTP/2 multiplexes, but a cap keeps the hero set from
    *  starving the poster images that paint the rest of the page. */
@@ -74,7 +76,7 @@ function loadOne(src: string, signal?: AbortSignal): Promise<HTMLImageElement> {
 export async function loadFrames(
   slug: string,
   count: number,
-  { signal, onProgress, concurrency = 12 }: LoadFramesOptions = {},
+  { signal, onProgress, concurrency = 12, startFrame = 0 }: LoadFramesOptions = {},
 ): Promise<FrameSet> {
   const images = new Array<HTMLImageElement>(count);
   let loaded = 0;
@@ -83,7 +85,7 @@ export async function loadFrames(
   async function worker(): Promise<void> {
     while (cursor < count) {
       const i = cursor++;
-      images[i] = await loadOne(framePath(slug, i), signal);
+      images[i] = await loadOne(framePath(slug, startFrame + i), signal);
       loaded += 1;
       onProgress?.(loaded, count);
     }

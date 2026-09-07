@@ -42,7 +42,7 @@
   border: 1px solid var(--rule);
   border-radius: 10px;
   background: rgba(6, 6, 8, 0.86);
-  will-change: opacity, transform;
+  @include will-change-while-pinned(opacity, transform);
 }
 
 .calloutIndex {
@@ -72,7 +72,7 @@
   width: 1px;
   background: rgba(237, 234, 228, 0.55);
   transform-origin: top center;
-  will-change: transform;
+  @include will-change-while-pinned(transform);
 
   &::after {
     content: '';

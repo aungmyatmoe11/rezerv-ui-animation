@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { MOBILE_CLIP_WIDTH } from '../src/data/media';
-import { navLink, settle, traceDocumentHeight } from './helpers/metrics';
+import { clickNav, navLink, sectionTop, settle, traceDocumentHeight } from './helpers/metrics';
 
 /**
  * The motion tiers, and the promise each one makes.
@@ -13,6 +13,24 @@ import { navLink, settle, traceDocumentHeight } from './helpers/metrics';
  * every other film on that tier.
  */
 test.describe('responsive', () => {
+  test('the loading count travels instead of jumping to 100', async ({ page }) => {
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    const bar = page.getByRole('progressbar', { name: 'Loading the iPhone 18 Pro sequence' });
+    await expect(bar).toBeVisible();
+
+    const samples: number[] = [];
+    const t0 = Date.now();
+    while (Date.now() - t0 < 900) {
+      samples.push(Number((await bar.getAttribute('aria-valuenow')) ?? '0'));
+      await page.waitForTimeout(120);
+    }
+
+    const early = samples[0] ?? 0;
+    const later = samples[samples.length - 1] ?? 0;
+    expect(early, `first sample was ${early}; the count must not flash 100`).toBeLessThan(85);
+    expect(later, `count did not climb (${samples.join(', ')})`).toBeGreaterThan(early);
+  });
+
   test('every film uses the same treatment within a tier', async ({ page }, testInfo) => {
     test.setTimeout(180_000);
     await page.goto('/');
@@ -154,6 +172,156 @@ test.describe('responsive', () => {
     const items = await page.locator('[data-nav-id]').count();
     expect(items).toBe(9);
   });
+
+  test('mobile capsules sit side by side without overlapping', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'mobile');
+    await page.goto('/');
+    await settle(page);
+    await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.5));
+    await page.waitForTimeout(500);
+
+    const wordmark = page.locator('header a[href="#top"]');
+    const links = page.locator('nav[aria-label="Sections"]');
+    const a = await wordmark.boundingBox();
+    const b = await links.boundingBox();
+    expect(a).not.toBeNull();
+    expect(b).not.toBeNull();
+
+    const overlapX = Math.min(a!.x + a!.width, b!.x + b!.width) - Math.max(a!.x, b!.x);
+    const overlapY = Math.min(a!.y + a!.height, b!.y + b!.height) - Math.max(a!.y, b!.y);
+    expect(overlapX, 'wordmark and sections capsule overlap horizontally').toBeLessThanOrEqual(0);
+    expect(overlapY > 0, 'capsules should share a row').toBe(true);
+    expect(b!.x + b!.width).toBeLessThanOrEqual(page.viewportSize()!.width + 1);
+    expect(b!.height, 'overflow menu must not inflate the capsule').toBeLessThan(72);
+
+    await page.getByRole('button', { name: 'More sections' }).click();
+    const menu = page.locator('#nav-overflow');
+    await expect(menu).toBeVisible();
+    await expect(menu.getByRole('link', { name: 'Sources', exact: true })).toBeVisible();
+  });
+
+  test('the sections capsule hugs its items instead of filling the row', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name === 'mobile', 'compact items already fill the phone row');
+    await page.goto('/');
+    await settle(page);
+    await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.5));
+    await page.waitForTimeout(500);
+
+    const links = page.locator('nav[aria-label="Sections"]');
+    const box = await links.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.width, 'sections capsule must not grow to fill leftover row').toBeLessThan(
+      page.viewportSize()!.width * 0.62,
+    );
+
+    const more = page.getByRole('button', { name: 'More sections' });
+    if (testInfo.project.name === 'tablet') {
+      await expect(more).toBeVisible();
+      await more.click();
+      await expect(page.locator('#nav-overflow').getByRole('link', { name: 'Sources', exact: true })).toBeVisible();
+    } else {
+      await expect(more).toBeHidden();
+      await expect(navLink(page, 'Sources')).toBeVisible();
+    }
+  });
+
+  test('the video tier does not prompt visitors to scroll-scrub', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'mobile', 'scrub stages keep the hint');
+    test.setTimeout(120_000);
+    await page.goto('/');
+    await settle(page);
+
+    const hints = page.getByText('Scroll to turn');
+    const count = await hints.count();
+    expect(count, 'the copy is still in the DOM on at least one overlay').toBeGreaterThan(0);
+    for (let i = 0; i < count; i += 1) {
+      await expect(hints.nth(i), `hint ${i}`).toBeHidden();
+    }
+  });
+
+  test('the A20 disclosure remains readable on the video tier', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'mobile', 'scrub overlay is pinned on wider viewports');
+    test.setTimeout(120_000);
+    await page.goto('/');
+    await settle(page);
+
+    const heading = page.getByRole('heading', { name: '2nm changes the equation.' });
+    await heading.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(400);
+
+    const caveat = page.getByText('Seven claims are rendered into the footage');
+    await expect(caveat).toBeVisible();
+
+    const badge = page.getByText('Concept render — figures unconfirmed');
+    await expect(badge).toBeVisible();
+    const badgePosition = await page.locator('#performance [data-mode]').evaluate((panel) => {
+      const corner = panel.firstElementChild as HTMLElement | null;
+      return corner ? getComputedStyle(corner).position : '';
+    });
+    expect(badgePosition, 'badge must sit in the copy column, not over the clip').toBe('static');
+  });
+
+  test('display overlay stats stay hidden until the film cues them', async ({ page }, testInfo) => {
+    await page.goto('/');
+    await settle(page);
+
+    const top = await sectionTop(page, 'display');
+    await page.evaluate((y) => window.scrollTo(0, y), top);
+    await page.waitForTimeout(500);
+
+    const opacity = await page.locator('#display [data-stat]').first().evaluate((el) =>
+      Number(getComputedStyle(el).opacity),
+    );
+
+    if (testInfo.project.name === 'mobile') {
+      expect(opacity, 'video tier shows the stats in the flow').toBeGreaterThan(0.9);
+    } else {
+      expect(opacity, 'scrub rest must not flash the stats at pin start').toBeLessThan(0.1);
+    }
+  });
+
+  test('pinned overlays promote will-change only while the stage is pinned', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name === 'mobile', 'video tier does not pin');
+    await page.goto('/');
+    await settle(page);
+
+    const resting = await page.evaluate(() => {
+      const label = document.querySelector<HTMLElement>('[data-callout] [data-label]');
+      const stage = label?.closest('section');
+      return {
+        pinned: stage?.dataset.pinned ?? '',
+        willChange: label ? getComputedStyle(label).willChange : '',
+      };
+    });
+    expect(resting.pinned).not.toBe('true');
+    expect(resting.willChange === 'auto' || resting.willChange === 'none').toBe(true);
+
+    await page.evaluate(() => {
+      const stage = document.querySelector('[data-callout]')?.closest('section');
+      if (!stage) return;
+      const spacer = stage.parentElement?.classList.contains('pin-spacer')
+        ? stage.parentElement
+        : stage;
+      const y = spacer.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo(0, y + 24);
+    });
+    await page.waitForFunction(
+      () => document.querySelector('[data-callout]')?.closest('section')?.dataset.pinned === 'true',
+      null,
+      { timeout: 8_000 },
+    );
+
+    const active = await page.evaluate(() => {
+      const label = document.querySelector<HTMLElement>('[data-callout] [data-label]');
+      const stage = label?.closest('section');
+      return {
+        pinned: stage?.dataset.pinned ?? '',
+        willChange: label ? getComputedStyle(label).willChange : '',
+      };
+    });
+    expect(active.pinned).toBe('true');
+    expect(active.willChange).toMatch(/opacity|transform/);
+  });
 });
 
 /**
@@ -203,7 +371,7 @@ test.describe('reduced motion', () => {
     await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.5));
     await page.waitForTimeout(400);
 
-    await navLink(page, 'Sources').click();
+    await clickNav(page, 'Sources');
     await page.waitForTimeout(500);
 
     const el = page.locator('#sources');

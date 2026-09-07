@@ -17,6 +17,7 @@ $max-reading: 820px;
 // CSS custom properties in global.scss so GSAP and CSS never drift apart.
 $ease-out:  cubic-bezier(0.22, 1, 0.36, 1);
 $ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+$dur-hover: 160ms;
 $dur-fast:  180ms;
 $dur-base:  420ms;
 $dur-slow:  900ms;

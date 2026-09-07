@@ -61,18 +61,34 @@ export function IslandGauge() {
           0.75,
         );
 
-      ScrollTrigger.create(
+      const st = ScrollTrigger.create(
         scrubbed
-          ? { trigger: root, start: 'top 80%', end: 'top 30%', scrub: 0.6, animation: tl }
+          ? {
+              trigger: root,
+              start: 'top 80%',
+              end: 'top 30%',
+              scrub: 0.6,
+              animation: tl,
+              onToggle: (self) => {
+                gsap.set(pill, { willChange: self.isActive ? 'transform' : 'auto' });
+              },
+            }
           : {
               trigger: root,
               start: 'top 85%',
               once: true,
               onEnter: () => {
+                gsap.set(pill, { willChange: 'transform' });
+                tl.eventCallback('onComplete', () => gsap.set(pill, { willChange: 'auto' }));
                 tl.play();
               },
             },
       );
+
+      return () => {
+        gsap.set(pill, { willChange: 'auto' });
+        st.kill();
+      };
     },
     { scope: ref, dependencies: [policy.tier, policy.canPin] },
   );

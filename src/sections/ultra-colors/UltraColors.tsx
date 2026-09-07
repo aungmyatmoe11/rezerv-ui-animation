@@ -51,7 +51,7 @@ export function UltraColors() {
         slug="ultra-colors"
         alt={ALT}
         pinVh={1.9}
-        smoothing={0.7}
+        smoothing={0.15}
         fit="contain"
         mediaHeight={0.9}
         videoLayout="stacked"

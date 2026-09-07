@@ -23,15 +23,29 @@
     border-color var(--dur-fast) var(--ease-out),
     background-color var(--dur-fast) var(--ease-out);
 
-  &:hover {
-    color: var(--bone);
-    border-color: rgba(237, 234, 228, 0.34);
-    background: rgba(8, 8, 10, 0.9);
+  @include hover-motion {
+    &:hover {
+      color: var(--bone);
+      border-color: rgba(237, 234, 228, 0.34);
+      background: rgba(8, 8, 10, 0.9);
+    }
   }
+
+  &:active .face { transform: scale(0.97); }
 
   &[aria-hidden='true'] { pointer-events: none; }
 
   &:focus-visible { @include focus-ring; }
+}
+
+/* GSAP owns transform on the button itself, so press feedback lives here. */
+.face {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  transition: transform var(--dur-hover) var(--ease-out);
 }
 
 .ring {

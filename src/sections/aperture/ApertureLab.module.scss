@@ -29,9 +29,12 @@
   position: absolute;
   inset: 0;
   opacity: 0;
-  transition: opacity var(--dur-base) var(--ease-out);
+  transform-origin: 50% 48%;
   pointer-events: none;
 
+  /* SSR / first paint only. GSAP writes inline opacity on hydration and owns
+     every scene change after that — a CSS transition here would snap when
+     `data-active` flips, then fight the timeline. */
   &[data-active='true'] { opacity: 1; }
 }
 
@@ -91,6 +94,29 @@
   @include tablet-up { width: 96px; height: 96px; }
 }
 
+/* Drag မဟုတ်သည့်အခါမှသာ ease လုပ်သည်။
+   Scene ပြောင်းလိုက်လျှင် mask နှင့် focus box သည် နေရာအသစ်သို့ ချက်ချင်း
+   ခုန်ခဲ့သည်။ Drag အတွင်းတွင်မူ တန်ဖိုးများသည် လက်ချောင်းနောက်ကို တိုက်ရိုက်
+   လိုက်ရမည်ဖြစ်၍ transition က နောက်ကျစေမည် — ထို့ကြောင့် gate လုပ်ထားသည်။
+   Preset (f/2.0 စသည်) နှိပ်လျှင်လည်း ease ဖြစ်မည်၊ ၎င်းသည်လိုချင်သည့်အတိုင်း။ */
+.viewfinder:not([data-dragging='true']) {
+  .subjectWrap {
+    transition:
+      --mask-x 220ms var(--ease-out),
+      --mask-y 220ms var(--ease-out),
+      --mask-rx 220ms var(--ease-out),
+      --mask-ry 220ms var(--ease-out);
+  }
+
+  /* 72–96px box တစ်ခုတည်း၊ ကလေးမရှိ၊ `overflow: clip` container အတွင်း —
+     left/top သည် layout ဖြစ်သော်လည်း ဤနေရာတွင် သီးသန့်ကန့်သတ်ထားပြီးဖြစ်သည်။ */
+  .focus {
+    transition:
+      left 220ms var(--ease-out),
+      top 220ms var(--ease-out);
+  }
+}
+
 .hud {
   position: absolute;
   top: 14px;
@@ -142,8 +168,12 @@
 }
 
 @include motion-reduce {
-  .plates { transition: none; }
   .hint { animation: none; }
+
+  .viewfinder:not([data-dragging='true']) {
+    .subjectWrap,
+    .focus { transition: none; }
+  }
 }
 
 /* ---- meta row ------------------------------------------------------------ */
@@ -265,11 +295,14 @@
 }
 
 .lab:not([data-used='true']) .slider::-webkit-slider-thumb {
-  animation: invite-thumb 1.8s var(--ease-out) infinite;
+  /* `infinite` သည် box-shadow ကို အဆုံးမရှိ paint လုပ်နေစေသည်။ hint စာသားက
+     ၃ ကြိမ်သာ ပြသည့်အတွက် thumb ကိုလည်း ထိုအတိုင်းညှိထားသည် — ဖိတ်ခေါ်မှု
+     ရောက်ပြီးနောက် ဆက်လက်လှုပ်ရှားနေရန် အကြောင်းမရှိပါ။ */
+  animation: invite-thumb 1.8s var(--ease-out) 3;
 }
 
 .lab:not([data-used='true']) .slider::-moz-range-thumb {
-  animation: invite-thumb 1.8s var(--ease-out) infinite;
+  animation: invite-thumb 1.8s var(--ease-out) 3;
 }
 
 @keyframes invite-thumb {
@@ -302,12 +335,15 @@
   transition:
     color var(--dur-fast) var(--ease-out),
     border-color var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out);
+    background-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-hover) var(--ease-out);
 
   &:hover {
     color: var(--bone);
     border-color: rgba(237, 234, 228, 0.34);
   }
+
+  &:active { transform: scale(0.97); }
 
   &[data-active='true'] {
     color: var(--bone);

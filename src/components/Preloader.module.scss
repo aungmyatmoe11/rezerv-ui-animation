@@ -65,11 +65,10 @@
 .meter {
   position: absolute;
   inset: 0;
+  transform: scaleX(0.015);
   transform-origin: left center;
   background: linear-gradient(90deg, var(--cherry-lo), var(--cherry-hi));
   will-change: transform;
-  /* Chases the real buffered figure rather than snapping to it. */
-  transition: transform 260ms linear;
 }
 
 .readout {

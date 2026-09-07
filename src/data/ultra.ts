@@ -25,7 +25,7 @@ export const ULTRA_SPECS: readonly UltraSpec[] = [
 
 // ---- 14 Fold ----------------------------------------------------------------
 
-/** The label swaps at the midpoint of the scrub, as the device passes half-open. */
+/** The label yields at the hinge midpoint: closed leaves, then open arrives. */
 export const FOLD_STATES = {
   closed: {
     size: 'About 5.5 inches.',

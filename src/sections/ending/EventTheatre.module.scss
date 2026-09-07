@@ -28,6 +28,16 @@
     background: rgba(0, 0, 0, 0.86);
     backdrop-filter: blur(14px);
     animation: veil 320ms var(--ease-out) both;
+    transition: opacity 240ms var(--ease-out);
+  }
+
+  /* GSAP သည် pseudo-element ကို မထိနိုင်သဖြင့် EventTheatre.tsx က dialog ပေါ်တွင်
+     flag ချပြီး backdrop ကိုယ်တိုင် ထွက်သွားစေသည် — panel ပြီးမှမဟုတ်ဘဲ အတူတူ။
+     `animation: none` မဖြစ်မနေလိုသည်: ဝင်ချိန် keyframe ၏ `both` fill က
+     opacity ကို 1 တွင်ကိုင်ထားပြီး အောက်ကကြေညာချက်ကို အနိုင်ယူမည်ဖြစ်သည်။ */
+  &[data-closing='true']::backdrop {
+    animation: none;
+    opacity: 0;
   }
 }
 
@@ -37,7 +47,7 @@
 }
 
 @include motion-reduce {
-  .dialog::backdrop { animation: none; }
+  .dialog::backdrop { animation: none; transition: none; }
 }
 
 .panel {
@@ -54,7 +64,6 @@
     var(--ink-raised);
   box-shadow: 0 40px 120px rgba(0, 0, 0, 0.65);
   overflow: hidden;
-  will-change: transform, opacity;
 }
 
 /* ---- bar ------------------------------------------------------------------ */

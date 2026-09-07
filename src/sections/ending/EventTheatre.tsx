@@ -52,6 +52,7 @@ export function EventTheatre({ open, onClose, status, when }: EventTheatreProps)
   /** Both exits end here: the dialog leaves the top layer, the player unmounts. */
   const settle = useCallback(() => {
     const dialog = dialogRef.current;
+    if (dialog) delete dialog.dataset.closing;
     if (dialog?.open) dialog.close();
     setMounted(false);
   }, []);
@@ -63,6 +64,9 @@ export function EventTheatre({ open, onClose, status, when }: EventTheatreProps)
       if (!dialog || !panel) return;
 
       if (open) {
+        // Reopening mid-exit kills the tween below, so its onComplete never
+        // runs — the flag has to be cleared here or the backdrop stays faded.
+        delete dialog.dataset.closing;
         if (policy.tier === 'static') {
           gsap.set(panel, { opacity: 1, y: 0, scale: 1 });
           return;
@@ -70,7 +74,16 @@ export function EventTheatre({ open, onClose, status, when }: EventTheatreProps)
         gsap.fromTo(
           panel,
           { opacity: 0, y: 24, scale: 0.985 },
-          { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: 'power3.out', overwrite: true },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.5,
+            ease: 'power3.out',
+            overwrite: true,
+            willChange: 'transform, opacity',
+            onComplete: () => gsap.set(panel, { willChange: 'auto' }),
+          },
         );
         return;
       }
@@ -80,14 +93,27 @@ export function EventTheatre({ open, onClose, status, when }: EventTheatreProps)
         settle();
         return;
       }
+
+      /**
+       * `::backdrop` သည် pseudo-element ဖြစ်၍ GSAP က မထိနိုင်ပါ။ Flag တစ်ခုချပြီး
+       * CSS ကို fade လုပ်ခိုင်းသဖြင့် panel နှင့် backdrop အတူထွက်သွားသည်။
+       *
+       * ယခင်က backdrop သည် 320ms ဖြင့်ဝင်ပြီး၊ ထွက်ချိန်တွင် `dialog.close()` က
+       * အနက် 86% နှင့် blur(14px) ကို frame တစ်ခုအတွင်း ဖြတ်ချခဲ့သည်။
+       */
+      dialog.dataset.closing = 'true';
       gsap.to(panel, {
         opacity: 0,
         y: 14,
         scale: 0.99,
         duration: 0.24,
-        ease: 'power2.in',
+        ease: 'power2.out',
         overwrite: true,
-        onComplete: settle,
+        willChange: 'transform, opacity',
+        onComplete: () => {
+          gsap.set(panel, { willChange: 'auto' });
+          settle();
+        },
       });
     },
     { dependencies: [open, policy.tier] },

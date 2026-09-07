@@ -27,22 +27,6 @@ test.describe('nav', () => {
     await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.2));
     await page.waitForTimeout(500);
 
-    // Debug: check how many nav elements exist
-    const navCount = await page.evaluate(() =>
-      document.querySelectorAll('nav[aria-label="Sections"]').length
-    );
-    console.log('Nav elements found:', navCount);
-
-    // Debug: get all links
-    const allLinks = await page.evaluate(() => {
-      const navs = document.querySelectorAll('nav[aria-label="Sections"]');
-      return Array.from(navs).map((nav, i) => ({
-        navIndex: i,
-        links: Array.from(nav.querySelectorAll('a[data-nav-id]')).map(el => el.getAttribute('data-nav-id'))
-      }));
-    });
-    console.log('All nav links:', JSON.stringify(allLinks, null, 2));
-
     // Get the nav link order from the main list only (select ul > li > a within the nav)
     const navOrder = await page.evaluate(() =>
       Array.from(document.querySelectorAll('nav[aria-label="Sections"] ul > li > a[data-nav-id]'))
@@ -134,7 +118,7 @@ test.describe('nav', () => {
     await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.5));
     await page.waitForTimeout(400);
 
-    await navLink(page, 'Battery').click();
+    await navLink(page, 'Design').click();
     await page.waitForTimeout(900);
 
     const focused = await page.evaluate(() => document.activeElement?.getAttribute('data-nav-id'));
@@ -148,13 +132,13 @@ test.describe('nav', () => {
     await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.5));
     await page.waitForTimeout(400);
 
-    const link = navLink(page, 'Battery');
+    const link = navLink(page, 'Design');
     await link.focus();
     await expect(link).toBeFocused();
     await page.keyboard.press('Enter');
     await page.waitForTimeout(1200);
 
-    const target = await sectionTop(page, 'battery');
+    const target = await sectionTop(page, 'design');
     const landed = await page.evaluate(() => Math.round(window.scrollY));
     expect(Math.abs(landed - target)).toBeLessThanOrEqual(6);
   });
@@ -166,7 +150,7 @@ test.describe('nav', () => {
     await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.5));
     await page.waitForTimeout(400);
 
-    await navLink(page, 'Evidence').click();
+    await navLink(page, 'Camera').click();
     await page.waitForTimeout(900);
 
     expect(new URL(page.url()).hash).toBe('');

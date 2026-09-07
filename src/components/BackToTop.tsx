@@ -56,12 +56,20 @@ export function BackToTop() {
         return;
       }
 
+      /**
+       * ဝင်ချိန်ထွက်ချိန်နှစ်ခုလုံး ease-out ဖြစ်သည်။
+       *
+       * ယခင်က ထွက်ချိန်တွင် `power2.in` ဖြစ်ခဲ့သည် — ease-in သည် အစပိုင်းတွင်
+       * နှေးသဖြင့် ကြည့်နေချိန်အတိအကျကို ဆွဲဆန့်ထားသည်။ ဝင်ချိန်၏
+       * `back.out(1.7)` သည်လည်း page တစ်ခုလုံးရှိ တစ်ခုတည်းသော overshoot
+       * ဖြစ်ပြီး၊ ကျန်တစ်ခုလုံးက power3.out ဖြင့် တည်ငြိမ်စွာရွေ့သည်။
+       */
       gsap.to(el, {
         opacity: shown ? 1 : 0,
         scale: shown ? 1 : 0.8,
         y: shown ? 0 : 12,
-        duration: 0.42,
-        ease: shown ? 'back.out(1.7)' : 'power2.in',
+        duration: shown ? 0.42 : 0.22,
+        ease: 'power3.out',
         overwrite: true,
       });
     },
@@ -80,21 +88,23 @@ export function BackToTop() {
       tabIndex={shown ? 0 : -1}
       aria-hidden={!shown}
     >
-      <svg className={styles.ring} viewBox="0 0 44 44" aria-hidden="true" focusable="false">
-        <circle className={styles.ringTrack} cx="22" cy="22" r="20" />
-        <circle
-          ref={ringRef}
-          className={styles.ringProgress}
-          cx="22"
-          cy="22"
-          r="20"
-          pathLength={RING_LENGTH}
-          strokeDasharray={RING_LENGTH}
-          strokeDashoffset={RING_LENGTH}
-        />
-      </svg>
-      <span className={styles.arrow} aria-hidden="true">
-        ↑
+      <span className={styles.face}>
+        <svg className={styles.ring} viewBox="0 0 44 44" aria-hidden="true" focusable="false">
+          <circle className={styles.ringTrack} cx="22" cy="22" r="20" />
+          <circle
+            ref={ringRef}
+            className={styles.ringProgress}
+            cx="22"
+            cy="22"
+            r="20"
+            pathLength={RING_LENGTH}
+            strokeDasharray={RING_LENGTH}
+            strokeDashoffset={RING_LENGTH}
+          />
+        </svg>
+        <span className={styles.arrow} aria-hidden="true">
+          ↑
+        </span>
       </span>
     </button>
   );

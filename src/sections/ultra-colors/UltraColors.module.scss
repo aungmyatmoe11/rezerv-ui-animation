@@ -14,16 +14,26 @@
   display: grid;
   justify-items: start;
   gap: 14px;
-  animation: swap var(--dur-slow) var(--ease-out) both;
-}
+  opacity: 1;
+  transform: none;
+  /* ယခင်က 900ms keyframe ဖြစ်ခဲ့သည်။ Click တစ်ချက်၏တုံ့ပြန်မှုအတွက်
+     အလွန်ရှည်ပြီး၊ swatch နှစ်ခုကို ဆက်တိုက်နှိပ်လျှင် စာသားက ဖျော့နေဆဲ
+     အခြေအနေတွင် အသစ်တစ်ခုဝင်လာသဖြင့် တဝက်တပျက်မြင်ရသည်။ */
+  transition:
+    opacity 200ms var(--ease-out),
+    transform 200ms var(--ease-out);
 
-@keyframes swap {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: none; }
+  @starting-style {
+    opacity: 0;
+    transform: translateY(12px);
+  }
 }
 
 @include motion-reduce {
-  .copy { animation: none; }
+  .copy {
+    transition: opacity 120ms var(--ease-out);
+    @starting-style { opacity: 0; transform: none; }
+  }
 }
 
 .name {
@@ -101,16 +111,17 @@
   cursor: pointer;
   color: var(--bone-dim);
   transition:
-    border-color var(--dur-base) var(--ease-out),
-    color var(--dur-base) var(--ease-out),
-    transform var(--dur-base) var(--ease-out);
-  will-change: transform;
+    border-color var(--dur-hover) var(--ease-out),
+    color var(--dur-hover) var(--ease-out),
+    transform var(--dur-hover) var(--ease-out);
 
   &:hover {
     color: var(--bone);
     border-color: rgba(237, 234, 228, 0.34);
-    transform: translateY(-2px);
+    @include hover-motion { transform: translateY(-2px); }
   }
+
+  &:active { transform: scale(0.97); }
 
   &[data-active='true'] {
     color: var(--bone);

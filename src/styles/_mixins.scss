@@ -7,6 +7,11 @@
 @mixin desktop-up    { @media (min-width: $bp-desktop) { @content; } }
 @mixin wide-up       { @media (min-width: $bp-wide)    { @content; } }
 
+// Phone + tablet — below the 1024px desktop layout.
+@mixin compact-nav {
+  @media (max-width: #{$bp-desktop - 1px}) { @content; }
+}
+
 // Tablet band only — used where tablet needs its own motion budget rather than
 // inheriting the desktop timeline.
 @mixin tablet-only {
@@ -17,7 +22,18 @@
 // Wrap anything expensive. The JS side has the matching guard in motionPolicy.ts;
 // this covers pure-CSS motion so the two can never disagree.
 @mixin motion-safe { @media (prefers-reduced-motion: no-preference) { @content; } }
+
+// Touch မှာ tap လုပ်လျှင် browser က hover ကိုတစ်ကြိမ်ဖြစ်စေသဖြင့်၊ gate
+// မလုပ်ထားသော hover transform သည် နောက်တစ်နေရာ tap လုပ်သည်အထိ ကပ်ငြိနေသည်။
+// ရွေ့လျားမှုပါသော hover အားလုံးကို ဤ mixin ဖြင့်ခြုံရမည်။
+@mixin hover-motion { @media (hover: hover) and (pointer: fine) { @content; } }
 @mixin motion-reduce { @media (prefers-reduced-motion: reduce) { @content; } }
+
+// Scrub overlays only need a compositor layer while their stage is pinned.
+// Permanent will-change kept every callout promoted for the whole session.
+@mixin will-change-while-pinned($props...) {
+  [data-pinned='true'] & { will-change: $props; }
+}
 
 // ---- layout ---------------------------------------------------------------
 @mixin page-gutter {

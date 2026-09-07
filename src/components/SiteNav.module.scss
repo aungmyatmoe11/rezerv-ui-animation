@@ -13,8 +13,8 @@
   opacity: 0;
   transform: translateY(-14px);
   transition:
-    opacity var(--dur-base) var(--ease-out),
-    transform var(--dur-base) var(--ease-out);
+    opacity var(--dur-hover) var(--ease-out),
+    transform var(--dur-hover) var(--ease-out);
 
   &[data-visible='true'] {
     opacity: 1;
@@ -24,11 +24,18 @@
 
 .inner {
   @include content-shell;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  min-width: 0;
   padding-block: 12px;
+
+  @include mobile-only {
+    gap: 8px;
+    padding-block: 10px;
+  }
 
   @include tablet-up { padding-block: 16px; }
 }
@@ -55,7 +62,8 @@
   display: inline-flex;
   align-items: center;
   gap: 9px;
-  flex: none;
+  flex: 0 0 auto;
+  max-width: 46%;
   padding: 9px 16px;
   color: var(--bone);
 
@@ -63,13 +71,19 @@
      visitor on a phone actually uses. */
   @include mobile-only {
     gap: 7px;
-    padding: 8px 12px;
+    padding: 8px 10px;
+    max-width: none;
   }
   transition:
     border-color var(--dur-fast) var(--ease-out),
-    opacity var(--dur-fast) var(--ease-out);
+    opacity var(--dur-fast) var(--ease-out),
+    transform var(--dur-hover) var(--ease-out);
 
-  &:hover { border-color: rgba(237, 234, 228, 0.24); }
+  @include hover-motion {
+    &:hover { border-color: rgba(237, 234, 228, 0.24); }
+  }
+
+  &:active { transform: scale(0.97); }
   &:focus-visible { @include focus-ring; }
 }
 
@@ -92,6 +106,10 @@
   @include mobile-only { font-size: 0.6875rem; }
 }
 
+.wordmarkBrand {
+  @include mobile-only { display: none; }
+}
+
 .wordmarkNote {
   @include t-eyebrow;
   font-size: 0.5625rem;
@@ -102,21 +120,34 @@
 }
 
 /* ---- sections ------------------------------------------------------------- */
+/* Hug the items. `flex: 1` stretched this capsule across the leftover row, so
+   on tablet a handful of labels sat in a hollow glass bar over the page. */
 .links {
   @include capsule;
+  position: relative;
+  flex: 0 1 auto;
+  width: max-content;
+  max-width: 100%;
   min-width: 0;
   padding: 5px;
+  overflow: visible;
+}
+
+.scroller {
+  min-width: 0;
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
-  /* Fades the ends of the scrolling list rather than letting labels hit a hard
-     capsule edge. Inset to the capsule's own padding. */
-  mask-image: linear-gradient(90deg, transparent, #000 18px, #000 calc(100% - 18px), transparent);
 
   &::-webkit-scrollbar { display: none; }
 
-  @include desktop-up { mask-image: none; }
+  /* Fade the ends only where the three compact labels can still overflow. */
+  @include mobile-only {
+    mask-image: linear-gradient(90deg, transparent, #000 18px, #000 calc(100% - 18px), transparent);
+  }
+
+  @include desktop-up { overflow: visible; }
 }
 
 .list {
@@ -141,12 +172,17 @@
   background: transparent;
   transition:
     color var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out);
+    background-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-hover) var(--ease-out);
 
-  &:hover {
-    color: var(--bone);
-    background: rgba(237, 234, 228, 0.06);
+  @include hover-motion {
+    &:hover {
+      color: var(--bone);
+      background: rgba(237, 234, 228, 0.06);
+    }
   }
+
+  &:active { transform: scale(0.97); }
 
   &[data-active='true'] {
     color: var(--ink);
@@ -156,22 +192,15 @@
   &:focus-visible { @include focus-ring; }
 }
 
-/* ---- mobile nav condensing ----------------------------------------------- */
-.highPriority {
-  /* Always visible */
-}
+/* ---- compact nav (<1024) ------------------------------------------------- */
+.highPriority { /* Always in the bar. */ }
 
 .normalPriority {
-  /* Hidden on mobile, visible on tablet+ */
-  @media (max-width: #{$bp-tablet - 1px}) { display: none; }
-}
-
-.desktopOnly {
-  @media (max-width: #{$bp-tablet - 1px}) { display: none; }
+  @include compact-nav { display: none; }
 }
 
 .mobileOnly {
-  @include tablet-up { display: none; }
+  @include desktop-up { display: none; }
 }
 
 .moreButton {
@@ -186,14 +215,20 @@
   background: transparent;
   transition:
     color var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out);
+    background-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-hover) var(--ease-out);
 
-  &:hover {
-    color: var(--bone);
-    background: rgba(237, 234, 228, 0.06);
+  @include hover-motion {
+    &:hover {
+      color: var(--bone);
+      background: rgba(237, 234, 228, 0.06);
+    }
   }
 
-  &[aria-expanded='true'] {
+  &:active { transform: scale(0.97); }
+
+  &[aria-expanded='true'],
+  &[data-active='true'] {
     color: var(--bone);
     background: rgba(237, 234, 228, 0.08);
   }
@@ -205,6 +240,11 @@
   letter-spacing: 0.1em;
 }
 
+/* Grows out of the corner the `⋯` button sits in, rather than appearing from
+   nowhere in the middle of itself. Resting state is `visibility: hidden` so the
+   closed menu is never painted and its links stay out of the tab order — the
+   same arrangement #scroll-veil uses, and for the same reason: `display: none`
+   would give the opacity tween no starting value to leave from. */
 .overflowMenu {
   position: absolute;
   top: calc(100% + 6px);
@@ -216,6 +256,27 @@
   flex-direction: column;
   gap: 2px;
   z-index: 100;
+
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.96);
+  transform-origin: top right;
+  transition:
+    opacity var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out),
+    visibility 0s linear var(--dur-fast);
+
+  @include desktop-up { display: none; }
+
+  &[data-open='true'] {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition:
+      opacity var(--dur-fast) var(--ease-out),
+      transform var(--dur-fast) var(--ease-out),
+      visibility 0s;
+  }
 }
 
 .overflowLink {
@@ -228,12 +289,17 @@
   background: transparent;
   transition:
     color var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out);
+    background-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-hover) var(--ease-out);
 
-  &:hover {
-    color: var(--bone);
-    background: rgba(237, 234, 228, 0.06);
+  @include hover-motion {
+    &:hover {
+      color: var(--bone);
+      background: rgba(237, 234, 228, 0.06);
+    }
   }
+
+  &:active { transform: scale(0.97); }
 
   &[data-active='true'] {
     color: var(--bone);
@@ -253,4 +319,21 @@
   transform: scaleX(0);
   transform-origin: left center;
   background: linear-gradient(90deg, var(--cherry-lo), var(--cherry-hi), var(--bone));
+}
+
+/* ---- reduced motion ------------------------------------------------------- */
+/* global.scss ကတိုချုံ့ပေးသည်မှာ duration သာဖြစ်ပြီး ရွေ့လျားမှုကို component
+   အလိုက် ဖယ်ရသည် — ဤဖိုင်သည် နောက်ဆုံးအထိ ကျန်နေခဲ့သည့်တစ်ခုဖြစ်သည်။
+   Nav နှင့် menu တို့သည် ပေါ်လာ/ပျောက်သွားဆဲဖြစ်ပြီး ခရီးမသွားတော့ပါ။ */
+@include motion-reduce {
+  .nav,
+  .nav[data-visible='true'] { transform: none; }
+
+  .wordmark,
+  .link,
+  .moreButton,
+  .overflowLink { transform: none; }
+
+  .overflowMenu,
+  .overflowMenu[data-open='true'] { transform: none; }
 }

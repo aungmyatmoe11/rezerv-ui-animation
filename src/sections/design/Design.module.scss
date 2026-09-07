@@ -19,12 +19,12 @@
   background: var(--ink-raised);
   /* transform, colour and opacity only — never a layout property on hover. */
   transition:
-    border-color var(--dur-base) var(--ease-out),
-    background-color var(--dur-base) var(--ease-out),
-    transform var(--dur-base) var(--ease-out);
+    border-color var(--dur-hover) var(--ease-out),
+    background-color var(--dur-hover) var(--ease-out),
+    transform var(--dur-hover) var(--ease-out);
 
   &:hover {
-    transform: translateY(-4px);
+    @include hover-motion { transform: translateY(-4px); }
     border-color: var(--rule);
     background: #0c0b0e;
 
@@ -36,7 +36,7 @@
 .index {
   @include t-mono;
   color: var(--bone-faint);
-  transition: color var(--dur-base) var(--ease-out);
+  transition: color var(--dur-hover) var(--ease-out);
 }
 
 .calloutTitle {
@@ -50,7 +50,7 @@
   font-size: clamp(0.9375rem, 1vw, 1.0625rem);
   color: var(--bone-dim);
   opacity: 0.72;
-  transition: opacity var(--dur-base) var(--ease-out);
+  transition: opacity var(--dur-hover) var(--ease-out);
 }
 
 .coda {

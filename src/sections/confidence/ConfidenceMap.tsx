@@ -56,6 +56,8 @@ export function ConfidenceMap() {
             duration: 1.1,
             stagger: 0.07,
             ease: 'power3.out',
+            willChange: 'transform',
+            onComplete: () => gsap.set(bars, { willChange: 'auto' }),
           });
         },
       });

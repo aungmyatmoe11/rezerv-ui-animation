@@ -26,6 +26,30 @@ export const FRAME_COUNTS = {
 } as const;
 
 /**
+ * ဖိုင်များထဲမှ ဘယ်ဖရိမ်ကစပြီး ဖွင့်မလဲ (0-based)။
+ *
+ * `display` sequence ၏ frame 1–56 သည် `colors` sequence တစ်ခုလုံးနှင့်
+ * frame-for-frame တူညီနေသည် — တိုင်းတာပြီး၊ အချို့မှာ အတိအကျတူသည်။ ဆိုလိုသည်မှာ
+ * visitor သည် Colors တွင် ဖုန်းသုံးလုံးလှည့်တာကိုကြည့်ပြီး၊ Display သို့ရောက်လျှင်
+ * ထိုအတူတူကို ထပ်ကြည့်ရသည် — pin ၏ထက်ဝက်စာ scroll လုပ်ပြီးမှ အသစ်တစ်ခုပေါ်သည်။
+ * ဤ section ၏ကိုယ်ပိုင်အကြောင်းအရာ — ဖုန်းများလှည့်ထွက်ပြီး 6.9" display
+ * ရှေ့သို့ရောက်လာခြင်း — သည် frame 57 မှစသည်၊ poster ကလည်း ထိုပုံပင်ဖြစ်သည်။
+ *
+ * ဖိုင်အမည်များကို ပြန်နံပါတ်မတပ်ဘဲ offset ဖြင့်ဖြေရှင်းထားသည်။ /frames သည်
+ * `immutable` ဖြင့် serve လုပ်ထားသဖြင့် (next.config.mjs) ဖိုင်အမည်တူပြီး
+ * အကြောင်းအရာပြောင်းလျှင် ပြန်လာသောဧည့်သည်က cache ဟောင်းကိုရမည်။
+ */
+export const FRAME_STARTS: Partial<Record<ScrubSlug, number>> = {
+  display: 56,
+};
+
+/** Frames actually played, after the start offset. */
+export function playedFrames(slug: ScrubSlug): { start: number; count: number } {
+  const start = FRAME_STARTS[slug] ?? 0;
+  return { start, count: FRAME_COUNTS[slug] - start };
+}
+
+/**
  * Output size of every native clip in /public/video, as written by
  * tools/build-assets.ps1 and confirmed with ffprobe.
  *
@@ -96,12 +120,31 @@ export const MOBILE_CLIP_WIDTH = 1280;
 export const hasMobileClip = (slug: ClipSlug): boolean => slug !== 'hero';
 
 /**
+ * Slug နှင့် ဖိုင်အမည် မတူသော clip များ။
+ *
+ * `display.mp4` ၏ ရှေ့ပိုင်း ၃.၂၅ စက္ကန့်သည် `colors` clip ကို ထပ်ဖွင့်နေခြင်း
+ * ဖြစ်သည် — canvas tier တွင် FRAME_STARTS ဖြင့်ဖြတ်ထားသည့် အထပ်တည်းဖြစ်ပြီး၊
+ * video tier (မိုဘိုင်း၊ reduced motion) ကလည်း တူညီစွာဖြတ်ထားရမည်။ ထို့ကြောင့်
+ * ဖြတ်ထားသော encode `display-panel` ကို သုံးသည်။
+ *
+ * ဖိုင်အမည်အသစ်ဖြစ်ရသည်မှာ မဖြစ်မနေလိုအပ်ချက်ဖြစ်သည်: /video သည် `immutable`
+ * ဖြင့် serve လုပ်ထားသဖြင့် အမည်ဟောင်းကို အကြောင်းအရာအသစ်ဖြင့်အစားထိုးလျှင်
+ * ပြန်လာသောဧည့်သည်သည် clip ဟောင်းကိုပင် ဆက်ရနေမည် — width ကို ဖိုင်အမည်တွင်
+ * ထည့်ရသည့် အကြောင်းရင်းအတိုင်းပင်။
+ */
+const CLIP_FILES: Partial<Record<ClipSlug, string>> = {
+  display: 'display-panel',
+};
+
+const clipFile = (slug: ClipSlug): string => CLIP_FILES[slug] ?? slug;
+
+/**
  * The hero has no mobile file. Asking for one must not invent a 404 path —
  * the preloader waits on this URL, and a miss would open the page on a poster.
  */
 export const videoSrc = (slug: ClipSlug, variant: ClipVariant = 'full') =>
   variant === 'mobile' && hasMobileClip(slug)
-    ? `/video/${slug}-${MOBILE_CLIP_WIDTH}.mp4`
-    : `/video/${slug}.mp4`;
+    ? `/video/${clipFile(slug)}-${MOBILE_CLIP_WIDTH}.mp4`
+    : `/video/${clipFile(slug)}.mp4`;
 
 export const posterSrc = (slug: ClipSlug) => `/poster/${slug}.jpg`;

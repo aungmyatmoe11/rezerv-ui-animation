@@ -85,7 +85,13 @@ export function Hero() {
         return;
       }
 
-      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+      /**
+       * Preloader ၏ ကန့်လန့်ကာသည် 0.72s ဖြင့် အပေါ်သို့တက်နေဆဲတွင်
+       * `entranceUnlocked` ဖြစ်သွားသည်။ Delay မပါလျှင် စာသားသည် ကန့်လန့်ကာ
+       * နှင့်အတူ တက်နေသည့်အလား မြင်ရသည်။ 0.1s က ကန့်လန့်ကာနောက်မှ
+       * ထွက်လာသည့်ခံစားမှုပေးသည် — hero သည် LCP candidate ဖြစ်၍ ဤထက်မတိုးရ။
+       */
+      const tl = gsap.timeline({ delay: 0.1, defaults: { ease: 'power3.out' } });
 
       tl.fromTo(
         words,

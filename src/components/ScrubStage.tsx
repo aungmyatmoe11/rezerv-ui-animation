@@ -15,7 +15,7 @@ import {
   type ProgressListener,
   type ScrubMode,
 } from '@/lib/motion/useScrubSequence';
-import { clipAspect, FRAME_COUNTS, posterSrc, type ScrubSlug } from '@/data/media';
+import { clipAspect, playedFrames, posterSrc, type ScrubSlug } from '@/data/media';
 import { LazyVideo } from './LazyVideo';
 import styles from './ScrubStage.module.scss';
 
@@ -135,9 +135,11 @@ export function ScrubStage({
   className,
   children,
 }: ScrubStageProps) {
+  const { start, count } = playedFrames(slug);
   const { sectionRef, canvasRef, mode, subscribe } = useScrubSequence({
     slug,
-    frameCount: FRAME_COUNTS[slug],
+    frameCount: count,
+    startFrame: start,
     eager,
     pinVh,
     fit,

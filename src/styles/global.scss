@@ -37,6 +37,7 @@
   /* --- motion (mirrors _tokens.scss so GSAP and CSS share one source) ----- */
   --ease-out:    cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-hover:   160ms;
   --dur-fast:    180ms;
   --dur-base:    420ms;
   --dur-slow:    900ms;
@@ -50,10 +51,15 @@
 /* Reduced motion: collapse every duration rather than hunting down each
    transition. Individual components additionally opt out of transforms. */
 @include motion-reduce {
+  /* Reduce ဆိုသည်မှာ လုံးဝမရှိခြင်းမဟုတ်ဘဲ ပိုနူးညံ့ခြင်းဖြစ်သည်။ ယခင်က
+     1ms သို့ခေါက်သိမ်းထားသဖြင့် device crossfade နှင့် အရောင်ပြောင်းမှုများ
+     ရုတ်တရက်ပြောင်းပြီး လှုပ်ရှားမှုထက်ပင် ပိုနှောင့်ယှက်ခဲ့သည်။ ရွေ့လျားမှုကို
+     component အလိုက် motion-reduce ဖြင့် ဖယ်ပြီးသားဖြစ်သည်။ */
   :root {
-    --dur-fast: 1ms;
-    --dur-base: 1ms;
-    --dur-slow: 1ms;
+    --dur-hover: 120ms;
+    --dur-fast: 120ms;
+    --dur-base: 160ms;
+    --dur-slow: 200ms;
   }
 }
 
@@ -64,6 +70,15 @@
 @property --theme-base { syntax: '<color>'; inherits: true; initial-value: #4d2439; }
 @property --theme-hi   { syntax: '<color>'; inherits: true; initial-value: #71405b; }
 @property --theme-lo   { syntax: '<color>'; inherits: true; initial-value: #280114; }
+
+/* Same trick for the aperture lab's focus ellipse. Registering them is the only
+   thing that lets the mask and the focus box EASE between the two sample scenes
+   instead of teleporting. `inherits: false` because every one of them is written
+   straight onto the element that reads it — see ApertureLab.tsx. */
+@property --mask-x  { syntax: '<percentage>'; inherits: false; initial-value: 50%; }
+@property --mask-y  { syntax: '<percentage>'; inherits: false; initial-value: 50%; }
+@property --mask-rx { syntax: '<percentage>'; inherits: false; initial-value: 24%; }
+@property --mask-ry { syntax: '<percentage>'; inherits: false; initial-value: 20%; }
 
 *, *::before, *::after { box-sizing: border-box; }
 

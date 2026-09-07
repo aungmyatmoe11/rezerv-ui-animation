@@ -2,11 +2,14 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { scrollToSection, scrollToTop } from '@/lib/motion/scrollTo';
+import { useMotionPolicy } from '@/lib/motion/motionPolicy';
 import { subscribeActiveSection, subscribeScroll } from '@/lib/motion/scrollState';
 import { NAV_ITEMS } from '@/data/sections';
 import styles from './SiteNav.module.scss';
 
 const NAV_IDS = NAV_ITEMS.map((item) => item.id);
+const OVERFLOW_ITEMS = NAV_ITEMS.filter((item) => item.priority === 'normal');
+const OVERFLOW_IDS = new Set(OVERFLOW_ITEMS.map((item) => item.id));
 
 /**
  * Fixed chrome that stays out of the way of the film.
@@ -28,14 +31,20 @@ const NAV_IDS = NAV_ITEMS.map((item) => item.id);
  * Both the progress rule and the active item are driven from the shared scroll
  * tick in lib/motion/scrollState.ts, so the whole nav costs one style write per
  * frame and never measures anything during a scroll.
+ *
+ * Below 1024px the bar condenses: three high-priority anchors stay visible, the
+ * rest live in the overflow menu. The menu is a sibling of the scrolling list
+ * so it is not clipped (or used as scrollable overflow) by the capsule.
  */
 export function SiteNav() {
   const [visible, setVisible] = useState(false);
   const [active, setActive] = useState<string | null>(null);
   const [overflowOpen, setOverflowOpen] = useState(false);
+  const policy = useMotionPolicy();
   const listRef = useRef<HTMLUListElement | null>(null);
   const progressRef = useRef<HTMLSpanElement | null>(null);
   const overflowRef = useRef<HTMLDivElement | null>(null);
+  const moreRef = useRef<HTMLButtonElement | null>(null);
 
   // ---- reveal past the hero, and drive the progress rule -------------------
   useEffect(
@@ -54,15 +63,21 @@ export function SiteNav() {
   // ---- which section owns the viewport ------------------------------------
   useEffect(() => subscribeActiveSection(NAV_IDS, setActive), []);
 
-  // Keep the current item in view in the horizontally scrolling mobile nav.
+  // Keep the current item in view in the horizontally scrolling list.
   useEffect(() => {
     const list = listRef.current;
     if (!list || !active) return;
-    // Measuring is fine here: this runs on a section change, not on every frame.
     if (list.scrollWidth <= list.clientWidth) return;
     const link = list.querySelector<HTMLElement>(`[data-nav-id="${active}"]`);
-    link?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-  }, [active]);
+    // This fires on every section the visitor passes, so it is real motion the
+    // reduced-motion setting has to be able to switch off. The item still ends
+    // up in view — it just gets there without travelling.
+    link?.scrollIntoView({
+      behavior: policy.tier === 'static' ? 'auto' : 'smooth',
+      block: 'nearest',
+      inline: 'center',
+    });
+  }, [active, policy.tier]);
 
   const modified = (event: React.MouseEvent) =>
     event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0;
@@ -83,17 +98,39 @@ export function SiteNav() {
     scrollToTop();
   }, []);
 
-  // Close overflow when clicking outside on mobile
   useEffect(() => {
     if (!overflowOpen) return;
-    const handle = (e: MouseEvent) => {
-      if (overflowRef.current && !overflowRef.current.contains(e.target as Node)) {
+
+    const onPointer = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (overflowRef.current?.contains(target) || moreRef.current?.contains(target)) return;
+      setOverflowOpen(false);
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
         setOverflowOpen(false);
+        moreRef.current?.focus();
       }
     };
-    document.addEventListener('click', handle);
-    return () => document.removeEventListener('click', handle);
+
+    document.addEventListener('pointerdown', onPointer);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onPointer);
+      window.removeEventListener('keydown', onKey);
+    };
   }, [overflowOpen]);
+
+  useEffect(() => {
+    const desktop = window.matchMedia('(min-width: 1024px)');
+    const close = () => {
+      if (desktop.matches) setOverflowOpen(false);
+    };
+    desktop.addEventListener('change', close);
+    return () => desktop.removeEventListener('change', close);
+  }, []);
+
+  const overflowOwnsActive = active !== null && OVERFLOW_IDS.has(active);
 
   return (
     <header className={styles.nav} data-visible={visible}>
@@ -104,67 +141,78 @@ export function SiteNav() {
       <div className={styles.inner}>
         <a className={styles.wordmark} href="#top" onClick={onWordmarkClick}>
           <span className={styles.dot} aria-hidden="true" />
-          <span className={styles.wordmarkName}>iPhone&nbsp;18&nbsp;Pro</span>
+          <span className={styles.wordmarkName}>
+            <span className={styles.wordmarkBrand}>iPhone&nbsp;</span>
+            18&nbsp;Pro
+          </span>
           <span className={styles.wordmarkNote}>concept</span>
         </a>
 
         <nav aria-label="Sections" className={styles.links}>
-          <ul className={styles.list} ref={listRef}>
-            {/* Render all items in document/scroll order */}
-            {NAV_ITEMS.map((item) => (
-              <li key={item.id}>
-                <a
-                  className={styles.link}
-                  href={`#${item.id}`}
-                  data-nav-id={item.id}
-                  data-active={item.id === active}
-                  aria-current={item.id === active ? 'true' : undefined}
-                  onClick={(e) => onNavClick(e, item.id)}
+          <div className={styles.scroller}>
+            <ul className={styles.list} ref={listRef}>
+              {NAV_ITEMS.map((item) => (
+                <li
+                  key={item.id}
+                  className={item.priority === 'high' ? styles.highPriority : styles.normalPriority}
                 >
-                  {item.label}
-                </a>
-              </li>
-            ))}
-
-            {/* Mobile: overflow menu button */}
-            <li className={styles.mobileOnly}>
-              <button
-                className={styles.moreButton}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setOverflowOpen(!overflowOpen);
-                }}
-                aria-label="More sections"
-                aria-expanded={overflowOpen}
-              >
-                <span className={styles.moreIcon}>⋯</span>
-              </button>
-            </li>
-          </ul>
-
-          {/* Mobile overflow menu - hardcode list for now */}
-          {overflowOpen && (
-            <div ref={overflowRef} className={styles.overflowMenu}>
-              {['performance', 'battery', 'compare-ultra', 'evidence'].map((id) => {
-                const item = NAV_ITEMS.find(i => i.id === id);
-                if (!item) return null;
-                return (
                   <a
-                    key={item.id}
-                    className={styles.overflowLink}
+                    className={styles.link}
                     href={`#${item.id}`}
+                    data-nav-id={item.id}
                     data-active={item.id === active}
-                    onClick={(e) => {
-                      onNavClick(e, item.id);
-                      setOverflowOpen(false);
-                    }}
+                    aria-current={item.id === active ? 'true' : undefined}
+                    onClick={(e) => onNavClick(e, item.id)}
                   >
                     {item.label}
                   </a>
-                );
-              })}
-            </div>
-          )}
+                </li>
+              ))}
+              <li className={styles.mobileOnly}>
+                <button
+                  ref={moreRef}
+                  type="button"
+                  className={styles.moreButton}
+                  data-active={overflowOwnsActive}
+                  aria-label="More sections"
+                  aria-expanded={overflowOpen}
+                  aria-controls="nav-overflow"
+                  onClick={() => setOverflowOpen((open) => !open)}
+                >
+                  <span className={styles.moreIcon} aria-hidden="true">
+                    ⋯
+                  </span>
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          {/* Always in the DOM, hidden with `visibility` rather than unmounted:
+              a menu that is torn out of the tree has nothing left to animate on
+              the way out, and a transition retargets mid-flight where a
+              keyframe would restart. `visibility: hidden` keeps the closed
+              links out of the tab order, same trick as #scroll-veil. */}
+          <div
+            id="nav-overflow"
+            ref={overflowRef}
+            className={styles.overflowMenu}
+            data-open={overflowOpen}
+          >
+            {OVERFLOW_ITEMS.map((item) => (
+              <a
+                key={item.id}
+                className={styles.overflowLink}
+                href={`#${item.id}`}
+                data-active={item.id === active}
+                onClick={(e) => {
+                  onNavClick(e, item.id);
+                  setOverflowOpen(false);
+                }}
+              >
+                {item.label}
+              </a>
+            ))}
+          </div>
         </nav>
       </div>
     </header>

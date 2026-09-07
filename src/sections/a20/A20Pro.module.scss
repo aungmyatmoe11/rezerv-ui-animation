@@ -18,14 +18,35 @@
     background: linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.55) 76%, rgba(0, 0, 0, 0.84) 100%);
   }
 
-  /* Stacked video tier: normal flow beneath the clip, badge on the clip. */
+  /* Stacked video tier: copy in normal flow beneath the clip.
+     The disclosure stays — it is the thing this overlay exists to say, and
+     hiding it left phones with only the baked-in spec list and no caveat.
+     The leader line comes off: it points at a pixel that is no longer under
+     the label. The badge sits in the copy column, not over the picture. */
   &[data-mode='video'] {
     position: static;
     padding-block: 32px 48px;
+    gap: 16px;
+    align-content: start;
 
     &::before { display: none; }
-    .corner { top: 16px; left: 16px; }
-    .callout { display: none; }
+
+    .corner {
+      position: static;
+      top: auto;
+      left: auto;
+      z-index: auto;
+    }
+
+    .callout {
+      position: static;
+      left: auto;
+      top: auto;
+      height: auto;
+      display: block;
+    }
+
+    .calloutLine { display: none; }
   }
 }
 
@@ -68,7 +89,7 @@
   font-size: 0.875rem;
   line-height: 1.4;
   color: var(--bone);
-  will-change: opacity, transform;
+  @include will-change-while-pinned(opacity, transform);
 }
 
 .calloutLine {
@@ -78,7 +99,7 @@
   width: 1px;
   background: rgba(237, 234, 228, 0.55);
   transform-origin: top center;
-  will-change: transform;
+  @include will-change-while-pinned(transform);
 
   &::after {
     content: '';
@@ -160,7 +181,7 @@
 
     .rowValue {
       color: var(--bone);
-      transform: translateX(4px);
+      @include hover-motion { transform: translateX(4px); }
     }
     .rowNote { opacity: 1; }
   }
@@ -180,8 +201,8 @@
   font-size: clamp(1.125rem, 1.7vw, 1.5rem);
   color: var(--bone-dim);
   transition:
-    color var(--dur-base) var(--ease-out),
-    transform var(--dur-base) var(--ease-out);
+    color var(--dur-hover) var(--ease-out),
+    transform var(--dur-hover) var(--ease-out);
 }
 
 .rowBadge {
@@ -195,7 +216,7 @@
   font-size: 0.9375rem;
   color: var(--bone-dim);
   opacity: 0.6;
-  transition: opacity var(--dur-base) var(--ease-out);
+  transition: opacity var(--dur-hover) var(--ease-out);
 }
 
 @include motion-reduce {

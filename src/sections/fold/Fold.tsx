@@ -28,7 +28,7 @@ export function Fold() {
         slug="fold"
         alt={ALT}
         pinVh={2.8}
-        smoothing={0.7}
+        smoothing={0.13}
         fit="contain"
         mediaHeight={0.86}
         videoLayout="stacked"
@@ -58,15 +58,29 @@ export function Fold() {
 function FoldCaption() {
   const ref = useRef<HTMLDivElement | null>(null);
 
-  // The swap happens at the film's midpoint, not on a timer, so it tracks the
-  // device rather than the clock — and reverses when the visitor scrolls back.
+  // The swap tracks the hinge, not a clock, and runs backwards on scroll-up.
+  //
+  // Both labels share one grid cell. A 0.05 overlap (0.50–0.55) used to hold
+  // "5.5 inches" and "7.8 inches" on screen together. They now yield through
+  // an empty beat: outgoing leaves, incoming arrives. `y` keeps the handoff
+  // on the compositor — blur is reserved for the one-shot ApertureLab dissolve,
+  // not a filter that would repaint on every scrub tick.
   const mode = useScrubTimeline(ref, (tl, root) => {
     const closed = root.querySelector<HTMLElement>('[data-state="closed"]');
     const open = root.querySelector<HTMLElement>('[data-state="open"]');
     if (!closed || !open) return;
 
-    tl.fromTo(closed, { opacity: 1 }, { opacity: 0, duration: 0.1 }, 0.45)
-      .fromTo(open, { opacity: 0 }, { opacity: 1, duration: 0.1 }, 0.5);
+    tl.fromTo(
+      closed,
+      { autoAlpha: 1, y: 0 },
+      { autoAlpha: 0, y: -14, duration: 0.07, ease: 'none' },
+      0.44,
+    ).fromTo(
+      open,
+      { autoAlpha: 0, y: 14 },
+      { autoAlpha: 1, y: 0, duration: 0.08, ease: 'none' },
+      0.53,
+    );
   });
 
   return (

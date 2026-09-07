@@ -110,11 +110,10 @@
   font-size: 0.9375rem;
   /* transform/opacity/colour only - never width, padding or margin on hover. */
   transition:
-    background-color var(--dur-base) var(--ease-out),
-    border-color var(--dur-base) var(--ease-out),
-    color var(--dur-base) var(--ease-out),
-    transform var(--dur-base) var(--ease-out);
-  will-change: transform;
+    background-color var(--dur-hover) var(--ease-out),
+    border-color var(--dur-hover) var(--ease-out),
+    color var(--dur-hover) var(--ease-out),
+    transform var(--dur-hover) var(--ease-out);
 }
 
 .cta {
@@ -123,7 +122,7 @@
   color: var(--ink);
 
   &:hover {
-    transform: translateY(-2px);
+    @include hover-motion { transform: translateY(-2px); }
     background: #fff;
   }
   &:active { transform: translateY(0); }
@@ -136,16 +135,18 @@
   &:hover {
     color: var(--bone);
     border-color: rgba(237, 234, 228, 0.35);
-    transform: translateY(-2px);
+    @include hover-motion { transform: translateY(-2px); }
   }
   &:active { transform: translateY(0); }
 }
 
 .arrow {
   display: inline-block;
-  transition: transform var(--dur-base) var(--ease-out);
+  transition: transform var(--dur-hover) var(--ease-out);
 
-  .cta:hover & { transform: translateY(3px); }
+  @include hover-motion {
+    .cta:hover & { transform: translateY(3px); }
+  }
 }
 
 @include motion-reduce {

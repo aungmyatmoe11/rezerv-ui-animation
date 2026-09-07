@@ -36,7 +36,7 @@ export function CameraSensor() {
         slug="camera-sensor"
         alt={ALT}
         pinVh={2.6}
-        smoothing={0.7}
+        smoothing={0.14}
         fit="contain"
         mediaHeight={0.86}
         videoLayout="stacked"

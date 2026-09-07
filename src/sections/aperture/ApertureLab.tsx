@@ -1,7 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import { useId, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { gsap, useGSAP } from '@/lib/motion/gsap';
+import { useMotionPolicy } from '@/lib/motion/motionPolicy';
 import styles from './ApertureLab.module.scss';
 
 /** Reported mechanical range: f/1.4 to f/4 is three full stops. */
@@ -9,15 +11,35 @@ const MIN_STOP = 1.4;
 const STOPS = 3;
 const BLADES = 9;
 
+/** Iris geometry. Module scope so the imperative drag path can reuse it. */
+const IRIS_C = 120;
+const IRIS_RING = 104;
+const IRIS_BLADE = 240;
+
+/**
+ * Wide-open blur, in pixels.
+ *
+ * 22px ဖြစ်ခဲ့သည်။ Transition/gesture အတွင်း blur သည် 20px အောက်တွင်ရှိရမည် —
+ * အထူးသဖြင့် Safari တွင် စျေးကြီးသည်။ ဤသည်မှာ drag တစ်ခုလုံး၏ frame တိုင်းတွင်
+ * full-bleed ဓာတ်ပုံပေါ်တွင် ပြန်တွက်နေရသော တစ်ခုတည်းသော filter ဖြစ်သည်။
+ */
+const MAX_BLUR = 18;
+
 const fNumber = (t: number) => MIN_STOP * 2 ** ((STOPS * t) / 2);
 const formatStop = (n: number) => n.toFixed(1);
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
+
+const depthLabel = (t: number) =>
+  t < 0.34 ? 'Shallow depth, more light' : t < 0.72 ? 'Balanced' : 'Deep focus, less light';
 
 /**
  * Opening radius as a fraction of the ring. Diameter scales with 1/N; the
  * exponent is compressed so f/4 still reads as an opening, not a pinprick.
  */
 const opening = (n: number) => 0.84 * (MIN_STOP / n) ** 0.55;
+
+const bladeTransform = (i: number, distance: number) =>
+  `rotate(${(i * 360) / BLADES} ${IRIS_C} ${IRIS_C}) translate(${IRIS_C + distance} ${IRIS_C})`;
 
 const PRESETS = [
   { t: 0, stop: '1.4' },
@@ -59,6 +81,16 @@ const SCENES: readonly Scene[] = [
 
 const SIZES = '(max-width: 767px) 92vw, (max-width: 1023px) 86vw, 920px';
 
+/** The nodes the drag writes to, cached once so no frame runs a querySelector. */
+interface LiveNodes {
+  plates: HTMLElement[];
+  subjects: HTMLElement[];
+  veil: HTMLElement | null;
+  focus: HTMLElement | null;
+}
+
+const EMPTY_NODES: LiveNodes = { plates: [], subjects: [], veil: null, focus: null };
+
 /**
  * Slider-driven aperture demo: a nine-blade iris, the rumoured f/1.4–f/4
  * range, and a photograph whose background defocuses as the iris opens.
@@ -67,16 +99,50 @@ const SIZES = '(max-width: 767px) 92vw, (max-width: 1023px) 86vw, 920px';
  * ways into the same number. Everything that number touches is transform,
  * opacity, mask size, or a filter on the plate. No layout.
  *
+ * WHY THE DRAG DOES NOT GO THROUGH REACT
+ *
+ * ယခင်က `onPointerMove` တိုင်းတွင် `setT()` ခေါ်ခဲ့သည်။ ၎င်းသည် pointer event
+ * တိုင်းအတွက် React render အပြည့်တစ်ခုစီဖြစ်စေပြီး၊ 9-circle iris SVG ကို
+ * ပြန်တည်ဆောက်ကာ၊ `.viewfinder` ပေါ်တွင် CSS variable ခြောက်ခုရေးသဖြင့်
+ * descendant တစ်ဒါဇင်နီးပါး၏ style ကို recalculate လုပ်စေခဲ့သည် — အားလုံးသည်
+ * 18px blur တစ်ခုအောက်တွင်ဖြစ်သည်။ ဤ page ၏ တစ်ခုတည်းသော continuous gesture
+ * ဖြစ်၍ frame budget အရေးအကြီးဆုံးနေရာလည်းဖြစ်သည်။
+ *
+ * ယခု drag သည် DOM သို့တိုက်ရိုက်ရေးပြီး (scrollState နှင့် UltraTransition တို့
+ * လုပ်သည့်နည်းအတိုင်း)၊ pointer တင်လိုက်မှသာ React state သို့ commit လုပ်သည်။
+ * React state သည် slider value, preset ၏ pressed state နှင့် screen reader
+ * ဖတ်သော live region တို့အတွက် ကျန်ရှိနေဆဲဖြစ်သည် — ၎င်းတို့သည် အတည်ပြုပြီးသား
+ * တန်ဖိုးကိုသာ လိုအပ်သည်။
+ *
  * It is labelled as a simulation on the frame itself, not just in the copy.
  */
 export function ApertureLab() {
   const id = useId().replace(/[^a-zA-Z0-9_-]/g, '');
+  const policy = useMotionPolicy();
   const [t, setT] = useState(0);
   const [sceneId, setSceneId] = useState<Scene['id']>('interior');
   const [used, setUsed] = useState(false);
   const [dragging, setDragging] = useState(false);
+
+  const scene = SCENES.find((s) => s.id === sceneId) ?? SCENES[0]!;
+  const n = fNumber(t);
+  const label = formatStop(n);
+  const open = opening(n);
+  const depth = depthLabel(t);
+
   const tRef = useRef(t);
-  tRef.current = t;
+  const sceneRef = useRef(scene);
+  sceneRef.current = scene;
+  const sceneHydrated = useRef(false);
+
+  const viewRef = useRef<HTMLDivElement | null>(null);
+  const irisRef = useRef<SVGGElement | null>(null);
+  const hudStopRef = useRef<HTMLSpanElement | null>(null);
+  const hudDepthRef = useRef<HTMLSpanElement | null>(null);
+  const readoutRef = useRef<HTMLSpanElement | null>(null);
+  const nodes = useRef<LiveNodes>(EMPTY_NODES);
+  const frame = useRef(0);
+
   const gesture = useRef<{
     pointerId: number;
     startX: number;
@@ -85,14 +151,173 @@ export function ApertureLab() {
     locked: boolean;
   } | null>(null);
 
-  const scene = SCENES.find((s) => s.id === sceneId) ?? SCENES[0]!;
-  const n = fNumber(t);
-  const label = formatStop(n);
-  const open = opening(n);
-  const blur = 22 * (1 - t) ** 1.35;
-  const veil = 0.38 * t;
-  const depth =
-    t < 0.34 ? 'Shallow depth, more light' : t < 0.72 ? 'Balanced' : 'Deep focus, less light';
+  /**
+   * Paint one aperture value. Never allocates a render.
+   *
+   * Variable တိုင်းကို ၎င်းကိုတကယ်သုံးသော element ပေါ်တွင်သာရေးသည် — parent
+   * ပေါ်တွင်မဟုတ်။ Parent ပေါ်တွင်ရေးလျှင် subtree တစ်ခုလုံး style recalculate
+   * ဖြစ်သည်၊ ယခုမူ ရေးလိုက်သည့် node များသာဖြစ်သည်။
+   */
+  const applyAperture = useCallback((value: number) => {
+    const { plates, subjects, veil, focus } = nodes.current;
+    const { focus: area } = sceneRef.current;
+
+    const stop = formatStop(fNumber(value));
+    const blur = MAX_BLUR * (1 - value) ** 1.35;
+    const x = `${area.x}%`;
+    const y = `${area.y}%`;
+    const rx = `${(area.rx + 30 * value).toFixed(1)}%`;
+    const ry = `${(area.ry + 34 * value).toFixed(1)}%`;
+
+    for (const plate of plates) plate.style.setProperty('--blur', `${blur.toFixed(2)}px`);
+    veil?.style.setProperty('--veil', (0.38 * value).toFixed(3));
+
+    for (const subject of subjects) {
+      subject.style.setProperty('--mask-x', x);
+      subject.style.setProperty('--mask-y', y);
+      subject.style.setProperty('--mask-rx', rx);
+      subject.style.setProperty('--mask-ry', ry);
+    }
+
+    if (focus) {
+      focus.style.setProperty('--mask-x', x);
+      focus.style.setProperty('--mask-y', y);
+    }
+
+    const blades = irisRef.current?.children;
+    if (blades) {
+      const distance = IRIS_BLADE + opening(fNumber(value)) * 92;
+      for (let i = 0; i < blades.length; i += 1) {
+        blades[i]!.setAttribute('transform', bladeTransform(i, distance));
+      }
+    }
+
+    if (hudStopRef.current) hudStopRef.current.textContent = `f/${stop}`;
+    if (hudDepthRef.current) hudDepthRef.current.textContent = depthLabel(value);
+    if (readoutRef.current) readoutRef.current.textContent = stop;
+  }, []);
+
+  // Cache the write targets once. The two scenes are always both in the DOM,
+  // so this structure never changes.
+  useLayoutEffect(() => {
+    const root = viewRef.current;
+    if (!root) return;
+    nodes.current = {
+      plates: Array.from(root.querySelectorAll<HTMLElement>(`.${styles.plateWrap}`)),
+      subjects: Array.from(root.querySelectorAll<HTMLElement>(`.${styles.subjectWrap}`)),
+      veil: root.querySelector<HTMLElement>(`.${styles.veil}`),
+      focus: root.querySelector<HTMLElement>(`.${styles.focus}`),
+    };
+    applyAperture(tRef.current);
+  }, [applyAperture]);
+
+  /**
+   * Slider, preset taps and scene changes still come through React; this is
+   * where they reach the DOM. A drag never lands here — `t` does not move
+   * until the pointer is released.
+   *
+   * React သည် render နှစ်ခုကြားတွင် prop ပြောင်းသွားသည့် attribute ကိုသာ
+   * ရေးသဖြင့်၊ drag အတွင်း `setDragging` ကြောင့် render ဖြစ်လျှင်လည်း
+   * `t` မပြောင်းသည့်အတွက် iris နှင့် HUD ၏ imperative တန်ဖိုးများ ကျန်ရှိသည်။
+   */
+  useLayoutEffect(() => {
+    tRef.current = t;
+    applyAperture(t);
+  }, [t, sceneId, applyAperture]);
+
+  useEffect(
+    () => () => {
+      if (frame.current) cancelAnimationFrame(frame.current);
+    },
+    [],
+  );
+
+  const plateNodes = () =>
+    Array.from(viewRef.current?.querySelectorAll<HTMLElement>(`.${styles.plates}`) ?? []);
+
+  /**
+   * Scene change is a GSAP timeline, not a CSS opacity transition.
+   *
+   * The two plates share the viewfinder, so a 420ms CSS crossfade held both
+   * photographs on screen together — a double-exposure. GSAP lets the outgoing
+   * plate yield, then the incoming one arrive, with a 2px blur mask on the
+   * overlap that desktop/tablet can afford. Mobile (lite) drops the blur and
+   * shortens the beat: same story, cheaper paint. Rapid taps kill and retarget
+   * from the current values, so the dissolve never restarts from zero.
+   */
+  useGSAP(
+    () => {
+      const incoming = plateNodes().find((el) => el.dataset.scene === sceneId);
+      const outgoing = plateNodes().find((el) => el.dataset.scene !== sceneId);
+      if (!incoming) return;
+
+      if (!sceneHydrated.current) {
+        sceneHydrated.current = true;
+        gsap.set(incoming, { opacity: 1, scale: 1, filter: 'none' });
+        if (outgoing) gsap.set(outgoing, { opacity: 0, scale: 1, filter: 'none' });
+        return;
+      }
+
+      if (!outgoing) return;
+
+      const incomingShown = Number(gsap.getProperty(incoming, 'opacity')) > 0.95;
+      const outgoingHidden = Number(gsap.getProperty(outgoing, 'opacity')) < 0.05;
+      if (incomingShown && outgoingHidden) return;
+
+      if (policy.tier === 'static') {
+        gsap.set(outgoing, { opacity: 0, scale: 1, filter: 'none' });
+        gsap.set(incoming, { opacity: 1, scale: 1, filter: 'none' });
+        return;
+      }
+
+      // Lite = phone: opacity + scale only. Pinning viewports get the blur mask.
+      const lite = !policy.canPin;
+      const dur = lite ? 0.28 : 0.42;
+      const incomingAtRest = Number(gsap.getProperty(incoming, 'opacity')) < 0.08;
+
+      if (incomingAtRest) {
+        gsap.set(incoming, lite ? { scale: 1.03 } : { scale: 1.03, filter: 'blur(2px)' });
+      }
+
+      const tl = gsap.timeline({
+        defaults: { overwrite: 'auto' },
+        onComplete: () => gsap.set([incoming, outgoing], { clearProps: 'filter,willChange' }),
+      });
+
+      const leave: gsap.TweenVars = {
+        opacity: 0,
+        scale: 0.985,
+        duration: dur * 0.62,
+        ease: 'power2.inOut',
+      };
+      const arrive: gsap.TweenVars = {
+        opacity: 1,
+        scale: 1,
+        duration: dur,
+        ease: 'power3.out',
+      };
+      if (!lite) {
+        leave.filter = 'blur(2px)';
+        arrive.filter = 'blur(0px)';
+      }
+
+      tl.set([incoming, outgoing], { willChange: 'opacity, transform' })
+        .to(outgoing, leave, 0)
+        .to(incoming, arrive, dur * 0.28);
+
+      return () => tl.kill();
+    },
+    { scope: viewRef, dependencies: [sceneId, policy.tier, policy.canPin] },
+  );
+
+  const lockPlateStyles = () => {
+    for (const plate of plateNodes()) {
+      gsap.set(plate, {
+        opacity: gsap.getProperty(plate, 'opacity'),
+        scale: gsap.getProperty(plate, 'scale'),
+      });
+    }
+  };
 
   const setAperture = (next: number) => {
     setT(clamp01(next));
@@ -123,7 +348,16 @@ export function ApertureLab() {
       setUsed(true);
     }
     const width = e.currentTarget.clientWidth || 1;
-    setT(clamp01(g.startT + dx / width));
+    tRef.current = clamp01(g.startT + dx / width);
+
+    // Pointer events out-fire the display on a trackpad; one paint per frame
+    // is the most the screen can show.
+    if (frame.current === 0) {
+      frame.current = requestAnimationFrame(() => {
+        frame.current = 0;
+        applyAperture(tRef.current);
+      });
+    }
   };
 
   const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -133,24 +367,27 @@ export function ApertureLab() {
       e.currentTarget.releasePointerCapture(e.pointerId);
     }
     gesture.current = null;
+
+    if (frame.current) {
+      cancelAnimationFrame(frame.current);
+      frame.current = 0;
+    }
+
+    if (g.locked) {
+      // Paint the final position before committing: if the value happens to
+      // match `t` React bails out of the update and the effect never runs.
+      applyAperture(tRef.current);
+      setT(tRef.current);
+    }
     setDragging(false);
   };
 
   return (
     <div className={styles.lab} data-reveal data-used={used}>
       <div
+        ref={viewRef}
         className={styles.viewfinder}
         data-dragging={dragging}
-        style={
-          {
-            '--blur': `${blur.toFixed(2)}px`,
-            '--veil': veil.toFixed(3),
-            '--mask-x': `${scene.focus.x}%`,
-            '--mask-y': `${scene.focus.y}%`,
-            '--mask-rx': `${(scene.focus.rx + 30 * t).toFixed(1)}%`,
-            '--mask-ry': `${(scene.focus.ry + 34 * t).toFixed(1)}%`,
-          } as React.CSSProperties
-        }
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -160,6 +397,7 @@ export function ApertureLab() {
           <div
             key={plate.id}
             className={styles.plates}
+            data-scene={plate.id}
             data-active={plate.id === scene.id}
             aria-hidden="true"
           >
@@ -192,8 +430,8 @@ export function ApertureLab() {
         <div className={styles.veil} aria-hidden="true" />
         <div className={styles.focus} aria-hidden="true" />
         <p className={styles.hud} aria-hidden="true">
-          <span>f/{label}</span>
-          <span>{depth}</span>
+          <span ref={hudStopRef}>f/{label}</span>
+          <span ref={hudDepthRef}>{depth}</span>
         </p>
         <p className={styles.hint} aria-hidden="true">
           Drag across the photograph
@@ -203,10 +441,12 @@ export function ApertureLab() {
 
       <div className={styles.meta}>
         <div className={styles.iris}>
-          <Iris id={id} open={open} />
+          <Iris id={id} open={open} gRef={irisRef} />
           <p className={styles.readout} aria-hidden="true">
             <span className={styles.readoutF}>f/</span>
-            <span className={styles.readoutN}>{label}</span>
+            <span className={styles.readoutN} ref={readoutRef}>
+              {label}
+            </span>
           </p>
         </div>
 
@@ -252,6 +492,11 @@ export function ApertureLab() {
                 className={styles.sceneBtn}
                 data-active={option.id === scene.id}
                 onClick={() => {
+                  if (option.id === scene.id) return;
+                  // Inline the current opacities before React flips `data-active`,
+                  // otherwise CSS would snap both plates and GSAP would tween
+                  // from the snapped values.
+                  lockPlateStyles();
                   setSceneId(option.id);
                   setUsed(true);
                 }}
@@ -270,17 +515,22 @@ export function ApertureLab() {
   );
 }
 
-function Iris({ id, open }: { id: string; open: number }) {
-  const C = 120;
-  const RING = 104;
-  const BLADE = 240;
-  const distance = BLADE + open * 92;
+function Iris({
+  id,
+  open,
+  gRef,
+}: {
+  id: string;
+  open: number;
+  gRef: React.RefObject<SVGGElement | null>;
+}) {
+  const distance = IRIS_BLADE + open * 92;
 
   return (
     <svg viewBox="0 0 240 240" className={styles.irisSvg} aria-hidden="true" focusable="false">
       <defs>
         <clipPath id={`${id}-clip`}>
-          <circle cx={C} cy={C} r={RING} />
+          <circle cx={IRIS_C} cy={IRIS_C} r={IRIS_RING} />
         </clipPath>
         <radialGradient id={`${id}-glass`} cx="38%" cy="32%" r="72%">
           <stop offset="0" stopColor="#6b8fc2" />
@@ -293,21 +543,28 @@ function Iris({ id, open }: { id: string; open: number }) {
         </linearGradient>
       </defs>
 
-      <circle cx={C} cy={C} r={114} fill="#0a0a0c" stroke="rgba(237, 234, 228, 0.16)" />
-      <circle cx={C} cy={C} r={RING} fill={`url(#${id}-glass)`} />
-      <g clipPath={`url(#${id}-clip)`}>
+      <circle cx={IRIS_C} cy={IRIS_C} r={114} fill="#0a0a0c" stroke="rgba(237, 234, 228, 0.16)" />
+      <circle cx={IRIS_C} cy={IRIS_C} r={IRIS_RING} fill={`url(#${id}-glass)`} />
+      {/* The drag writes each blade's transform straight onto these nodes. */}
+      <g clipPath={`url(#${id}-clip)`} ref={gRef}>
         {Array.from({ length: BLADES }, (_, i) => (
           <circle
             key={i}
-            r={BLADE}
+            r={IRIS_BLADE}
             fill={`url(#${id}-blade)`}
             stroke="rgba(0, 0, 0, 0.8)"
             strokeWidth={1.5}
-            transform={`rotate(${(i * 360) / BLADES} ${C} ${C}) translate(${C + distance} ${C})`}
+            transform={bladeTransform(i, distance)}
           />
         ))}
       </g>
-      <circle cx={C} cy={C} r={RING} fill="none" stroke="rgba(237, 234, 228, 0.22)" />
+      <circle
+        cx={IRIS_C}
+        cy={IRIS_C}
+        r={IRIS_RING}
+        fill="none"
+        stroke="rgba(237, 234, 228, 0.22)"
+      />
     </svg>
   );
 }

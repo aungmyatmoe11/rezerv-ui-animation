@@ -45,6 +45,9 @@ export function UltraTransition() {
         end: 'center 55%',
         scrub: 0.8,
         animation: undefined,
+        onToggle: (self) => {
+          card.style.willChange = self.isActive ? 'opacity, transform' : 'auto';
+        },
         onUpdate: (self) => {
           const p = self.progress;
           card.style.opacity = String(0.3 + 0.7 * p);
@@ -52,7 +55,10 @@ export function UltraTransition() {
         },
       });
 
-      return () => tween.kill();
+      return () => {
+        card.style.willChange = 'auto';
+        tween.kill();
+      };
     },
     { scope: ref, dependencies: [policy.canPin] },
   );

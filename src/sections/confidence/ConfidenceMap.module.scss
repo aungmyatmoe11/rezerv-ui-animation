@@ -69,7 +69,9 @@
   border-radius: 999px;
   transform-origin: left center;
   transform: scaleX(0);
-  will-change: transform;
+  /* No permanent will-change: these nine bars draw once and never move again.
+     ConfidenceMap.tsx promotes them for the length of the tween and demotes
+     them on complete, the same way useSectionReveal does. */
   background: var(--c-concept);
 
   &[data-level='official']   { background: var(--c-official); }

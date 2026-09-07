@@ -15,6 +15,8 @@ export interface UseScrubSequenceOptions {
   /** Folder under /public/frames. */
   slug: string;
   frameCount: number;
+  /** ဖိုင်များထဲမှ စတင်ဖတ်မည့် ဖရိမ် (0-based). */
+  startFrame?: number;
   /** Hero only: load during the preloader and report progress to it. */
   eager?: boolean;
   /** Pin length as a multiple of viewport height, before the tier's pinScale. */
@@ -53,9 +55,10 @@ export interface UseScrubSequenceResult {
 export function useScrubSequence({
   slug,
   frameCount,
+  startFrame = 0,
   eager = false,
   pinVh = 2,
-  smoothing = 0.7,
+  smoothing = 0.18,
   fit = 'cover',
 }: UseScrubSequenceOptions): UseScrubSequenceResult {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -70,7 +73,6 @@ export function useScrubSequence({
   const rendererRef = useRef<FrameRenderer | null>(null);
   const targetRef = useRef(0);
   const currentRef = useRef(0);
-  const lastFrameIndexRef = useRef(-1);
 
   // Stable for the life of the hook, so subscribing components can list it as
   // a dependency without re-subscribing on every render.
@@ -112,6 +114,7 @@ export function useScrubSequence({
     const run = () => {
       loadFrames(slug, frameCount, {
         signal: controller.signal,
+        startFrame,
         onProgress: eager
           ? (loaded, total) => preloadStore.setProgress(loaded, total)
           : undefined,
@@ -160,7 +163,7 @@ export function useScrubSequence({
       io.disconnect();
       controller.abort();
     };
-  }, [slug, frameCount, eager, entranceUnlocked, policy.canScrub]);
+  }, [slug, frameCount, startFrame, eager, entranceUnlocked, policy.canScrub]);
 
   // ---- 2. renderer + resize ---------------------------------------------
   useEffect(() => {
@@ -217,38 +220,28 @@ export function useScrubSequence({
        * ScrollTrigger updates on. Sharing the ticker means the canvas is painted
        * in the same frame as the pin it belongs to, so the frame on screen can
        * never be one tick out of step with the scroll position that chose it.
-       * 
-       * PERFORMANCE: Only redraw canvas when the quantized frame index changes.
-       * At 60fps ticker with smoothing=0.7, the interpolated position changes
-       * every frame, but the actual frame index might not change for 2-3 ticks.
-       * Skipping redundant draw calls reduces main-thread pressure during scroll.
+       *
+       * `smoothing` သည် tick တစ်ခုလျှင်မဟုတ်ဘဲ 1/60s လျှင် ကျန်အကွာအဝေး၏
+       * ရာခိုင်နှုန်းအဖြစ် အဓိပ္ပာယ်သတ်မှတ်သည်။
+       *
+       * ယခင်က တန်ဖိုးကို tick တိုင်းတွင် တိုက်ရိုက်သုံးခဲ့သဖြင့် chase သည်
+       * display refresh rate ပေါ်မူတည်နေခဲ့သည် — 120Hz (ProMotion) တွင် 60Hz
+       * ထက် ၂ ဆမြန်ပြီး၊ frame တစ်ခုကျော်သွားလျှင် ကျန်ခဲ့ကာ နောက်တစ်ခါတွင်
+       * ခုန်လိုက်သည်။ deltaRatio() က elapsed/16.67 ကိုပေးသဖြင့် 60Hz တွင်
+       * အပြုအမူမပြောင်းဘဲ၊ refresh rate မည်မျှဖြစ်စေ တစ်စက္ကန့်လျှင် တူညီသော
+       * နှုန်းဖြင့် ချဉ်းကပ်သည်။
        */
       const tick = () => {
         const target = targetRef.current;
-        const next = currentRef.current + (target - currentRef.current) * smoothing;
-        const settled = Math.abs(target - next) < 0.0005;
-        currentRef.current = settled ? target : next;
+        const k = 1 - (1 - smoothing) ** gsap.ticker.deltaRatio();
+        const next = currentRef.current + (target - currentRef.current) * k;
+        currentRef.current = Math.abs(target - next) < 0.0005 ? target : next;
         progressRef.current = currentRef.current;
-
-        // Calculate quantized frame index (matches frameRenderer QUANT logic)
-        const renderer = rendererRef.current;
-        if (renderer) {
-          const p = Math.min(1, Math.max(0, currentRef.current));
-          // QUANT = frameCount * 16, same as in frameRenderer
-          const quant = Math.round(p * frameCount * 16);
-          
-          // Only redraw when frame index actually changes
-          if (quant !== lastFrameIndexRef.current || settled) {
-            lastFrameIndexRef.current = quant;
-            renderer.draw(currentRef.current);
-          }
-        }
-
-        // Notify listeners with interpolated position (not just on redraw)
+        rendererRef.current?.draw(currentRef.current);
         for (const listener of listeners) listener(currentRef.current);
 
-        // Settled: stop ticking until scroll moves again
-        if (settled) {
+        // Settled: stop drawing until the scroll moves again.
+        if (currentRef.current === target) {
           running = false;
           gsap.ticker.remove(tick);
         }
@@ -257,8 +250,6 @@ export function useScrubSequence({
       const kick = () => {
         if (running) return;
         running = true;
-        // Reset frame index to force first redraw after scroll pause
-        lastFrameIndexRef.current = -1;
         gsap.ticker.add(tick);
       };
 
@@ -275,6 +266,10 @@ export function useScrubSequence({
         anticipatePin: 1,
         scrub: true,
         invalidateOnRefresh: true,
+        onToggle: (self) => {
+          if (self.isActive) section.dataset.pinned = 'true';
+          else delete section.dataset.pinned;
+        },
         onUpdate: (self) => {
           targetRef.current = self.progress;
           kick();
@@ -282,7 +277,10 @@ export function useScrubSequence({
         onRefresh: () => rendererRef.current?.resize(),
       });
 
+      if (trigger.isActive) section.dataset.pinned = 'true';
+
       return () => {
+        delete section.dataset.pinned;
         gsap.ticker.remove(tick);
         running = false;
         trigger.kill();

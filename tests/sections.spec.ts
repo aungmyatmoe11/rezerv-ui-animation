@@ -102,6 +102,60 @@ test.describe('thinness', () => {
   });
 });
 
+test.describe('fold captions', () => {
+  test('the two sizes never share the cell on the scrub tier', async ({ page }, testInfo) => {
+    test.setTimeout(150_000);
+    await page.goto('/');
+    await settle(page);
+
+    const caption = page.getByText('One device. Two states.');
+    await caption.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
+
+    const read = () =>
+      page.locator('[data-state]').evaluateAll((els) =>
+        els.map((el) => ({
+          state: (el as HTMLElement).dataset.state,
+          opacity: Number(getComputedStyle(el).opacity),
+        })),
+      );
+
+    if (testInfo.project.name === 'mobile') {
+      const rows = await read();
+      expect(rows.every((r) => r.opacity > 0.9), JSON.stringify(rows)).toBe(true);
+      return;
+    }
+
+    const section = page.locator('section').filter({ hasText: 'One device. Two states.' });
+    await section.evaluate((el) => {
+      const spacer = (el.parentElement?.classList.contains('pin-spacer')
+        ? el.parentElement
+        : el) as HTMLElement;
+      spacer.scrollIntoView({ block: 'start' });
+    });
+    await page.waitForTimeout(400);
+
+    const start = await read();
+    expect(start.find((r) => r.state === 'closed')!.opacity).toBeGreaterThan(0.85);
+    expect(start.find((r) => r.state === 'open')!.opacity).toBeLessThan(0.2);
+
+    const span = await section.evaluate((el) => {
+      const spacer = (el.parentElement?.classList.contains('pin-spacer')
+        ? el.parentElement
+        : el) as HTMLElement;
+      return spacer.offsetHeight;
+    });
+
+    // Halfway through the pin is the old overlap (0.50–0.55). After the yield,
+    // both labels should be near zero rather than both half-visible.
+    await page.evaluate((y) => window.scrollBy(0, y), Math.round(span * 0.52));
+    await page.waitForTimeout(350);
+    const mid = await read();
+    const bothLit = mid.every((r) => r.opacity > 0.35);
+    expect(bothLit, `double-exposure at the swap: ${JSON.stringify(mid)}`).toBe(false);
+  });
+});
+
 test.describe('ultra finishes', () => {
   test('the film edges are feathered against the page', async ({ page }, testInfo) => {
     test.setTimeout(150_000);

@@ -49,13 +49,13 @@
   height: 1px;
   background: rgba(237, 234, 228, 0.55);
   transform-origin: left center;
-  will-change: transform;
+  @include will-change-while-pinned(transform);
 }
 
 .calloutLabel {
   display: block;
   margin-left: 8px;
-  will-change: opacity, transform;
+  @include will-change-while-pinned(opacity, transform);
 }
 
 .note {

@@ -34,9 +34,9 @@
   /* Scrubbed from 0.3 in UltraTransition.tsx; this is the resting value for
      mobile and reduced motion, where no ramp runs. */
   opacity: 1;
-  will-change: opacity, transform;
   /* A soft halo so the bright card does not meet the black page on a hard
-     edge. Part of the same photosensitivity thinking as the opacity ramp. */
+     edge. Part of the same photosensitivity thinking as the opacity ramp.
+     will-change is applied only while the ramp ScrollTrigger is active. */
   box-shadow: 0 0 120px rgba(154, 183, 220, 0.09);
 
   @include desktop-up { width: min(58vw, 860px); }

@@ -34,11 +34,14 @@
   display: grid;
   justify-items: center;
   gap: 6px;
-  will-change: opacity;
 
+  /* Video tier stacks both labels, so GSAP's hidden/offset resting state
+     must not leak onto phones and reduced-motion. */
   .caption[data-mode='video'] & {
     grid-area: auto;
     opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
   }
 }
 

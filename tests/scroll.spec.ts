@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import {
   measureScrollPacing,
+  clickNav,
   navLink,
   recordScrollPath,
   sectionTop,
@@ -86,7 +87,7 @@ test.describe('scroll', () => {
     await settle(page);
 
     const path = await recordScrollPath(page, async () => {
-      await navLink(page, 'Sources').click();
+      await clickNav(page, 'Sources');
     });
 
     const target = await sectionTop(page, 'sources');

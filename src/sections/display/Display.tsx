@@ -28,7 +28,7 @@ export function Display() {
       slug="display"
       alt={ALT}
       pinVh={2.2}
-      smoothing={0.7}
+      smoothing={0.14}
       fit="contain"
       mediaHeight={0.92}
       videoLayout="stacked"
@@ -42,6 +42,15 @@ export function Display() {
 function DisplayPanel() {
   const ref = useRef<HTMLDivElement | null>(null);
 
+  /**
+   * Cue positions က ဖလင်နှင့်ချိန်ထားသည်၊ နာရီနှင့်မဟုတ်။
+   *
+   * ယခင်က 0.5 / 0.68 ဖြစ်ခဲ့သည် — အကြောင်းမှာ ဖလင်၏ရှေ့ပိုင်းထက်ဝက်သည်
+   * colors sequence ကို ထပ်ဖွင့်နေခြင်းဖြစ်၍ ဤ section ၏ကိုယ်ပိုင်အကြောင်းအရာ
+   * သည် တစ်ဝက်ပြီးမှစခဲ့သည်။ ထိုအထပ်ကို FRAME_STARTS ဖြင့်ဖြတ်လိုက်ပြီဖြစ်၍
+   * cue များကို ဖလင်အသစ်၏ အချိုးအစားနှင့်ပြန်ချိန်ထားသည် — display သည်
+   * ~0.41 တွင် ရှေ့သို့ရောက်လာသဖြင့် stat များက ထိုအချိန်တွင်ဝင်လာသည်။
+   */
   const mode = useScrubTimeline(ref, (tl, root) => {
     const stats = root.querySelectorAll<HTMLElement>('[data-stat]');
     const note = root.querySelector<HTMLElement>('[data-note]');
@@ -50,10 +59,10 @@ function DisplayPanel() {
         stats,
         { opacity: 0, y: 14 },
         { opacity: 1, y: 0, duration: 0.12, stagger: 0.03 },
-        0.5,
+        0.34,
       );
     }
-    if (note) tl.fromTo(note, { opacity: 0 }, { opacity: 1, duration: 0.1 }, 0.68);
+    if (note) tl.fromTo(note, { opacity: 0 }, { opacity: 1, duration: 0.1 }, 0.62);
   });
 
   return (

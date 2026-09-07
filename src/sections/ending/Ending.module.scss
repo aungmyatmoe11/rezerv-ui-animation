@@ -31,11 +31,11 @@
   border-radius: 14px;
   background: var(--ink-raised);
   transition:
-    border-color var(--dur-base) var(--ease-out),
-    transform var(--dur-base) var(--ease-out);
+    border-color var(--dur-hover) var(--ease-out),
+    transform var(--dur-hover) var(--ease-out);
 
   &:hover {
-    transform: translateY(-3px);
+    @include hover-motion { transform: translateY(-3px); }
     border-color: var(--rule);
 
     .what { color: var(--bone); }
@@ -51,7 +51,7 @@
   @include t-body;
   font-size: 0.9375rem;
   color: var(--bone-dim);
-  transition: color var(--dur-base) var(--ease-out);
+  transition: color var(--dur-hover) var(--ease-out);
 }
 
 /* ---- the event ------------------------------------------------------------ */
@@ -81,15 +81,14 @@
   font-size: 0.9375rem;
   color: var(--bone-dim);
   transition:
-    border-color var(--dur-base) var(--ease-out),
-    color var(--dur-base) var(--ease-out),
-    transform var(--dur-base) var(--ease-out);
-  will-change: transform;
+    border-color var(--dur-hover) var(--ease-out),
+    color var(--dur-hover) var(--ease-out),
+    transform var(--dur-hover) var(--ease-out);
 
   &:hover {
     color: var(--bone);
     border-color: rgba(237, 234, 228, 0.35);
-    transform: translateY(-2px);
+    @include hover-motion { transform: translateY(-2px); }
   }
   &:active { transform: translateY(0); }
 }

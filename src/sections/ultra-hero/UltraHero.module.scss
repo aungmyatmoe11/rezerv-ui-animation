@@ -47,6 +47,8 @@
   border: 1px solid var(--rule);
   border-radius: 16px;
   background: rgba(6, 6, 8, 0.8);
+
+  .panel:not([data-mode='video']) & { opacity: 0; }
 }
 
 .specLabel {

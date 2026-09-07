@@ -205,3 +205,23 @@ export async function recordScrollPath(
 export function navLink(page: Page, label: string): Locator {
   return page.locator('header').first().getByRole('link', { name: label, exact: true });
 }
+
+/**
+ * Click a section in the site nav, opening the compact overflow when the label
+ * is not in the visible bar (phone and tablet, below 1024px).
+ */
+export async function clickNav(page: Page, label: string): Promise<void> {
+  const inBar = page
+    .locator('header')
+    .first()
+    .locator('nav[aria-label="Sections"] ul')
+    .getByRole('link', { name: label, exact: true });
+
+  if (await inBar.isVisible()) {
+    await inBar.click();
+    return;
+  }
+
+  await page.getByRole('button', { name: 'More sections' }).click();
+  await page.locator('#nav-overflow').getByRole('link', { name: label, exact: true }).click();
+}

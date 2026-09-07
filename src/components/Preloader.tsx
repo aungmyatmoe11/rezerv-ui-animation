@@ -7,50 +7,63 @@ import { useMotionPolicy } from '@/lib/motion/motionPolicy';
 import styles from './Preloader.module.scss';
 
 /**
- * Hold long enough for the loading screen to read as a designed moment rather
- * than a flash of black. The hero film usually buffers faster than this on a
- * warm cache, so without a floor the loader appeared and vanished in one frame,
- * which looked like a glitch.
+ * The loader is a designed moment, not a spinner over a download.
  *
- * Repeat visits: skip the 2s floor, show only until assets load.
+ * On a warm cache the hero is ready before the first paint, so a bar tied to
+ * real progress jumps 0 → 100 in one frame and the screen reads as a glitch.
+ * Displayed progress chases the real figure with a 0–100 floor (2.4s first
+ * visit, 1.2s returning), so the count always travels. A slow connection still
+ * leads: each small increment retargets from the current value and does not
+ * wait out the full floor.
+ *
+ * Brand words need a beat to rise before the curtain can lift, independent of
+ * how fast the count ran.
  */
-const MIN_VISIBLE_MS = 2000;
-const MIN_VISIBLE_REPEAT_MS = 400; // ပြန်လည်လာရောက်သောအခါ တိုတောင်းသော အချိန်သာ
+const COUNT_FIRST_S = 2.4;
+const COUNT_REPEAT_S = 1.2;
+const BRAND_FIRST_MS = 1100;
+const BRAND_REPEAT_MS = 700;
 /** Nobody waits forever. Past this the page opens regardless. */
 const MAX_VISIBLE_MS = 8000;
 const VISIT_KEY = 'rezerv_visited';
+
+function visitPace(): 'first' | 'repeat' {
+  if (typeof sessionStorage === 'undefined') return 'first';
+  const repeat = sessionStorage.getItem(VISIT_KEY) === 'true';
+  sessionStorage.setItem(VISIT_KEY, 'true');
+  return repeat ? 'repeat' : 'first';
+}
 
 export function Preloader() {
   const { phase, loaded, total } = usePreloadState();
   const policy = useMotionPolicy();
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const countRef = useRef<HTMLSpanElement | null>(null);
+  const meterRef = useRef<HTMLSpanElement | null>(null);
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const displayed = useRef(0);
+  const [pace] = useState(visitPace);
   const [dismissed, setDismissed] = useState(false);
-  const [canDismiss, setCanDismiss] = useState(false);
+  const [brandReady, setBrandReady] = useState(false);
+  const [barComplete, setBarComplete] = useState(false);
 
   const pct = total > 0 ? Math.round((loaded / total) * 100) : 0;
   // 'failed' still opens the page — the video fallback carries the section.
   const settled = phase === 'ready' || phase === 'failed';
+  const canExit = settled && brandReady && barComplete;
 
   useEffect(() => {
-    // Check if this is a repeat visit within the session
-    const hasVisited = typeof sessionStorage !== 'undefined' && sessionStorage.getItem(VISIT_KEY) === 'true';
-    const minDelay = hasVisited ? MIN_VISIBLE_REPEAT_MS : MIN_VISIBLE_MS;
-
-    if (typeof sessionStorage !== 'undefined') {
-      sessionStorage.setItem(VISIT_KEY, 'true');
-    }
-
-    const min = window.setTimeout(() => setCanDismiss(true), minDelay);
+    const brandMs = pace === 'repeat' ? BRAND_REPEAT_MS : BRAND_FIRST_MS;
+    const brand = window.setTimeout(() => setBrandReady(true), brandMs);
     const max = window.setTimeout(() => {
-      // Release the hero too, or the page opens on a frozen film.
       preloadStore.unlockEntrance();
       setDismissed(true);
     }, MAX_VISIBLE_MS);
     return () => {
-      window.clearTimeout(min);
+      window.clearTimeout(brand);
       window.clearTimeout(max);
     };
-  }, []);
+  }, [pace]);
 
   // Hand off as soon as the assets are ready, independent of the exit animation.
   //
@@ -59,8 +72,8 @@ export function Preloader() {
   // backgrounded tab rAF is throttled to a stop, so the timeline never started,
   // the entrance never unlocked, and the hero film never played.
   useEffect(() => {
-    if (settled && canDismiss) preloadStore.unlockEntrance();
-  }, [settled, canDismiss]);
+    if (canExit) preloadStore.unlockEntrance();
+  }, [canExit]);
 
   // Scroll stays locked until the entrance timeline owns frame 0.
   useEffect(() => {
@@ -69,6 +82,57 @@ export function Preloader() {
       document.body.dataset.scrollLocked = 'false';
     };
   }, [dismissed]);
+
+  // ---- displayed progress: chase, never snap --------------------------------
+  useGSAP(
+    () => {
+      const countEl = countRef.current;
+      const meterEl = meterRef.current;
+      const trackEl = trackRef.current;
+      if (!countEl || !meterEl) return;
+
+      const target = settled ? 100 : pct;
+      const from = displayed.current;
+
+      const write = (n: number) => {
+        displayed.current = n;
+        const rounded = Math.round(n);
+        countEl.textContent = String(rounded).padStart(3, '0');
+        meterEl.style.transform = `scaleX(${Math.max(n / 100, 0.015)})`;
+        trackEl?.setAttribute('aria-valuenow', String(rounded));
+      };
+
+      if (policy.tier === 'static') {
+        write(target);
+        if (settled) setBarComplete(true);
+        return;
+      }
+
+      const distance = Math.max(0, target - from);
+      if (distance < 0.5) {
+        write(target);
+        if (settled && target >= 100) setBarComplete(true);
+        return;
+      }
+
+      const full = pace === 'repeat' ? COUNT_REPEAT_S : COUNT_FIRST_S;
+      const proxy = { n: from };
+      const tween = gsap.to(proxy, {
+        n: target,
+        duration: Math.max(0.28, (distance / 100) * full),
+        ease: 'power2.out',
+        overwrite: true,
+        onUpdate: () => write(proxy.n),
+        onComplete: () => {
+          write(target);
+          if (settled && target >= 100) setBarComplete(true);
+        },
+      });
+
+      return () => tween.kill();
+    },
+    { scope: rootRef, dependencies: [pct, settled, policy.tier, pace] },
+  );
 
   // ---- entrance: the loader is itself a designed moment -------------------
   useGSAP(
@@ -94,7 +158,7 @@ export function Preloader() {
   // ---- exit ----------------------------------------------------------------
   useGSAP(
     () => {
-      if (!settled || !canDismiss || dismissed) return;
+      if (!canExit || dismissed) return;
       const root = rootRef.current;
       if (!root) return;
 
@@ -104,7 +168,7 @@ export function Preloader() {
       }
 
       gsap
-        .timeline({ onComplete: () => setDismissed(true) })
+        .timeline({ delay: 0.14, onComplete: () => setDismissed(true) })
         .to(`.${styles.meter}`, { scaleX: 1, duration: 0.34, ease: 'power2.inOut' })
         .to(
           [`.${styles.readout}`, `.${styles.eyebrow}`],
@@ -117,7 +181,7 @@ export function Preloader() {
         // from the bottom edge instead of ghosting through a fade.
         .to(root, { yPercent: -100, duration: 0.72, ease: 'power3.inOut' }, '-=0.15');
     },
-    { scope: rootRef, dependencies: [settled, canDismiss, dismissed, policy.tier] },
+    { scope: rootRef, dependencies: [canExit, dismissed, policy.tier] },
   );
 
   if (dismissed) return null;
@@ -136,21 +200,21 @@ export function Preloader() {
         </p>
 
         <div
+          ref={trackRef}
           className={styles.track}
           role="progressbar"
           aria-valuemin={0}
           aria-valuemax={100}
-          aria-valuenow={pct}
+          aria-valuenow={0}
           aria-label="Loading the iPhone 18 Pro sequence"
         >
-          <span
-            className={styles.meter}
-            style={{ transform: `scaleX(${Math.max(pct / 100, 0.015)})` }}
-          />
+          <span ref={meterRef} className={styles.meter} />
         </div>
 
         <p className={styles.readout}>
-          <span className={styles.count}>{String(pct).padStart(3, '0')}</span>
+          <span ref={countRef} className={styles.count}>
+            000
+          </span>
           <span className={styles.unit}>%</span>
         </p>
       </div>

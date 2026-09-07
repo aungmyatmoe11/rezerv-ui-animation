@@ -30,7 +30,7 @@ export function ProVsProMax() {
         slug="pro-vs-promax"
         alt={ALT}
         pinVh={1.8}
-        smoothing={0.7}
+        smoothing={0.16}
         fit="contain"
         mediaHeight={0.92}
         videoLayout="stacked"

@@ -50,6 +50,10 @@
   border: 1px solid var(--rule);
   border-radius: 16px;
   background: rgba(6, 6, 8, 0.8);
+
+  /* GSAP owns opacity on the scrub tier. CSS rest hides the first-paint flash
+     before the timeline is built; the video tier has no timeline. */
+  .panel:not([data-mode='video']) & { opacity: 0; }
 }
 
 .statLabel {
@@ -73,4 +77,6 @@
   line-height: 1.5;
   color: var(--bone-dim);
   max-width: 44ch;
+
+  .panel:not([data-mode='video']) & { opacity: 0; }
 }

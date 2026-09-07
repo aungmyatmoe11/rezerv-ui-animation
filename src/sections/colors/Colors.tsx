@@ -48,7 +48,7 @@ export function Colors() {
         slug="colors"
         alt={ALT}
         pinVh={2.2}
-        smoothing={0.7}
+        smoothing={0.14}
         fit="contain"
         mediaHeight={0.78}
         videoLayout="stacked"
