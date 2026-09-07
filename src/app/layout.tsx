@@ -68,6 +68,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en-GB">
       <head>
+        {/* Scroll restoration: reset scroll position and hash BEFORE hydration.
+            Must run before the browser's auto-restore or ScrollTrigger pins are
+            created. Blocking script ensures the page always loads at top. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+              if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+              scrollTo(0, 0);
+            `,
+          }}
+        />
         {/* The hero poster is the first thing the page paints once the loader
             lifts, and nothing in the markup asks for it early: the <video> that
             carries it is client-rendered, so the request could not start until

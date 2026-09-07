@@ -141,4 +141,71 @@ test.describe('scroll', () => {
 
     expect(await page.evaluate(() => Math.round(window.scrollY))).toBeLessThanOrEqual(2);
   });
+
+  /**
+   * Hard reload always lands at the top, never restoring scroll position or hash.
+   *
+   * Before: the page briefly showed the hero, then ~1s later jumped back to the
+   * mid-page section where the user had been. This was caused by browser scroll
+   * restoration or ScrollTrigger restoration happening after useEffect ran.
+   *
+   * The fix: a blocking script in layout.tsx sets scrollRestoration='manual',
+   * clears the hash, and scrolls to 0 BEFORE hydration. ScrollReset now uses
+   * useLayoutEffect as backup. Together they prevent any delayed jump.
+   */
+  test('hard reload after scrolling down always starts at top', async ({ page }) => {
+    test.setTimeout(120_000);
+    await page.goto('/');
+    await settle(page);
+
+    // Scroll to a mid-page section
+    const batteryTop = await sectionTop(page, 'battery');
+    await page.evaluate((y) => window.scrollTo(0, y), batteryTop);
+    await page.waitForTimeout(800);
+
+    // Verify we're scrolled down
+    const scrolledPosition = await page.evaluate(() => window.scrollY);
+    expect(scrolledPosition).toBeGreaterThan(1000);
+
+    // Hard reload
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    
+    // Check immediately after DOMContentLoaded (before any delayed restoration)
+    const immediateScroll = await page.evaluate(() => window.scrollY);
+    expect(immediateScroll, 'page should be at top immediately after reload').toBeLessThanOrEqual(2);
+
+    // Wait for potential delayed jump (ScrollTrigger initialization, etc.)
+    await page.waitForTimeout(1500);
+    
+    // Verify still at top (no delayed jump occurred)
+    const finalScroll = await page.evaluate(() => window.scrollY);
+    expect(finalScroll, 'page must stay at top after delayed initialization').toBeLessThanOrEqual(2);
+  });
+
+  /**
+   * Reload with a hash in URL clears the hash and stays at top.
+   *
+   * Before: navigating to /#colors then reloading would jump to the colors
+   * section. Now the hash is stripped before any scroll restoration occurs.
+   */
+  test('hard reload with hash in URL clears hash and stays at top', async ({ page }) => {
+    test.setTimeout(120_000);
+    // Load with a hash that would normally jump to a section
+    await page.goto('/#battery');
+    await settle(page);
+
+    // Should be at top, not at the battery section
+    const scrollAfterLoad = await page.evaluate(() => window.scrollY);
+    expect(scrollAfterLoad, 'page should be at top despite hash in URL').toBeLessThanOrEqual(2);
+
+    // Hash should be cleared from URL
+    expect(new URL(page.url()).hash).toBe('');
+
+    // Wait for potential delayed jump
+    await page.waitForTimeout(1500);
+    
+    // Still at top
+    const finalScroll = await page.evaluate(() => window.scrollY);
+    expect(finalScroll, 'page must stay at top after initialization with hash').toBeLessThanOrEqual(2);
+  });
 });
