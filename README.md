@@ -250,7 +250,7 @@ cards over a 2:1 plate. Nav collapses to priority capsules + overflow. `overflow
 
 ### Design residual risks (honest)
 
-Live visual pass on https://iphone-18-concept-rust.vercel.app (desktop 1280 + mobile 390)
+Live visual pass on https://rezerv-ui-animation.vercel.app (desktop 1280 + mobile 390)
 confirmed the thesis and also these remaining risks:
 
 - ~20 sections + generous black holds still risk **scroll fatigue** — over-delivery vs the brief's
@@ -388,7 +388,7 @@ The repaint gate is what makes this survivable: the canvas is touched only when 
 position moves, and a paint composites two images, not 104. Decoding stays off the critical path.
 
 **Lab + live Lighthouse captured** (see Known limitations + `docs/lighthouse-*.report.*`).
-Live origin measured 2026-09-07 on https://iphone-18-concept-rust.vercel.app (`e49b625`).
+Live origin measured 2026-09-07 on https://rezerv-ui-animation.vercel.app.
 A Chrome Performance trace under 4× CPU throttle is still outstanding.
 
 ---
@@ -595,7 +595,7 @@ This project includes production-ready features suitable for CTO-level review:
 - **Lighthouse (lab, localhost:3100, 2026-09-07):** desktop Perf **99** / A11y 97 / BP 96 / SEO **100**
   (LCP 0.9s, CLS 0); mobile Perf **61** / A11y **100** / BP 96 / SEO **100** (LCP 4.1s, TBT 1.34s).
   Reports under `docs/lighthouse-*.report.*`.
-- **Lighthouse (live, https://iphone-18-concept-rust.vercel.app, `e49b625`, 2026-09-07):** desktop
+- **Lighthouse (live, https://rezerv-ui-animation.vercel.app, 2026-09-07):** desktop
   Perf **100** / A11y **100** / BP 96 / SEO **100** (LCP 0.6s, TBT 20ms, CLS 0); mobile Perf **98** /
   A11y 97 / BP 96 / SEO **100** (LCP 1.9s, TBT 150ms, CLS 0). Lab mobile was throttled/synthetic;
   live mobile on this origin is the submission number to cite. A 4× CPU throttle Performance
