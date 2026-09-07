@@ -29,6 +29,13 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
   },
+  icons: {
+    icon: [
+      { url: '/poster/hero.jpg', sizes: 'any' },
+      { url: '/poster/hero.jpg', sizes: '32x32', type: 'image/jpeg' },
+    ],
+    apple: [{ url: '/poster/hero.jpg', sizes: '180x180', type: 'image/jpeg' }],
+  },
   openGraph: {
     type: 'article',
     url: SITE.url,

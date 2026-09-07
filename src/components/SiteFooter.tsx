@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { DISCLAIMER } from '@/data/sections';
 import styles from './SiteFooter.module.scss';
 
@@ -27,6 +28,23 @@ export function SiteFooter() {
             >
               MacRumors &mdash; iPhone Fold roundup
             </a>
+          </li>
+        </ul>
+        <ul className={styles.legalLinks}>
+          <li>
+            <Link href="/privacy" className={styles.legalLink}>
+              Privacy Policy
+            </Link>
+          </li>
+          <li>
+            <Link href="/cookies" className={styles.legalLink}>
+              Cookie Notice
+            </Link>
+          </li>
+          <li>
+            <Link href="/terms" className={styles.legalLink}>
+              Terms of Use
+            </Link>
           </li>
         </ul>
       </div>

@@ -9,12 +9,12 @@
  * named author, plus the site itself.
  */
 
-const FALLBACK_URL = 'https://iphone-18-concept-rust.vercel.app';
+const FALLBACK_URL = 'https://rezerv-ui-animation.vercel.app';
 
 /**
  * Set NEXT_PUBLIC_SITE_URL at build/deploy time to override. Canonical URLs,
  * Open Graph URLs and the sitemap all derive from it, so they cannot drift apart.
- * Defaults to the intended Vercel production origin.
+ * Defaults to the intended production origin (rezerv-ui-animation.vercel.app).
  */
 export const SITE = {
   url: (process.env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_URL).replace(/\/$/, ''),

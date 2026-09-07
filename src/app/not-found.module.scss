@@ -1,0 +1,62 @@
+@use '@/styles/abstracts' as *;
+
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  background: var(--ink);
+}
+
+.shell {
+  @include shell;
+  max-width: $max-reading;
+  text-align: center;
+}
+
+.code {
+  @include t-hero;
+  color: var(--bone-dim);
+  margin-bottom: 24px;
+  line-height: 1;
+}
+
+.heading {
+  @include t-section;
+  color: var(--bone);
+  margin-bottom: 16px;
+}
+
+.body {
+  @include t-body;
+  color: var(--bone-faint);
+  margin-bottom: 32px;
+  max-width: 48ch;
+  margin-inline: auto;
+}
+
+.link {
+  @include t-mono;
+  display: inline-block;
+  padding: 12px 24px;
+  background: var(--ink-raised);
+  color: var(--bone);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  text-transform: uppercase;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+
+  &:hover {
+    background: var(--bone);
+    color: var(--ink);
+    border-color: var(--bone);
+  }
+
+  &:focus-visible {
+    @include focus-ring;
+  }
+}

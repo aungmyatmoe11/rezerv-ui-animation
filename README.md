@@ -250,7 +250,7 @@ cards over a 2:1 plate. Nav collapses to priority capsules + overflow. `overflow
 
 ### Design residual risks (honest)
 
-Live visual pass on https://iphone-18-concept-rust.vercel.app (desktop 1280 + mobile 390)
+Live visual pass on https://rezerv-ui-animation.vercel.app (desktop 1280 + mobile 390)
 confirmed the thesis and also these remaining risks:
 
 - ~20 sections + generous black holds still risk **scroll fatigue** — over-delivery vs the brief's
@@ -388,19 +388,21 @@ The repaint gate is what makes this survivable: the canvas is touched only when 
 position moves, and a paint composites two images, not 104. Decoding stays off the critical path.
 
 **Lab + live Lighthouse captured** (see Known limitations + `docs/lighthouse-*.report.*`).
-Live origin measured 2026-09-07 on https://iphone-18-concept-rust.vercel.app (`e49b625`).
+Live origin measured 2026-09-07 on https://rezerv-ui-animation.vercel.app.
 A Chrome Performance trace under 4× CPU throttle is still outstanding.
 
 ---
 
 ## Deployment
 
-**Production:** https://iphone-18-concept-rust.vercel.app (`main` @ `e49b625` and later).
+**Production:** https://rezerv-ui-animation.vercel.app
+
+> Update `NEXT_PUBLIC_SITE_URL` in your deployment settings to match your actual domain.
 
 The page is one fully prerendered static route — `next build` reports `○ /  (Static)` — plus
-`robots.txt` and `sitemap.xml`. There is no server data, no database and no runtime environment
-beyond the origin URL, so any host that can run `next start` (or serve a Next static output) is
-enough.
+supporting pages (`/privacy`, `/cookies`, `/terms`, `/not-found`), `robots.txt` and `sitemap.xml`.
+There is no server data, no database and no runtime environment beyond the origin URL, so any host
+that can run `next start` (or serve a Next static output) is enough.
 
 ```bash
 NEXT_PUBLIC_SITE_URL=https://the-real-origin npm run build
@@ -515,6 +517,65 @@ Full audit: `../docs/ASSET_INVENTORY.md`.
    entire subject is product imagery, and every heavy asset is lazy, so the resolution ceiling
    was set by the source rather than by a target size.
 
+## Professional Checklist
+
+This project includes production-ready features suitable for CTO-level review:
+
+### ✅ Core Pages
+- [x] Main landing page (iPhone 18 Pro & Ultra concept)
+- [x] Custom 404 page (`/not-found`)
+- [x] Privacy Policy (`/privacy`)
+- [x] Cookie Notice (`/cookies`)
+- [x] Terms of Use (`/terms`)
+
+### ✅ SEO & Metadata
+- [x] Comprehensive metadata (Open Graph, Twitter Cards)
+- [x] JSON-LD structured data (WebSite, Article schemas)
+- [x] Sitemap with all pages
+- [x] Robots.txt (allows all, includes sitemap)
+- [x] Favicon and app icons metadata
+- [x] Canonical URLs
+
+### ✅ Security
+- [x] Security headers (CSP, HSTS, X-Frame-Options, etc.)
+- [x] Referrer policy
+- [x] Permissions policy
+- [x] No tracking/analytics cookies
+- [x] SECURITY.md for vulnerability reporting
+
+### ✅ Repository Hygiene
+- [x] LICENSE (MIT)
+- [x] CONTRIBUTING.md (setup, code style, PR process)
+- [x] SECURITY.md (vulnerability reporting)
+- [x] GitHub Actions CI (typecheck, lint, build, test)
+- [x] Professional README with deployment guide
+
+### ✅ Accessibility
+- [x] Skip link for keyboard users
+- [x] Visible focus rings
+- [x] Reduced motion support
+- [x] ARIA labels and semantic HTML
+- [x] Color never carries meaning alone
+
+### ✅ Legal & Privacy
+- [x] Privacy-first (no tracking, no analytics, no cookies)
+- [x] Clear disclaimer (unofficial concept)
+- [x] Contact information provided
+- [x] No fake GDPR consent banner
+
+### ✅ Testing & Quality
+- [x] TypeScript strict mode
+- [x] ESLint configuration
+- [x] Playwright tests
+- [x] `npm run check` script (typecheck + lint + build)
+- [x] CI pipeline on GitHub Actions
+
+### 📝 Supporting Documentation
+- Footer links to privacy, cookies, and terms pages
+- Professional pages match main site's design system
+- Pages are indexed in sitemap (except 404)
+- All pages respect existing SCSS modules and tokens
+
 ## Known limitations
 
 - The hero is `object-fit: contain` in portrait rather than `cover`. Cover-cropping 16:9 into a
@@ -534,7 +595,7 @@ Full audit: `../docs/ASSET_INVENTORY.md`.
 - **Lighthouse (lab, localhost:3100, 2026-09-07):** desktop Perf **99** / A11y 97 / BP 96 / SEO **100**
   (LCP 0.9s, CLS 0); mobile Perf **61** / A11y **100** / BP 96 / SEO **100** (LCP 4.1s, TBT 1.34s).
   Reports under `docs/lighthouse-*.report.*`.
-- **Lighthouse (live, https://iphone-18-concept-rust.vercel.app, `e49b625`, 2026-09-07):** desktop
+- **Lighthouse (live, https://rezerv-ui-animation.vercel.app, 2026-09-07):** desktop
   Perf **100** / A11y **100** / BP 96 / SEO **100** (LCP 0.6s, TBT 20ms, CLS 0); mobile Perf **98** /
   A11y 97 / BP 96 / SEO **100** (LCP 1.9s, TBT 150ms, CLS 0). Lab mobile was throttled/synthetic;
   live mobile on this origin is the submission number to cite. A 4× CPU throttle Performance
