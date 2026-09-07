@@ -1,0 +1,76 @@
+/* Overlay over the pinned film: copy on the left, where the footage is clear,
+   behind a left-weighted scrim. On the stacked video tier it becomes a normal
+   block beneath the clip. */
+.panel {
+  position: absolute;
+  inset: 0;
+  isolation: isolate;
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  @include content-shell;
+  padding-block: 72px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.84) 0%, rgba(0, 0, 0, 0.5) 32%, transparent 62%);
+  }
+
+  &[data-mode='video'] {
+    position: static;
+    padding-block: 32px 48px;
+
+    &::before { display: none; }
+  }
+}
+
+.copy {
+  display: grid;
+  gap: 22px;
+  max-width: $max-reading;
+  pointer-events: auto;
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 6px 0 0;
+}
+
+.stat {
+  display: grid;
+  gap: 6px;
+  min-width: 10rem;
+  padding: 16px 18px;
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  background: rgba(6, 6, 8, 0.8);
+}
+
+.statLabel {
+  @include t-eyebrow;
+  color: var(--bone-dim);
+}
+
+.statValue {
+  @include t-sub;
+  font-size: clamp(1.5rem, 2.6vw, 2.25rem);
+  font-variant-numeric: tabular-nums;
+  color: var(--bone);
+  margin: 0;
+}
+
+.statBadge { margin: 2px 0 0; }
+
+.note {
+  @include t-mono;
+  text-transform: none;
+  line-height: 1.5;
+  color: var(--bone-dim);
+  max-width: 44ch;
+}

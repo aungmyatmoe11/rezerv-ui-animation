@@ -1,0 +1,37 @@
+.badge {
+  --badge-color: var(--c-concept);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  /* Deliberately NOT backdrop-filter. There are ~70 badges on this page, and a
+     backdrop blur forces the compositor to snapshot and blur whatever is behind
+     each one on every frame it is on screen. That single declaration was most of
+     why a plain DOM section cost 13.9ms per frame. On a page that is almost
+     entirely black, a slightly more opaque flat fill is visually equivalent and
+     free. */
+  background: rgba(6, 6, 8, 0.82);
+  color: var(--bone-dim);
+  white-space: nowrap;
+  @include t-mono;
+  text-transform: uppercase;
+
+  &[data-size='sm'] { padding: 4px 9px 4px 8px; gap: 6px; }
+
+  &[data-level='official']   { --badge-color: var(--c-official); }
+  &[data-level='high']       { --badge-color: var(--c-high); }
+  &[data-level='developing'] { --badge-color: var(--c-developing); }
+  &[data-level='uncertain']  { --badge-color: var(--c-uncertain); }
+  &[data-level='concept']    { --badge-color: var(--c-concept); }
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--badge-color);
+  flex: none;
+}

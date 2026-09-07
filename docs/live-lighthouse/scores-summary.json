@@ -1,0 +1,68 @@
+{
+  "mobile": {
+    "file_json": "/workspace/rezerv-audit/live-lh/mobile.report.json",
+    "file_html": "/workspace/rezerv-audit/live-lh/mobile.report.html",
+    "performance": 98,
+    "accessibility": 97,
+    "best-practices": 96,
+    "seo": 100,
+    "LCP": {
+      "display": "1.9\u00a0s",
+      "numeric": 1899.0149000000001,
+      "score": 0.98
+    },
+    "TBT": {
+      "display": "150\u00a0ms",
+      "numeric": 146,
+      "score": 0.95
+    },
+    "CLS": {
+      "display": "0",
+      "numeric": 0,
+      "score": 1
+    },
+    "FCP": {
+      "display": "1.3\u00a0s",
+      "numeric": 1282.0149000000001,
+      "score": 0.98
+    },
+    "SI": {
+      "display": "2.4\u00a0s",
+      "numeric": 2438.630226359108,
+      "score": 0.98
+    }
+  },
+  "desktop": {
+    "file_json": "/workspace/rezerv-audit/live-lh/desktop.report.json",
+    "file_html": "/workspace/rezerv-audit/live-lh/desktop.report.html",
+    "performance": 100,
+    "accessibility": 100,
+    "best-practices": 96,
+    "seo": 100,
+    "LCP": {
+      "display": "0.6\u00a0s",
+      "numeric": 613.4503,
+      "score": 0.99
+    },
+    "TBT": {
+      "display": "20\u00a0ms",
+      "numeric": 21.5,
+      "score": 1
+    },
+    "CLS": {
+      "display": "0.001",
+      "numeric": 0.0005003458541283601,
+      "score": 1
+    },
+    "FCP": {
+      "display": "0.4\u00a0s",
+      "numeric": 383.45029999999997,
+      "score": 1
+    },
+    "SI": {
+      "display": "0.8\u00a0s",
+      "numeric": 760.7348298960213,
+      "score": 0.99
+    }
+  }
+}

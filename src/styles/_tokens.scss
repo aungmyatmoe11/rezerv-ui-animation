@@ -1,0 +1,22 @@
+// Design tokens.
+// Colour values are MEASURED off the source device renders, not eyeballed —
+// see docs/ASSET_INVENTORY.md §1.2. The spec doc's original guesses were wrong
+// (notably Sky Blue, which it listed as a pale #B6CEE3 tint).
+
+// ---- breakpoints ----------------------------------------------------------
+$bp-tablet:  768px;
+$bp-desktop: 1024px;
+$bp-wide:    1440px;
+
+// ---- layout ---------------------------------------------------------------
+$max-page:    1440px;
+$max-reading: 820px;
+
+// ---- motion ---------------------------------------------------------------
+// Single source of truth for every duration/easing in the app, mirrored into
+// CSS custom properties in global.scss so GSAP and CSS never drift apart.
+$ease-out:  cubic-bezier(0.22, 1, 0.36, 1);
+$ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+$dur-fast:  180ms;
+$dur-base:  420ms;
+$dur-slow:  900ms;

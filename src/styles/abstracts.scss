@@ -1,0 +1,6 @@
+// Injected into every *.module.scss by next.config.mjs (sassOptions.additionalData).
+// MUST stay emit-free — variables, mixins and functions only. Anything that
+// outputs CSS here would be duplicated into every module.
+@forward 'tokens';
+@forward 'mixins';
+@forward 'type';

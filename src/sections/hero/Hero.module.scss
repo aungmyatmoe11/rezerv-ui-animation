@@ -1,0 +1,155 @@
+.section {
+  position: relative;
+  background: var(--ink);
+}
+
+.stage {
+  position: relative;
+  width: 100%;
+  height: 100svh;
+  overflow: clip;
+}
+
+/* The source sits on pure black, so cover-cropping against a black page leaves
+   no visible edge at any aspect ratio. The film simply stops on its own title
+   card - there is no second element to hand over to. */
+.film {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Portrait is the exception, and it matters here more than anywhere else on the
+   page: this film resolves onto an "iPhone 18 PRO" title card, and that card IS
+   the headline (the <h1> is visually hidden because of it). Cover-cropping 16:9
+   into a 3:4 phone viewport keeps barely a third of the width, which sliced the
+   wordmark open at both ends and left the page with no readable title at all.
+   Contain keeps it whole; the letterbox bands are black on black, so nothing
+   reads as a boxed video. Sitting the frame high leaves the lower third clear
+   for the copy that already lives there. */
+@media (max-aspect-ratio: 1 / 1) {
+  .film {
+    object-fit: contain;
+    object-position: center 38%;
+  }
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  @include page-gutter;
+  padding-block: 28px 40px;
+
+  @include tablet-up { padding-block: 36px 56px; }
+
+  /* Scrim weighted to the bottom, where our copy sits. The top is left almost
+     clear so the film's own title card stays crisp. */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.42) 0%,
+      transparent 22%,
+      transparent 46%,
+      rgba(0, 0, 0, 0.72) 88%,
+      rgba(0, 0, 0, 0.86) 100%
+    );
+  }
+}
+
+.badge { justify-self: start; }
+
+/* Our copy lives below the film's title card, never over it. */
+.lower {
+  grid-row: 3;
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: 14px;
+}
+
+.eyebrow {
+  @include t-eyebrow;
+  color: var(--bone-dim);
+}
+
+.sub {
+  @include t-sub;
+  color: var(--bone);
+  max-width: 24ch;
+  text-shadow: 0 2px 28px rgba(0, 0, 0, 0.8);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px 20px;
+  margin-top: 6px;
+}
+
+.cta,
+.ctaGhost {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  @include t-body;
+  font-size: 0.9375rem;
+  /* transform/opacity/colour only - never width, padding or margin on hover. */
+  transition:
+    background-color var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
+  will-change: transform;
+}
+
+.cta {
+  background: var(--bone);
+  border-color: var(--bone);
+  color: var(--ink);
+
+  &:hover {
+    transform: translateY(-2px);
+    background: #fff;
+  }
+  &:active { transform: translateY(0); }
+}
+
+.ctaGhost {
+  color: var(--bone-dim);
+  background: rgba(6, 6, 8, 0.55);
+
+  &:hover {
+    color: var(--bone);
+    border-color: rgba(237, 234, 228, 0.35);
+    transform: translateY(-2px);
+  }
+  &:active { transform: translateY(0); }
+}
+
+.arrow {
+  display: inline-block;
+  transition: transform var(--dur-base) var(--ease-out);
+
+  .cta:hover & { transform: translateY(3px); }
+}
+
+@include motion-reduce {
+  .cta:hover,
+  .ctaGhost:hover,
+  .cta:hover .arrow { transform: none; }
+}

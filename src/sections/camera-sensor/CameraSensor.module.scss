@@ -1,0 +1,158 @@
+/* ---- pinned film ---------------------------------------------------------- */
+/* The overlay mirrors the contained film's geometry exactly — a 2:1 box that
+   is either the full stage width or 86svh tall, whichever is smaller — so a
+   callout's --x is a percentage of the picture, not of the viewport. */
+.callouts {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(100%, 172svh);
+  aspect-ratio: 2 / 1;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.callout {
+  position: absolute;
+  top: 6%;
+  height: 36%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  &[data-row='1'] {
+    top: 20%;
+    height: 22%;
+  }
+
+  &[data-align='start'] { left: var(--x); }
+
+  &[data-align='end'] {
+    right: calc(100% - var(--x));
+    align-items: flex-end;
+  }
+}
+
+.calloutLabel {
+  display: grid;
+  gap: 2px;
+  width: max-content;
+  max-width: 12rem;
+  padding: 8px 11px 9px;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: rgba(6, 6, 8, 0.86);
+  will-change: opacity, transform;
+}
+
+.calloutIndex {
+  @include t-mono;
+  color: var(--cherry-hi);
+}
+
+.calloutText {
+  @include t-body;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--bone);
+}
+
+.calloutNote {
+  @include t-mono;
+  text-transform: none;
+  line-height: 1.4;
+  color: var(--bone-dim);
+}
+
+/* The leader line grows down from the label to the element row. */
+.line {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 1px;
+  background: rgba(237, 234, 228, 0.55);
+  transform-origin: top center;
+  will-change: transform;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: -3px;
+    bottom: -3px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--bone);
+  }
+}
+
+/* Video tier: a legend strip instead of positioned leaders.
+   The stage is stacked on this tier — the clip sits in normal flow at its own
+   aspect ratio — so the legend flows beneath it rather than being absolutely
+   placed over a letterboxed picture. Leader lines pointing at a phone that is
+   no longer where they think it is would be worse than no leaders at all. */
+.callouts[data-mode='video'] {
+  position: static;
+  inset: auto;
+  width: 100%;
+  aspect-ratio: auto;
+  transform: none;
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  padding-inline: 16px;
+
+  .callout {
+    position: static;
+    height: auto;
+    display: block;
+  }
+
+  .calloutLabel {
+    max-width: none;
+    grid-auto-flow: column;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .calloutNote,
+  .line { display: none; }
+}
+
+/* ---- after the film ------------------------------------------------------- */
+.after {
+  display: grid;
+  gap: 40px;
+  align-items: start;
+
+  @include desktop-up {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: 72px;
+  }
+}
+
+.gains {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  @include tablet-up { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 32px; }
+}
+
+.gain {
+  @include t-sub;
+  font-size: clamp(1.125rem, 1.8vw, 1.625rem);
+  color: var(--bone);
+  padding: 16px 0;
+  border-bottom: 1px solid var(--rule-soft);
+}
+
+.tele {
+  @include t-body;
+  color: var(--bone-dim);
+  max-width: 40ch;
+}

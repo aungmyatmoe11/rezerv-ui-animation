@@ -1,0 +1,107 @@
+.root {
+  position: relative;
+  display: grid;
+  background: var(--ink);
+}
+
+/* Mobile: the clip at its own aspect ratio. Tablet and up: a viewport-scaled
+   stage with the copy laid over it. */
+.stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--aspect, 16 / 9);
+  overflow: clip;
+  background: var(--ink);
+
+  @include tablet-up { aspect-ratio: auto; }
+}
+
+@include tablet-up {
+  .root[data-height='full'] .stage { height: 100svh; }
+  .root[data-height='tall'] .stage { height: clamp(560px, 82svh, 920px); }
+  .root[data-height='half'] .stage { height: clamp(440px, 64svh, 760px); }
+}
+
+.film {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Portrait tablet: a 2:1 clip cover-cropped into a 3:4 box loses its subject.
+   Contain instead — the bands are black on black, so nothing reads as a box.
+   Specificity deliberately beats LazyVideo's own [data-fit] rule. */
+@media (min-width: $bp-tablet) and (max-aspect-ratio: 1 / 1) {
+  .root .stage .film { object-fit: contain; }
+}
+
+.scrim {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+
+  @include tablet-up { display: block; }
+}
+
+.root[data-scrim='none'] .scrim { display: none; }
+
+.root[data-scrim='bottom'] .scrim {
+  background: linear-gradient(180deg, transparent 38%, rgba(0, 0, 0, 0.55) 74%, rgba(0, 0, 0, 0.84) 100%);
+}
+
+.root[data-scrim='top'] .scrim {
+  background: linear-gradient(0deg, transparent 42%, rgba(0, 0, 0, 0.58) 78%, rgba(0, 0, 0, 0.86) 100%);
+}
+
+.root[data-scrim='start'] .scrim {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.82) 0%, rgba(0, 0, 0, 0.5) 30%, transparent 60%);
+}
+
+.root[data-scrim='end'] .scrim {
+  background: linear-gradient(270deg, rgba(0, 0, 0, 0.82) 0%, rgba(0, 0, 0, 0.5) 30%, transparent 60%);
+}
+
+.corner {
+  position: absolute;
+  z-index: 3;
+  top: 16px;
+  left: 16px;
+
+  @include tablet-up  { top: 28px; left: 48px; }
+  @include desktop-up { left: 64px; }
+}
+
+.overlay {
+  @include content-shell;
+  padding-block: 32px 48px;
+
+  @include tablet-up {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: grid;
+    padding-block: 72px;
+    pointer-events: none;
+  }
+
+  @include desktop-up { padding-block: 88px; }
+}
+
+.copy {
+  display: grid;
+  gap: 22px;
+  max-width: $max-reading;
+  pointer-events: auto;
+}
+
+@include tablet-up {
+  .root[data-place^='bottom'] .overlay { align-content: end; }
+  .root[data-place^='top']    .overlay { align-content: start; }
+  .root[data-place^='center'] .overlay { align-content: center; }
+  .root[data-place$='start']  .overlay { justify-items: start; }
+  .root[data-place$='end']    .overlay { justify-items: end; }
+  .root[data-place$='end']    .copy    { justify-items: end; text-align: right; }
+}

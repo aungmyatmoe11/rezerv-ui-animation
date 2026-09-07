@@ -1,0 +1,138 @@
+.grid {
+  display: grid;
+  gap: 48px;
+  align-items: center;
+
+  @include desktop-up {
+    grid-template-columns: minmax(0, 6fr) minmax(0, 6fr);
+    gap: 72px;
+  }
+}
+
+.copy {
+  display: grid;
+  gap: 28px;
+}
+
+/* ---- reported / unsettled / not claimed ------------------------------------ */
+.claims {
+  display: grid;
+  margin: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.claim {
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1fr);
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--rule-soft);
+}
+
+.claimKey {
+  @include t-eyebrow;
+  color: var(--bone-faint);
+  padding-top: 4px;
+}
+
+.claimText {
+  @include t-body;
+  font-size: 0.9375rem;
+  color: var(--bone-dim);
+  margin: 0;
+}
+
+.filmBox {
+  position: relative;
+  border-radius: 20px;
+  overflow: clip;
+  background: var(--ink);
+}
+
+/* ---- lineage ------------------------------------------------------------------ */
+.lineage {
+  display: grid;
+  gap: 14px;
+  margin: 64px 0 0;
+  padding: 0;
+  list-style: none;
+
+  @include tablet-up {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+}
+
+.step {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: 22px 22px 24px;
+  border: 1px solid var(--rule-soft);
+  border-radius: 18px;
+  background: var(--ink-raised);
+  transition:
+    border-color var(--dur-base) var(--ease-out),
+    background-color var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
+
+  &:hover {
+    transform: translateY(-4px);
+    border-color: var(--rule);
+
+    .stepNote { opacity: 1; }
+  }
+
+  /* The rumoured step is the one this page is about. */
+  &[data-current='true'] {
+    border-color: rgba(113, 64, 91, 0.6);
+    background:
+      linear-gradient(180deg, rgba(77, 36, 57, 0.22), transparent 60%),
+      var(--ink-raised);
+  }
+
+  /* Connector to the next step. */
+  @include tablet-up {
+    &:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      right: -18px;
+      width: 18px;
+      height: 1px;
+      background: var(--rule);
+    }
+  }
+}
+
+.stepIndex {
+  @include t-mono;
+  color: var(--bone-faint);
+}
+
+.stepChip {
+  @include t-section;
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  color: var(--bone);
+}
+
+.stepDevice {
+  @include t-body;
+  font-size: 0.9375rem;
+  color: var(--bone-dim);
+}
+
+.stepBadge { margin-top: 4px; }
+
+.stepNote {
+  @include t-body;
+  font-size: 0.9375rem;
+  color: var(--bone-dim);
+  opacity: 0.7;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+@include motion-reduce {
+  .step:hover { transform: none; }
+}

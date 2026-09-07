@@ -1,0 +1,35 @@
+import { DISCLAIMER } from '@/data/sections';
+import styles from './SiteFooter.module.scss';
+
+export function SiteFooter() {
+  return (
+    <footer className={styles.footer}>
+      <div className={styles.shell}>
+        <p className={styles.heading}>Unofficial concept project</p>
+        <p className={styles.body}>{DISCLAIMER}</p>
+        <ul className={styles.links}>
+          <li>
+            <a
+              className={styles.link}
+              href="https://www.macrumors.com/roundup/iphone-18-pro/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              MacRumors &mdash; iPhone 18 Pro roundup
+            </a>
+          </li>
+          <li>
+            <a
+              className={styles.link}
+              href="https://www.macrumors.com/roundup/iphone-fold/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              MacRumors &mdash; iPhone Fold roundup
+            </a>
+          </li>
+        </ul>
+      </div>
+    </footer>
+  );
+}

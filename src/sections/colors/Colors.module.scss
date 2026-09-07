@@ -1,0 +1,229 @@
+.section { position: relative; }
+
+/* ---- header ------------------------------------------------------------- */
+.head {
+  display: grid;
+  gap: 18px;
+  max-width: $max-reading;
+}
+
+.eyebrow { @include t-eyebrow; color: var(--bone-faint); }
+.title   { @include t-section; }
+.lede    { @include t-body; color: var(--bone-dim); max-width: 52ch; }
+
+/* ---- pinned scrub film -------------------------------------------------- */
+.film {
+  /* Faint cherry bloom so the pinned frame edges never read as a hard box. */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: radial-gradient(60% 50% at 50% 50%, rgba(113, 64, 91, 0.14), transparent 72%);
+  }
+}
+
+.filmOverlay {
+  display: grid;
+  align-content: end;
+  justify-items: center;
+  gap: 6px;
+  height: 100%;
+  @include content-shell;
+  /* Lands in the clear band left below the 78%-height media box, so the caption
+     never sits over the devices. */
+  padding-bottom: clamp(18px, 5vh, 44px);
+  text-align: center;
+}
+
+.filmCaption {
+  @include t-body;
+  color: var(--bone-dim);
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.8);
+}
+
+.filmHint {
+  @include t-mono;
+  color: var(--bone-faint);
+}
+
+/* ---- interactive picker ------------------------------------------------- */
+.picker {
+  display: grid;
+  gap: 48px;
+  align-items: center;
+
+  @include desktop-up {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 27rem);
+    gap: 72px;
+  }
+}
+
+/* Definite height + absolutely positioned devices.
+   The previous version used `aspect-ratio` on the stage and `height: 100%` on the
+   images, which is a circular sizing dependency: the grid row sized itself to the
+   image while the image sized itself to the row. At some widths the device
+   escaped its container entirely and overlapped the footer. A fixed height and
+   absolute children remove the cycle; `overflow: clip` is the belt-and-braces. */
+.deviceStage {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  height: clamp(320px, 50vh, 600px);
+  overflow: clip;
+}
+
+.glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    44% 40% at 50% 54%,
+    var(--theme-hi),
+    var(--theme-lo) 46%,
+    transparent 72%
+  );
+  opacity: 0.32;
+  filter: blur(28px);
+  /* Registered via @property in global.scss, so the tint genuinely tweens. */
+  transition:
+    --theme-hi var(--dur-slow) var(--ease-out),
+    --theme-lo var(--dur-slow) var(--ease-out);
+}
+
+.device {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  /* All four renders share the same device centre and body width at every
+     scanline (verified in docs/ASSET_INVENTORY.md), so a straight opacity
+     cross-fade lands pixel-on-pixel with no per-file correction. */
+  transition: opacity var(--dur-slow) var(--ease-out);
+  will-change: opacity;
+
+  &[data-active='true'] { opacity: 1; }
+}
+
+/* ---- panel -------------------------------------------------------------- */
+.panel {
+  display: grid;
+  gap: 32px;
+  align-content: start;
+  min-width: 0;
+}
+
+.copy {
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+  animation: swap var(--dur-slow) var(--ease-out) both;
+}
+
+@keyframes swap {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@include motion-reduce {
+  .copy { animation: none; }
+}
+
+.finishName {
+  @include t-sub;
+  font-size: clamp(1.75rem, 3.4vw, 2.75rem);
+  color: var(--bone);
+}
+
+.finishCopy { @include t-body; color: var(--bone-dim); max-width: 40ch; }
+
+.note {
+  @include t-mono;
+  color: var(--bone-faint);
+  max-width: 42ch;
+  line-height: 1.5;
+  text-transform: none;
+}
+
+/* ---- swatches ----------------------------------------------------------- */
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+  min-inline-size: 0;
+}
+
+.swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px 9px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  cursor: pointer;
+  color: var(--bone-dim);
+  transition:
+    border-color var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
+  will-change: transform;
+
+  &:hover {
+    color: var(--bone);
+    border-color: rgba(237, 234, 228, 0.34);
+    transform: translateY(-2px);
+  }
+
+  &[data-active='true'] {
+    color: var(--bone);
+    border-color: var(--theme-hi);
+  }
+
+  /* The label owns the focus ring because the input itself is visually hidden. */
+  &:has(input:focus-visible) { @include focus-ring; }
+}
+
+.chip {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--swatch);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  flex: none;
+}
+
+.swatchLabel {
+  @include t-mono;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  font-size: 0.8125rem;
+}
+
+.swatchGroups {
+  display: grid;
+  gap: 18px;
+}
+
+.swatchLegend {
+  flex: 1 0 100%;
+  @include t-mono;
+  color: var(--bone-faint);
+  text-transform: none;
+  letter-spacing: 0.04em;
+  padding: 0;
+}
+
+.swatch[data-expected='false'] {
+  border-style: dashed;
+  opacity: 0.82;
+}
+
+@include motion-reduce {
+  .swatch:hover { transform: none; }
+}

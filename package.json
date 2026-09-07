@@ -1,0 +1,37 @@
+{
+  "name": "iphone-18-pro-ultra-concept",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Rezerv Frontend Assessment \u2014 Part 1. Animation-heavy single page: an unofficial iPhone 18 Pro / iPhone Ultra concept reconstruction.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "assets": "powershell -NoProfile -ExecutionPolicy Bypass -File ../tools/build-assets.ps1",
+    "check": "npm run typecheck && npm run lint && npm run build",
+    "test": "playwright test",
+    "test:desktop": "playwright test --project=desktop",
+    "test:ui": "playwright test --ui",
+    "test:diagnose": "playwright test diagnose --project=desktop"
+  },
+  "dependencies": {
+    "@gsap/react": "^2.1.2",
+    "gsap": "^3.13.0",
+    "next": "^15.5.4",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^22.15.3",
+    "@types/react": "^19.1.9",
+    "@types/react-dom": "^19.1.7",
+    "eslint": "^9.34.0",
+    "eslint-config-next": "^15.5.4",
+    "sass": "^1.92.1",
+    "typescript": "^5.9.2"
+  }
+}

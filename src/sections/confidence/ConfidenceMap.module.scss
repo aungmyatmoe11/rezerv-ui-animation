@@ -1,0 +1,89 @@
+.map {
+  display: grid;
+  gap: 0;
+  margin-top: 56px;
+  border-top: 1px solid var(--rule);
+}
+
+.row {
+  display: grid;
+  gap: 10px;
+  padding: 22px 12px 24px;
+  margin-inline: -12px;
+  border-bottom: 1px solid var(--rule-soft);
+  border-radius: 10px;
+  transition: background-color var(--dur-fast) var(--ease-out);
+
+  /* Areas MUST be named at every width. A child whose `grid-area` names an area
+     that does not exist is placed on an implicit track instead of the one it
+     asked for, which is why the bars used to sit on top of the claim text on
+     mobile rather than under it. */
+  grid-template-areas:
+    'head'
+    'track'
+    'note';
+
+  @include desktop-up {
+    grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+    grid-template-areas:
+      'head track'
+      'head note';
+    align-items: center;
+    column-gap: 40px;
+  }
+
+  &:hover {
+    background: rgba(237, 234, 228, 0.045);
+
+    .note { opacity: 1; }
+  }
+}
+
+.head {
+  grid-area: head;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.claim {
+  @include t-body;
+  font-weight: 500;
+  color: var(--bone);
+}
+
+.track {
+  grid-area: track;
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(237, 234, 228, 0.09);
+  overflow: hidden;
+}
+
+/* scaleX from a left origin: the draw never touches layout. */
+.bar {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  transform-origin: left center;
+  transform: scaleX(0);
+  will-change: transform;
+  background: var(--c-concept);
+
+  &[data-level='official']   { background: var(--c-official); }
+  &[data-level='high']       { background: var(--c-high); }
+  &[data-level='developing'] { background: var(--c-developing); }
+  &[data-level='uncertain']  { background: var(--c-uncertain); }
+}
+
+.note {
+  grid-area: note;
+  @include t-mono;
+  text-transform: none;
+  line-height: 1.5;
+  color: var(--bone-dim);
+  opacity: 0.7;
+  transition: opacity var(--dur-base) var(--ease-out);
+}

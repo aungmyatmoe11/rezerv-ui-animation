@@ -1,0 +1,8 @@
+.video {
+  width: 100%;
+  height: 100%;
+  /* Source clips sit on pure black, so cover-cropping against a black page
+     leaves no visible video edge. See docs/ASSET_INVENTORY.md §1.1. */
+  &[data-fit='cover']   { object-fit: cover; }
+  &[data-fit='contain'] { object-fit: contain; }
+}

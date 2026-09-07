@@ -1,0 +1,26 @@
+﻿{
+    "a20-pro":  {
+                    "frames":  120
+                },
+    "pro-vs-promax":  {
+                          "frames":  48
+                      },
+    "ultra-hero":  {
+                       "frames":  100
+                   },
+    "display":  {
+                    "frames":  112
+                },
+    "colors":  {
+                   "frames":  56
+               },
+    "fold":  {
+                 "frames":  120
+             },
+    "camera-sensor":  {
+                          "frames":  104
+                      },
+    "ultra-colors":  {
+                         "frames":  64
+                     }
+}

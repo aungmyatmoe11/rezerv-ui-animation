@@ -1,0 +1,26 @@
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 16px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: rgba(6, 6, 8, 0.8);
+  @include t-body;
+  font-size: 0.9375rem;
+  color: var(--bone);
+}
+
+.index {
+  @include t-mono;
+  color: var(--bone-faint);
+}

@@ -1,0 +1,148 @@
+/* ---- picker beneath -------------------------------------------------------- */
+.picker {
+  display: grid;
+  gap: 40px;
+  align-items: start;
+
+  @include desktop-up {
+    grid-template-columns: minmax(0, 6fr) minmax(0, 6fr);
+    gap: 72px;
+  }
+}
+
+.copy {
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+  animation: swap var(--dur-slow) var(--ease-out) both;
+}
+
+@keyframes swap {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@include motion-reduce {
+  .copy { animation: none; }
+}
+
+.name {
+  @include t-section;
+  font-size: clamp(1.75rem, 3.4vw, 2.75rem);
+  color: var(--bone);
+  position: relative;
+}
+
+/* The selection is felt as light behind the name, not as a shadow on it.
+   `text-shadow: 0 0 60px var(--swatch)` put a 60px blur of the finish colour
+   directly behind the glyphs at full strength; against Silver that is a grey
+   smear sitting on the word, which is exactly what it looked like. A soft
+   radial bloom behind the text does the same job — it says which finish is
+   selected — without touching the letterforms, and it fades with the swatch
+   instead of competing with it. */
+.name::before {
+  content: '';
+  position: absolute;
+  left: -8%;
+  top: 50%;
+  width: 116%;
+  height: 210%;
+  transform: translateY(-50%);
+  background: radial-gradient(
+    58% 52% at 22% 50%,
+    color-mix(in srgb, var(--swatch) 40%, transparent) 0%,
+    transparent 72%
+  );
+  opacity: 0.62;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* No @property support means no colour interpolation, but the bloom still
+   reads; browsers without color-mix fall back to no bloom at all, which is a
+   perfectly good resting state. */
+@supports not (background: color-mix(in srgb, red 50%, transparent)) {
+  .name::before { display: none; }
+}
+
+.body { @include t-body; color: var(--bone-dim); max-width: 40ch; }
+
+.note {
+  @include t-mono;
+  text-transform: none;
+  line-height: 1.5;
+  color: var(--bone-faint);
+  max-width: 42ch;
+}
+
+.controls {
+  display: grid;
+  gap: 20px;
+  justify-items: start;
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px 9px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  cursor: pointer;
+  color: var(--bone-dim);
+  transition:
+    border-color var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
+  will-change: transform;
+
+  &:hover {
+    color: var(--bone);
+    border-color: rgba(237, 234, 228, 0.34);
+    transform: translateY(-2px);
+  }
+
+  &[data-active='true'] {
+    color: var(--bone);
+    border-color: var(--chip);
+  }
+
+  &:has(input:focus-visible) { @include focus-ring; }
+}
+
+.chip {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--chip);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  flex: none;
+}
+
+.swatchLabel {
+  @include t-mono;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  font-size: 0.8125rem;
+}
+
+.caveat {
+  @include t-body;
+  font-size: 0.9375rem;
+  color: var(--bone-faint);
+  max-width: 44ch;
+}
+
+@include motion-reduce {
+  .swatch:hover { transform: none; }
+}

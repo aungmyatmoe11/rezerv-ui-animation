@@ -1,0 +1,90 @@
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  @include page-gutter;
+
+  /* Not flat black: a faint cherry bloom from below, so the loading screen
+     already belongs to the film it is loading. */
+  background:
+    radial-gradient(120% 70% at 50% 118%, rgba(77, 36, 57, 0.5), transparent 68%),
+    var(--ink);
+  will-change: transform;
+}
+
+.inner {
+  display: grid;
+  justify-items: center;
+  gap: 22px;
+  width: min(420px, 100%);
+  text-align: center;
+}
+
+.eyebrow {
+  @include t-eyebrow;
+  color: var(--bone-faint);
+}
+
+/* ---- wordmark ------------------------------------------------------------- */
+.brand {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0 0.28em;
+  @include t-section;
+  font-size: clamp(1.75rem, 7vw, 3rem);
+  color: var(--bone);
+}
+
+/* Clips each word's rise, the same masking the hero headline uses. */
+.brandMask {
+  display: inline-block;
+  overflow: clip;
+  padding-bottom: 0.1em;
+  margin-bottom: -0.1em;
+}
+
+.brandWord {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* ---- progress ------------------------------------------------------------- */
+.track {
+  position: relative;
+  width: 100%;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--rule-soft);
+  overflow: hidden;
+  transform-origin: left center;
+}
+
+.meter {
+  position: absolute;
+  inset: 0;
+  transform-origin: left center;
+  background: linear-gradient(90deg, var(--cherry-lo), var(--cherry-hi));
+  will-change: transform;
+  /* Chases the real buffered figure rather than snapping to it. */
+  transition: transform 260ms linear;
+}
+
+.readout {
+  @include t-mono;
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  color: var(--bone-dim);
+}
+
+.count { font-variant-numeric: tabular-nums; }
+.unit  { color: var(--bone-faint); }
+
+/* If frames could not be fetched we still open the page — say so quietly
+   rather than sitting on a stalled meter. */
+.root[data-phase='failed'] .meter {
+  background: var(--c-uncertain);
+}

@@ -1,0 +1,150 @@
+.grid {
+  display: grid;
+  gap: 48px;
+  align-items: center;
+
+  @include desktop-up {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 72px;
+  }
+}
+
+.copy {
+  display: grid;
+  gap: 28px;
+}
+
+/* ---- the equation ----------------------------------------------------------- */
+.equation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.term {
+  @include t-body;
+  font-size: 0.9375rem;
+  padding: 10px 16px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  color: var(--bone);
+  background: var(--ink-raised);
+}
+
+.result {
+  background: var(--bone);
+  border-color: var(--bone);
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.op {
+  @include t-sub;
+  font-size: 1.25rem;
+  color: var(--bone-dim);
+}
+
+/* ---- contained film ---------------------------------------------------------- */
+.filmBox {
+  position: relative;
+  border-radius: 20px;
+  overflow: clip;
+  background: var(--ink);
+}
+
+.corner {
+  position: absolute;
+  z-index: 2;
+  top: 16px;
+  left: 16px;
+}
+
+/* ---- footnote ---------------------------------------------------------------- */
+.footnote {
+  display: grid;
+  gap: 48px;
+  align-items: start;
+  margin-top: 72px;
+
+  @include desktop-up {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 72px;
+    margin-top: 96px;
+  }
+}
+
+.lead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  @include t-eyebrow;
+  color: var(--bone-faint);
+  margin-bottom: 18px;
+}
+
+.factorList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--rule);
+}
+
+.factor {
+  @include t-body;
+  color: var(--bone);
+  padding: 14px 0;
+  border-bottom: 1px solid var(--rule-soft);
+}
+
+.capTable {
+  width: 100%;
+  border-collapse: collapse;
+  @include t-body;
+  font-size: clamp(0.9375rem, 1.05vw, 1.125rem);
+
+  th,
+  td {
+    text-align: left;
+    padding: 14px 16px 14px 0;
+    border-bottom: 1px solid var(--rule-soft);
+    font-weight: 400;
+    color: var(--bone-dim);
+    font-variant-numeric: tabular-nums;
+  }
+
+  thead th {
+    @include t-eyebrow;
+    color: var(--bone-faint);
+    font-weight: 500;
+    border-bottom-color: var(--rule);
+  }
+
+  tbody th {
+    color: var(--bone);
+    font-weight: 500;
+  }
+}
+
+.capNote {
+  @include t-mono;
+  text-transform: none;
+  line-height: 1.5;
+  color: var(--bone-faint);
+  margin-top: 16px;
+  max-width: 60ch;
+}
+
+.source {
+  color: var(--bone-dim);
+  border-bottom: 1px solid var(--rule);
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+
+  &:hover { color: var(--bone); border-color: var(--bone); }
+}

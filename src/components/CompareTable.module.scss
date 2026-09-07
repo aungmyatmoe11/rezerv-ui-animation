@@ -1,0 +1,82 @@
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  @include t-body;
+  font-size: clamp(0.9375rem, 1.05vw, 1.125rem);
+}
+
+.th {
+  @include t-eyebrow;
+  color: var(--bone-faint);
+  font-weight: 500;
+  text-align: left;
+  padding: 0 16px 14px;
+  border-bottom: 1px solid var(--rule);
+
+  &:first-child { padding-left: 0; }
+}
+
+.row {
+  border-bottom: 1px solid var(--rule-soft);
+  transition: background-color var(--dur-fast) var(--ease-out);
+
+  &:hover {
+    background: rgba(237, 234, 228, 0.05);
+
+    .feature,
+    .cell { color: var(--bone); }
+  }
+}
+
+.feature {
+  padding: 18px 16px 18px 0;
+  text-align: left;
+  font-weight: 500;
+  color: var(--bone-dim);
+  vertical-align: top;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.featureInner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.cell {
+  padding: 18px 16px;
+  vertical-align: top;
+  color: var(--bone-dim);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+/* Reflow, not shrink. */
+@include mobile-only {
+  .head { @include visually-hidden; }
+
+  .row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 16px;
+    padding: 16px 0;
+  }
+
+  .feature {
+    grid-column: 1 / -1;
+    padding: 0;
+  }
+
+  .cell {
+    padding: 0;
+
+    &::before {
+      content: attr(data-label);
+      display: block;
+      margin-bottom: 4px;
+      @include t-eyebrow;
+      font-size: 0.625rem;
+      color: var(--bone-faint);
+    }
+  }
+}

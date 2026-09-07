@@ -1,0 +1,95 @@
+.grid {
+  display: grid;
+  gap: 48px;
+  align-items: center;
+
+  @include desktop-up {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 72px;
+  }
+}
+
+.copy {
+  display: grid;
+  gap: 24px;
+}
+
+.caveat {
+  @include t-body;
+  color: var(--bone-dim);
+  max-width: 46ch;
+}
+
+.media {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+}
+
+.filmBox {
+  position: relative;
+  border-radius: 20px;
+  overflow: clip;
+  background: var(--ink);
+}
+
+/* ---- gauge -------------------------------------------------------------- */
+.gauge {
+  display: grid;
+  gap: 14px;
+  padding: 22px 24px;
+  border: 1px solid var(--rule-soft);
+  border-radius: 18px;
+  background: var(--ink-raised);
+}
+
+.gaugeRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 16px;
+
+  @include tablet-up { grid-template-columns: minmax(0, 10rem) minmax(0, 1fr) auto; }
+}
+
+.gaugeLabel {
+  @include t-mono;
+  text-transform: none;
+  color: var(--bone-dim);
+}
+
+.gaugeValue {
+  @include t-mono;
+  color: var(--bone);
+  min-width: 5.5ch;
+  text-align: right;
+}
+
+.track {
+  display: grid;
+  align-items: center;
+  height: 22px;
+
+  @include mobile-only { grid-column: 1 / -1; }
+}
+
+.pill {
+  display: block;
+  width: 100%;
+  height: 14px;
+  border-radius: 999px;
+  background: var(--bone-faint);
+  /* Narrows from the middle, like the cutout itself. */
+  transform-origin: 50% 50%;
+}
+
+.pillRumour {
+  background: linear-gradient(90deg, var(--cherry-lo), var(--cherry-hi));
+  will-change: transform;
+}
+
+.delta {
+  @include t-mono;
+  text-transform: none;
+  color: var(--bone-faint);
+}

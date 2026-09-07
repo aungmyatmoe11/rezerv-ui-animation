@@ -1,0 +1,65 @@
+.callouts {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  @include tablet-up  { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @include desktop-up { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+}
+
+.callout {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  padding: 24px 22px 26px;
+  border: 1px solid var(--rule-soft);
+  border-radius: 18px;
+  background: var(--ink-raised);
+  /* transform, colour and opacity only — never a layout property on hover. */
+  transition:
+    border-color var(--dur-base) var(--ease-out),
+    background-color var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
+
+  &:hover {
+    transform: translateY(-4px);
+    border-color: var(--rule);
+    background: #0c0b0e;
+
+    .index { color: var(--cherry-hi); }
+    .calloutBody { opacity: 1; }
+  }
+}
+
+.index {
+  @include t-mono;
+  color: var(--bone-faint);
+  transition: color var(--dur-base) var(--ease-out);
+}
+
+.calloutTitle {
+  @include t-sub;
+  font-size: clamp(1.125rem, 1.6vw, 1.5rem);
+  color: var(--bone);
+}
+
+.calloutBody {
+  @include t-body;
+  font-size: clamp(0.9375rem, 1vw, 1.0625rem);
+  color: var(--bone-dim);
+  opacity: 0.72;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+.coda {
+  @include t-body;
+  color: var(--bone-faint);
+  margin-top: 28px;
+  max-width: 52ch;
+}
+
+@include motion-reduce {
+  .callout:hover { transform: none; }
+}

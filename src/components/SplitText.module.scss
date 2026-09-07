@@ -1,0 +1,20 @@
+.root {
+  display: inline;
+}
+
+.mask {
+  display: inline-block;
+  /* Clips the word's rise so it appears to come up out of the baseline.
+     `clip` rather than `hidden` so it never creates a scroll container. */
+  overflow: clip;
+  vertical-align: bottom;
+  /* Descenders would otherwise be shaved by the clip. */
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+
+.word {
+  display: inline-block;
+  /* No permanent will-change: these words animate once, during the hero
+     entrance, and that timeline promotes them for its own duration only. */
+}

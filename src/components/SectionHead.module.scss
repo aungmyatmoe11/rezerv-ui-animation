@@ -1,0 +1,45 @@
+.head {
+  display: grid;
+  gap: 16px;
+  justify-items: start;
+  max-width: $max-reading;
+}
+
+.eyebrow {
+  @include t-eyebrow;
+  color: var(--bone-faint);
+}
+
+.title {
+  @include t-section;
+  color: var(--bone);
+  /* The headline is the one place a long word may not force a scrollbar. */
+  max-width: 18ch;
+}
+
+.lede {
+  @include t-body;
+  color: var(--bone-dim);
+  max-width: 52ch;
+}
+
+.badge {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+/* Over footage: keep the type legible without a heavy scrim. Sizes are
+   identical to the page tone; only contrast handling differs. */
+.head[data-tone='film'] {
+  .eyebrow { color: var(--bone-dim); }
+
+  .title { text-shadow: 0 2px 30px rgba(0, 0, 0, 0.9); }
+
+  .lede {
+    color: rgba(237, 234, 228, 0.84);
+    text-shadow: 0 1px 20px rgba(0, 0, 0, 0.9);
+    max-width: 46ch;
+  }
+}

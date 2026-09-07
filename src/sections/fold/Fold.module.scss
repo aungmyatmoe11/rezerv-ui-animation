@@ -1,0 +1,66 @@
+.caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: clamp(56px, 11vh, 108px);
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  @include content-shell;
+  text-align: center;
+
+  /* Stacked video tier: normal flow under the clip, both states shown at once
+     because there is no scroll position to swap them with. */
+  &[data-mode='video'] {
+    position: static;
+    padding-block: 28px 8px;
+  }
+}
+
+.eyebrow {
+  @include t-eyebrow;
+  color: var(--bone-faint);
+}
+
+/* The two states occupy the same cell so the swap is a crossfade in place,
+   never a reflow. */
+.states {
+  display: grid;
+  justify-items: center;
+}
+
+.state {
+  grid-area: 1 / 1;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  will-change: opacity;
+
+  .caption[data-mode='video'] & {
+    grid-area: auto;
+    opacity: 1 !important;
+  }
+}
+
+/* On the video tier they stack rather than overlap. */
+.caption[data-mode='video'] .states {
+  grid-auto-flow: row;
+  gap: 20px;
+}
+
+.size {
+  @include t-sub;
+  font-size: clamp(1.5rem, 3.4vw, 2.75rem);
+  color: var(--bone);
+  text-shadow: 0 2px 28px rgba(0, 0, 0, 0.85);
+}
+
+.body {
+  @include t-body;
+  font-size: 0.9375rem;
+  color: var(--bone-dim);
+  max-width: 34ch;
+  text-shadow: 0 1px 18px rgba(0, 0, 0, 0.85);
+}
+
+.crease { max-width: $max-reading; }

@@ -1,0 +1,65 @@
+.panel {
+  position: absolute;
+  inset: 0;
+  isolation: isolate;
+  display: grid;
+  align-content: end;
+  justify-items: start;
+  @include content-shell;
+  padding-block: 72px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.55) 76%, rgba(0, 0, 0, 0.86) 100%);
+  }
+
+  &[data-mode='video'] {
+    position: static;
+    padding-block: 32px 48px;
+
+    &::before { display: none; }
+  }
+}
+
+.copy {
+  display: grid;
+  gap: 22px;
+  max-width: $max-reading;
+  pointer-events: auto;
+}
+
+.specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 6px 0 0;
+}
+
+.spec {
+  display: grid;
+  gap: 6px;
+  min-width: 9rem;
+  padding: 16px 18px;
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  background: rgba(6, 6, 8, 0.8);
+}
+
+.specLabel {
+  @include t-eyebrow;
+  color: var(--bone-dim);
+}
+
+.specValue {
+  @include t-sub;
+  font-size: clamp(1.5rem, 2.6vw, 2.25rem);
+  font-variant-numeric: tabular-nums;
+  color: var(--bone);
+  margin: 0;
+}
+
+.specBadge { margin: 2px 0 0; }

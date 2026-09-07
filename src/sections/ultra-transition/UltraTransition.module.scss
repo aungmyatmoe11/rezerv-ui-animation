@@ -1,0 +1,43 @@
+/* This is the act break, so it is given real air: the two lines and the card
+   get a full viewport to breathe in rather than the standard section rhythm.
+   The pause between the sentences is the point of the section. */
+.wrap {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: clamp(36px, 7vh, 80px);
+  min-height: 88svh;
+  text-align: center;
+
+  @include tablet-up { gap: clamp(48px, 8vh, 104px); }
+}
+
+.line {
+  @include t-sub;
+  font-size: clamp(1.5rem, 3.6vw, 2.75rem);
+  color: var(--bone);
+  max-width: 20ch;
+  text-wrap: balance;
+}
+
+.lineLate { color: var(--bone-dim); }
+
+/* Contained, bordered, and never full-bleed. The width cap is the safety
+   measure, not a style choice: this is the only bright clip on the page. */
+.card {
+  position: relative;
+  width: min(100%, 680px);
+  overflow: clip;
+  border: 1px solid var(--rule);
+  border-radius: 22px;
+  background: var(--ink-raised);
+  /* Scrubbed from 0.3 in UltraTransition.tsx; this is the resting value for
+     mobile and reduced motion, where no ramp runs. */
+  opacity: 1;
+  will-change: opacity, transform;
+  /* A soft halo so the bright card does not meet the black page on a hard
+     edge. Part of the same photosensitivity thinking as the opacity ramp. */
+  box-shadow: 0 0 120px rgba(154, 183, 220, 0.09);
+
+  @include desktop-up { width: min(58vw, 860px); }
+}

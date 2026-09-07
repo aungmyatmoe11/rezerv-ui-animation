@@ -1,0 +1,246 @@
+.stage {
+  display: grid;
+  border: 1px solid var(--rule);
+  border-radius: 18px;
+  background: var(--ink-raised);
+  overflow: hidden;
+
+  @include desktop-up {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    align-items: stretch;
+  }
+}
+
+/* ---- poster: the play surface --------------------------------------------- */
+.poster {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border-bottom: 1px solid var(--rule);
+  overflow: hidden;
+  text-align: left;
+
+  @include desktop-up {
+    border-bottom: 0;
+    border-right: 1px solid var(--rule);
+    aspect-ratio: auto;
+    min-height: 340px;
+  }
+}
+
+/* No third-party artwork here: the poster is composed from the page's own
+   palette, so the promise in the provenance note below still holds. */
+.posterGlow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 90% at 50% 118%, var(--theme-hi), transparent 62%),
+    radial-gradient(90% 70% at 50% 0%, rgba(237, 234, 228, 0.09), transparent 60%);
+  opacity: 0.5;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+.marquee {
+  position: absolute;
+  top: 18px;
+  left: 20px;
+  @include t-mono;
+  text-transform: uppercase;
+  color: var(--bone-dim);
+}
+
+.posterCopy {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 18px;
+  display: grid;
+  gap: 8px;
+}
+
+/* Apple's own line for the event, off the stream's artwork. */
+.tagline {
+  @include t-sub;
+  font-size: clamp(1.125rem, 1.8vw, 1.625rem);
+  color: var(--bone);
+}
+
+.posterCta {
+  @include t-eyebrow;
+  color: var(--bone-dim);
+  transition: color var(--dur-base) var(--ease-out);
+}
+
+/* ---- play button ---------------------------------------------------------- */
+.play {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.playRing {
+  position: absolute;
+  width: 84px;
+  height: 84px;
+  border-radius: 999px;
+  border: 1px solid rgba(237, 234, 228, 0.45);
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(2px);
+  transition:
+    transform var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    background-color var(--dur-base) var(--ease-out);
+}
+
+/* A triangle, not a glyph: no font on the page draws a play arrow the same way
+   twice, and this one is always optically centred in the ring. */
+.playGlyph {
+  position: relative;
+  width: 20px;
+  height: 22px;
+  background: var(--bone);
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  transform: translateX(3px);
+  transition: background-color var(--dur-base) var(--ease-out);
+}
+
+.poster:hover {
+  .posterGlow { opacity: 0.78; }
+  .posterCta { color: var(--bone); }
+  .playRing {
+    transform: scale(1.08);
+    border-color: var(--bone);
+    background: rgba(237, 234, 228, 0.12);
+  }
+}
+
+.poster:active .playRing { transform: scale(1); }
+
+/* ---- info ----------------------------------------------------------------- */
+.info {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: 26px 22px 28px;
+
+  @include tablet-up { padding: 32px 30px 34px; }
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  justify-self: start;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  @include t-mono;
+  text-transform: uppercase;
+  color: var(--bone-dim);
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--c-official);
+  box-shadow: 0 0 0 4px rgba(127, 209, 166, 0.14);
+}
+
+.title {
+  @include t-sub;
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
+  color: var(--bone);
+}
+
+.when,
+.note {
+  @include t-body;
+  font-size: 0.9375rem;
+  color: var(--bone-dim);
+}
+
+.note { max-width: 42ch; }
+
+/* ---- countdown ------------------------------------------------------------ */
+.countdown {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 8px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cell {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  padding: 12px 6px 10px;
+  border: 1px solid var(--rule-soft);
+  border-radius: 12px;
+  background: rgba(237, 234, 228, 0.035);
+}
+
+.value {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--bone);
+}
+
+.unit {
+  @include t-mono;
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  color: var(--bone-faint);
+}
+
+.out {
+  justify-self: start;
+  margin-top: 4px;
+  @include t-mono;
+  text-transform: none;
+  color: var(--bone-dim);
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 3px;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+
+  &:hover { color: var(--bone); border-color: var(--bone); }
+}
+
+/* ---- live ----------------------------------------------------------------- */
+/* The only state that earns a moving element: while the stream is actually
+   running, the dot pulses. Scheduled and ended sit still. */
+.stage[data-status='live'] {
+  .dot {
+    background: #ff5a5f;
+    box-shadow: 0 0 0 4px rgba(255, 90, 95, 0.16);
+  }
+  .status { color: var(--bone); border-color: rgba(255, 90, 95, 0.4); }
+}
+
+@include motion-safe {
+  .stage[data-status='live'] .dot { animation: livePulse 1.8s var(--ease-in-out) infinite; }
+}
+
+@keyframes livePulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(255, 90, 95, 0.16); }
+  50%      { box-shadow: 0 0 0 9px rgba(255, 90, 95, 0.05); }
+}
+
+.stage[data-status='ended'] .dot {
+  background: var(--c-uncertain);
+  box-shadow: 0 0 0 4px rgba(156, 143, 136, 0.12);
+}
+
+@include motion-reduce {
+  .poster:hover .playRing { transform: none; }
+}

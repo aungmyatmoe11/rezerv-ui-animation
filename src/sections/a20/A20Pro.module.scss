@@ -1,0 +1,203 @@
+/* ---- overlay over the pinned film ------------------------------------------ */
+.panel {
+  position: absolute;
+  inset: 0;
+  isolation: isolate;
+  display: grid;
+  align-content: end;
+  justify-items: start;
+  @include content-shell;
+  padding-block: 72px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.55) 76%, rgba(0, 0, 0, 0.84) 100%);
+  }
+
+  /* Stacked video tier: normal flow beneath the clip, badge on the clip. */
+  &[data-mode='video'] {
+    position: static;
+    padding-block: 32px 48px;
+
+    &::before { display: none; }
+    .corner { top: 16px; left: 16px; }
+    .callout { display: none; }
+  }
+}
+
+.copy {
+  display: grid;
+  gap: 22px;
+  max-width: $max-reading;
+  pointer-events: auto;
+}
+
+.corner {
+  position: absolute;
+  z-index: 3;
+  top: 28px;
+  left: 48px;
+
+  @include desktop-up { left: 64px; }
+}
+
+/* Label above the rendered spec list, leader line dropping onto it. */
+.callout {
+  position: absolute;
+  left: 34%;
+  top: 9%;
+  height: 22%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.calloutLabel {
+  display: block;
+  width: max-content;
+  max-width: 18rem;
+  padding: 9px 12px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: rgba(6, 6, 8, 0.86);
+  @include t-body;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--bone);
+  will-change: opacity, transform;
+}
+
+.calloutLine {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 1px;
+  background: rgba(237, 234, 228, 0.55);
+  transform-origin: top center;
+  will-change: transform;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: -3px;
+    bottom: -3px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--bone);
+  }
+}
+
+/* ---- rows beneath ----------------------------------------------------------- */
+.grid {
+  display: grid;
+  gap: 48px;
+  align-items: start;
+
+  @include desktop-up {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: 72px;
+  }
+}
+
+.wmcm {
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+  max-width: 40ch;
+}
+
+.wmcmEyebrow {
+  @include t-eyebrow;
+  color: var(--bone-faint);
+}
+
+.wmcmTitle {
+  @include t-sub;
+  color: var(--bone);
+}
+
+.wmcmBody {
+  @include t-body;
+  color: var(--bone-dim);
+}
+
+.rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--rule);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'key badge'
+    'value value'
+    'note note';
+  gap: 6px 16px;
+  align-items: center;
+  padding: 18px 12px;
+  margin-inline: -12px;
+  border-bottom: 1px solid var(--rule-soft);
+  border-radius: 10px;
+  transition: background-color var(--dur-fast) var(--ease-out);
+
+  @include tablet-up {
+    grid-template-columns: 8.5rem minmax(0, 1fr) auto;
+    grid-template-areas:
+      'key value badge'
+      'key note note';
+  }
+
+  &:hover {
+    background: rgba(237, 234, 228, 0.045);
+
+    .rowValue {
+      color: var(--bone);
+      transform: translateX(4px);
+    }
+    .rowNote { opacity: 1; }
+  }
+}
+
+.rowKey {
+  grid-area: key;
+  @include t-eyebrow;
+  color: var(--bone-faint);
+  align-self: start;
+  padding-top: 4px;
+}
+
+.rowValue {
+  grid-area: value;
+  @include t-sub;
+  font-size: clamp(1.125rem, 1.7vw, 1.5rem);
+  color: var(--bone-dim);
+  transition:
+    color var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
+}
+
+.rowBadge {
+  grid-area: badge;
+  justify-self: end;
+}
+
+.rowNote {
+  grid-area: note;
+  @include t-body;
+  font-size: 0.9375rem;
+  color: var(--bone-dim);
+  opacity: 0.6;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+@include motion-reduce {
+  .row:hover .rowValue { transform: none; }
+}

@@ -1,0 +1,14 @@
+node_modules/
+.next/
+.next-prod/
+test-results/
+playwright-report/
+out/
+.env*
+!.env.example
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store
+
+# public/frames, public/video, public/poster, and public/img are committed
+# so another machine can clone and run without regenerating assets.

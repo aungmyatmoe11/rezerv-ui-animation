@@ -1,0 +1,50 @@
+.tradeoffs {
+  display: grid;
+  gap: 14px;
+  margin: 56px 0 0;
+  padding: 0;
+  list-style: none;
+
+  @include tablet-up  { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+}
+
+.tradeoff {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  justify-items: start;
+  padding: 24px 22px 26px;
+  border: 1px solid var(--rule-soft);
+  border-radius: 18px;
+  background: var(--ink-raised);
+  transition:
+    border-color var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
+
+  &:hover {
+    transform: translateY(-4px);
+    border-color: var(--rule);
+
+    .tradeoffBody { opacity: 1; }
+  }
+}
+
+.tradeoffTitle {
+  @include t-sub;
+  font-size: clamp(1.125rem, 1.6vw, 1.5rem);
+  color: var(--bone);
+}
+
+.tradeoffBody {
+  @include t-body;
+  font-size: 0.9375rem;
+  color: var(--bone-dim);
+  opacity: 0.75;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+.tableWrap { margin-top: 56px; }
+
+@include motion-reduce {
+  .tradeoff:hover { transform: none; }
+}

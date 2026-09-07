@@ -1,0 +1,130 @@
+/* Stacked, not split: one focal point at a time — read the claim, then look at
+   the object, then decode what is written on it. */
+
+.head {
+  max-width: $max-reading;
+}
+
+.figure {
+  margin: 0;
+  margin-top: clamp(40px, 6vw, 84px);
+  display: grid;
+  gap: clamp(22px, 3vw, 36px);
+  min-width: 0;
+}
+
+/**
+ * The band.
+ *
+ * Cropped to a strip barely taller than the object inside it, so an edge-on
+ * phone fills its frame instead of floating in a mostly empty box. No plate and
+ * no radius: the render's own backdrop is a near-black that does not match the
+ * page, and a rounded rectangle of it read as a grey card. The mask dissolves
+ * all four edges into the page so the picture simply ends.
+ */
+.band {
+  position: relative;
+  width: 100%;
+  overflow: clip;
+  aspect-ratio: 16 / 7;
+  transform-origin: center center;
+
+  /* The vertical fade is the deep one. `cover` crops this clip to a strip, and
+     the render's own backdrop is a near-black that does not match the page —
+     so without a long fade the crop reads as a dark grey plate laid on true
+     black. Taking the top and bottom fifths down to nothing dissolves the plate
+     while leaving the subject, which sits across the middle, untouched. */
+  mask-image:
+    linear-gradient(90deg, transparent 0, #000 9%, #000 91%, transparent 100%),
+    linear-gradient(180deg, transparent 0, #000 22%, #000 78%, transparent 100%);
+  mask-composite: intersect;
+  -webkit-mask-composite: source-in;
+
+  @include tablet-up  { aspect-ratio: 1440 / 460; }
+  @include desktop-up { aspect-ratio: 1440 / 400; }
+}
+
+/* Counter-scaled against the band so the opening reveals the frame rather than
+   stretching it. GSAP owns both transforms — see Thickness.tsx. */
+.bandInner {
+  position: absolute;
+  inset: 0;
+  transform-origin: center center;
+
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* This render's backdrop is a near-black around #131316, not the page's
+       true black, so any crop of it shows as a faintly lighter plate. A small
+       contrast lift pulls that backdrop the rest of the way to black while
+       leaving the chassis — which lives in the mid-tones and highlights —
+       where it is. Cheaper and more exact than stacking another gradient over
+       the top of it. */
+    filter: contrast(1.18) brightness(0.98);
+  }
+}
+
+/* ---- what the two figures on screen mean ---------------------------------- */
+.legend {
+  display: grid;
+  gap: 18px;
+
+  @include desktop-up {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: 64px;
+    align-items: start;
+  }
+}
+
+.rail {
+  margin: 0;
+  display: grid;
+  gap: 0;
+}
+
+/* Stacked on mobile. Two columns at 390px left the key 11rem wide and pushed
+   "The closed-body reference" onto two ragged lines against it. */
+.railRow {
+  display: grid;
+  gap: 3px;
+  padding: 13px 0;
+  border-top: 1px solid var(--rule-soft);
+
+  &:last-child { border-bottom: 1px solid var(--rule-soft); }
+
+  @include tablet-up {
+    grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
+    gap: 16px;
+    align-items: baseline;
+  }
+}
+
+.railKey {
+  @include t-mono;
+  color: var(--bone-faint);
+}
+
+.railValue {
+  margin: 0;
+  @include t-body;
+  font-size: clamp(1rem, 1.05vw, 1.1875rem);
+  color: var(--bone);
+}
+
+/* The one caveat. Body type rather than mono: the old version set a three-line
+   sentence in 13px monospace at --bone-dim, which is a caption face doing a
+   paragraph's job and it was the least readable text on the page. */
+.note {
+  @include t-body;
+  font-size: clamp(0.9375rem, 1vw, 1.0625rem);
+  color: var(--bone-dim);
+  max-width: 34ch;
+
+  @include desktop-up { padding-top: 13px; }
+}
+
+@include motion-reduce {
+  .band,
+  .bandInner { transform: none !important; }
+}

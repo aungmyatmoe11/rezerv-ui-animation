@@ -1,0 +1,191 @@
+.section {
+  position: relative;
+  background: var(--ink);
+}
+
+.stage {
+  position: relative;
+  width: 100%;
+  height: 100svh;
+  overflow: clip;
+}
+
+/* The section is full-bleed; the film is inset to --media-h so a wide product
+   shot is not sliced off top and bottom, and the caption gets a clean band. */
+.media {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: var(--media-h, 100%);
+  transform: translateY(-50%);
+}
+
+.canvas,
+.fallback,
+.holding {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/**
+ * Feather the film into the page.
+ *
+ * A `contain` frame lands as a rectangle on pure black, and on the brighter
+ * clips its edges are plainly visible as hard seams — worst on the Ultra
+ * finishes, where a silver body runs right up to the left edge and the dark one
+ * is sliced clean off at the right. The renders were never composed to be cut at
+ * those points; they were composed to sit on black.
+ *
+ * The mask box is the PICTURE, not the element. Under `contain` those are
+ * different rectangles — the element is the whole stage, the picture is
+ * letterboxed inside it — so a mask sized to the element puts its fade out in
+ * the empty bars and leaves the actual edge as hard as it was. The renderer
+ * publishes the picture's rect as --pic-* on resize (frameRenderer.ts) and the
+ * mask is positioned against that.
+ *
+ * Static, on an element that already has its own compositor layer: one composite,
+ * nothing per frame.
+ *
+ * `cover` fills the stage edge to edge by definition — there is no seam to hide,
+ * and fading there would only crop the shot — so it is left alone.
+ */
+.section[data-fit='contain'] .canvas {
+  /* Eased stops rather than a straight ramp. A linear alpha ramp on a bright
+     subject over black still reads as an edge, because everything under ~30%
+     alpha looks like black and then the picture appears to switch on. Front
+     loading the ramp spreads that onset across the first third of the fade. */
+  mask-image:
+    linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(0, 0, 0, 0.14) 1.8%,
+      rgba(0, 0, 0, 0.46) 3.6%,
+      rgba(0, 0, 0, 0.8) 5.4%,
+      #000 7.5%,
+      #000 92.5%,
+      rgba(0, 0, 0, 0.8) 94.6%,
+      rgba(0, 0, 0, 0.46) 96.4%,
+      rgba(0, 0, 0, 0.14) 98.2%,
+      rgba(0, 0, 0, 0) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(0, 0, 0, 0.14) 1.8%,
+      rgba(0, 0, 0, 0.46) 3.6%,
+      rgba(0, 0, 0, 0.8) 5.4%,
+      #000 7.5%,
+      #000 92.5%,
+      rgba(0, 0, 0, 0.8) 94.6%,
+      rgba(0, 0, 0, 0.46) 96.4%,
+      rgba(0, 0, 0, 0.14) 98.2%,
+      rgba(0, 0, 0, 0) 100%
+    );
+  mask-size: var(--pic-w, 100%) var(--pic-h, 100%);
+  mask-position: var(--pic-x, 0) var(--pic-y, 0);
+  mask-repeat: no-repeat;
+  mask-composite: intersect;
+  -webkit-mask-composite: source-in;
+}
+
+/* A vignette over the contained films.
+   The feather stops the picture ending on a hard line; this stops it reading as
+   a rectangle at all. Corners take the most, the centre none, so the subject is
+   untouched and the frame dissolves into the page the way a projected image
+   does. One static layer above the canvas — no per-frame cost. */
+.section[data-fit='contain'] .media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    118% 96% at 50% 50%,
+    transparent 52%,
+    rgba(0, 0, 0, 0.42) 82%,
+    var(--ink) 100%
+  );
+}
+
+/* Stacked (video tier) shows the clip at its own aspect ratio in the flow;
+   there is no letterbox to dissolve and a vignette would just dim it. */
+.section[data-layout='stacked'][data-fit='contain'] .media::after { display: none; }
+
+.canvas {
+  /* Painted only when the quantised scroll position changes — see
+     lib/motion/frameRenderer.ts. */
+  display: block;
+  /* Held invisible until the renderer owns the picture. The context is
+     alpha:false, so an unpainted canvas would otherwise be a black wall over
+     the poster underneath it. The fade also covers the gap between the React
+     commit that mounts the frames and the effect that paints frame 0. */
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+  z-index: 1;
+}
+
+.section[data-mode='scrub'] .canvas { opacity: 1; }
+
+.holding {
+  background-position: center;
+  background-repeat: no-repeat;
+
+  &[data-fit='cover']   { background-size: cover; }
+  &[data-fit='contain'] { background-size: contain; }
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+
+  /* Interactive overlay content opts back in individually. */
+  :where(a, button, input, [tabindex]) { pointer-events: auto; }
+}
+
+/* While frames are still arriving the poster holds the stage — see .holding. */
+.section[data-mode='pending'] .stage { background: var(--ink); }
+
+/* Scroll hint, hidden on the video tier where the clip loops by itself. */
+.hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: clamp(18px, 5vh, 44px);
+  z-index: 2;
+  text-align: center;
+  @include t-mono;
+  color: var(--bone-faint);
+  pointer-events: none;
+}
+
+.section[data-mode='video'] .hint { display: none; }
+
+/* Stacked video tier: the clip at its own aspect ratio with the overlay
+   content in normal flow beneath it. Sections opt in when their overlay
+   carries more copy than a small viewport can hold over a letterboxed clip. */
+.section[data-layout='stacked'] {
+  .stage {
+    height: auto;
+    overflow: visible;
+  }
+
+  .media {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    height: auto;
+    aspect-ratio: var(--aspect, 16 / 9);
+    transform: none;
+  }
+
+  .overlay {
+    position: static;
+    pointer-events: auto;
+  }
+}

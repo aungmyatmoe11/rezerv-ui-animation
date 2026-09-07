@@ -1,0 +1,28 @@
+.section {
+  position: relative;
+  background: var(--ink);
+
+  /* Vertical rhythm variations */
+  &[data-rhythm='compact'] { @include section-rhythm(0.45); }
+  &[data-rhythm='tight']   { @include section-rhythm(0.6); }
+  &[data-rhythm='normal']  { @include section-rhythm(1); }
+  &[data-rhythm='loose']   { @include section-rhythm(1.5); }
+
+  /* Visual variant variations for reducing sameness */
+  &[data-variant='inset'] {
+    padding-inline: clamp(20px, 5vw, 60px);
+    
+    .shell {
+      border-radius: 12px;
+      background: rgba(237, 234, 228, 0.01);
+      padding-block: clamp(40px, 6vh, 80px);
+    }
+  }
+
+  &[data-variant='breathe'] {
+    /* Extra vertical space between sections */
+    margin-block: clamp(60px, 8vh, 120px);
+  }
+}
+
+.shell { @include shell; }

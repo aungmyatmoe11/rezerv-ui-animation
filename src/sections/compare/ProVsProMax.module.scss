@@ -1,0 +1,67 @@
+/* ---- overlay over the pinned film ------------------------------------------ */
+.panel {
+  position: absolute;
+  inset: 0;
+  isolation: isolate;
+  display: grid;
+  align-content: end;
+  justify-items: start;
+  @include content-shell;
+  padding-block: 72px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(180deg, transparent 42%, rgba(0, 0, 0, 0.55) 76%, rgba(0, 0, 0, 0.84) 100%);
+  }
+
+  &[data-mode='video'] {
+    position: static;
+    padding-block: 32px 48px;
+
+    &::before { display: none; }
+    .callout { display: none; }
+  }
+}
+
+.copy {
+  display: grid;
+  gap: 22px;
+  max-width: $max-reading;
+  pointer-events: auto;
+}
+
+/* Sits to the right of the rendered "48MP" caption, pointing at it. */
+.callout {
+  position: absolute;
+  left: 63.5%;
+  top: 9.5%;
+  display: flex;
+  align-items: center;
+}
+
+.calloutLine {
+  display: block;
+  width: 40px;
+  height: 1px;
+  background: rgba(237, 234, 228, 0.55);
+  transform-origin: left center;
+  will-change: transform;
+}
+
+.calloutLabel {
+  display: block;
+  margin-left: 8px;
+  will-change: opacity, transform;
+}
+
+.note {
+  @include t-body;
+  font-size: 0.9375rem;
+  color: var(--bone-dim);
+  margin-top: 28px;
+  max-width: 60ch;
+}

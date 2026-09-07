@@ -1,0 +1,167 @@
+@use 'abstracts' as *;
+
+/* ==========================================================================
+   Global layer. The only file in the app that emits unscoped CSS.
+   Everything else is a *.module.scss.
+   ========================================================================== */
+
+:root {
+  /* --- surface ---------------------------------------------------------- */
+  --ink:        #000000;
+  --ink-raised: #08080a;
+  --bone:       #edeae4;
+  --bone-dim:   #8e8b86;
+  --bone-faint: #8a8780;  /* WCAG AA: raised from #55534f to meet ~4.5:1 contrast on black */
+  --rule:       rgba(237, 234, 228, 0.14);
+  --rule-soft:  rgba(237, 234, 228, 0.07);
+  --focus:      #b6cee3;
+
+  /* --- measured device finishes (docs/ASSET_INVENTORY.md §1.2) ----------- */
+  --cherry-base: #4d2439;  --cherry-hi: #71405b;  --cherry-lo: #280114;
+  --blue-base:   #6785b6;  --blue-hi:   #9ab7dc;  --blue-lo:   #2a4572;
+  --silver-base: #a5a4a5;  --silver-hi: #c2c2c2;  --silver-lo: #6c6a6b;
+  --graphite-base: #2c2c2c; --graphite-hi: #817e7f; --graphite-lo: #030303;
+
+  /* --- active theme: retinted by the colour picker ----------------------- */
+  --theme-base: var(--cherry-base);
+  --theme-hi:   var(--cherry-hi);
+  --theme-lo:   var(--cherry-lo);
+
+  /* --- confidence system ------------------------------------------------- */
+  --c-official:   #7fd1a6;
+  --c-high:       #b6cee3;
+  --c-developing: #d8bd82;
+  --c-uncertain:  #9c8f88;
+  --c-concept:    #a892c4;
+
+  /* --- motion (mirrors _tokens.scss so GSAP and CSS share one source) ----- */
+  --ease-out:    cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast:    180ms;
+  --dur-base:    420ms;
+  --dur-slow:    900ms;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+
+  color-scheme: dark;
+}
+
+/* Reduced motion: collapse every duration rather than hunting down each
+   transition. Individual components additionally opt out of transforms. */
+@include motion-reduce {
+  :root {
+    --dur-fast: 1ms;
+    --dur-base: 1ms;
+    --dur-slow: 1ms;
+  }
+}
+
+/* Registering the theme colours as typed custom properties is what lets the
+   colour picker cross-fade the whole section's tint with a plain CSS
+   transition instead of a JS colour-interpolation tween. Browsers without
+   @property simply snap to the new colour, which is an acceptable fallback. */
+@property --theme-base { syntax: '<color>'; inherits: true; initial-value: #4d2439; }
+@property --theme-hi   { syntax: '<color>'; inherits: true; initial-value: #71405b; }
+@property --theme-lo   { syntax: '<color>'; inherits: true; initial-value: #280114; }
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  /* ScrollTrigger drives all scroll motion; smooth-scroll here would fight it. */
+  scroll-behavior: auto;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--bone);
+  font-family: var(--font-sans);
+  font-synthesis-weight: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* The page is a vertical cinema. Nothing may ever scroll sideways. */
+  overflow-x: clip;
+}
+
+/* Locked while the preloader is up so the entrance timeline owns frame 0. */
+body[data-scroll-locked='true'] {
+  overflow: hidden;
+  height: 100vh;
+}
+
+img, video, canvas { display: block; max-width: 100%; }
+
+h1, h2, h3, p { margin: 0; text-wrap: pretty; }
+h1, h2, h3 { text-wrap: balance; }
+
+a { color: inherit; text-decoration: none; }
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+:where(a, button, [tabindex]):focus-visible { @include focus-ring; }
+
+::selection { background: var(--theme-hi); color: var(--ink); }
+
+.visually-hidden { @include visually-hidden; }
+
+/* Long-jump curtain.
+   A click on "Sources" from the hero crosses thirty screens of film. Travelling
+   that distance strobes however well it is eased, so far jumps cut instead: dip
+   to black, move, come back up.
+
+   The resting state is `visibility: hidden`, not `display: none`: a hidden
+   element is never painted, so it costs nothing between jumps, but unlike a
+   display change it can still be transitioned — going straight from `none` to
+   `block` gives the opacity tween no starting value and the curtain would snap
+   on instead of fading. */
+#scroll-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: var(--ink);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  /* Visibility flips only after the fade has finished, so the curtain is not
+     yanked out from under the last frame of its own exit. */
+  transition:
+    opacity 320ms var(--ease-out),
+    visibility 0s linear 320ms;
+
+  &[data-state='in'] {
+    opacity: 1;
+    visibility: visible;
+    will-change: opacity;
+    transition:
+      opacity 170ms var(--ease-out),
+      visibility 0s;
+  }
+}
+
+/* Reduced motion jumps outright, so the curtain would only add a flash. */
+@include motion-reduce {
+  #scroll-veil { display: none; }
+}
+
+/* Skip link — the page is long and almost entirely scroll-driven, so keyboard
+   users get an explicit route past the cinematic run. */
+.skip-link {
+  position: fixed;
+  top: 12px; left: 12px;
+  z-index: 999;
+  padding: 10px 16px;
+  background: var(--bone);
+  color: var(--ink);
+  border-radius: 4px;
+  transform: translateY(-200%);
+  &:focus-visible { transform: none; }
+}

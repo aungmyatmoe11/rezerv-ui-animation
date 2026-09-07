@@ -1,0 +1,65 @@
+.button {
+  position: fixed;
+  right: max(clamp(16px, 3vw, 32px), env(safe-area-inset-right, 0px));
+  bottom: max(clamp(16px, 3vw, 32px), env(safe-area-inset-bottom, 0px));
+  z-index: 95;
+
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid var(--rule);
+  background: rgba(8, 8, 10, 0.72);
+  backdrop-filter: blur(14px);
+  color: var(--bone-dim);
+  cursor: pointer;
+
+  /* Starting state; GSAP owns it from mount onward. */
+  opacity: 0;
+
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+
+  &:hover {
+    color: var(--bone);
+    border-color: rgba(237, 234, 228, 0.34);
+    background: rgba(8, 8, 10, 0.9);
+  }
+
+  &[aria-hidden='true'] { pointer-events: none; }
+
+  &:focus-visible { @include focus-ring; }
+}
+
+.ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* Start the sweep at twelve o'clock. */
+  transform: rotate(-90deg);
+  overflow: visible;
+}
+
+.ringTrack,
+.ringProgress {
+  fill: none;
+  stroke-width: 1.5;
+}
+
+.ringTrack { stroke: rgba(237, 234, 228, 0.1); }
+
+.ringProgress {
+  stroke: var(--cherry-hi);
+  stroke-linecap: round;
+}
+
+.arrow {
+  font-size: 1rem;
+  line-height: 1;
+  /* The glyph sits optically low in most system faces. */
+  transform: translateY(-1px);
+}
