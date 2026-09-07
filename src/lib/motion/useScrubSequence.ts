@@ -55,7 +55,7 @@ export function useScrubSequence({
   frameCount,
   eager = false,
   pinVh = 2,
-  smoothing = 0.18,
+  smoothing = 0.42,
   fit = 'cover',
 }: UseScrubSequenceOptions): UseScrubSequenceResult {
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -219,17 +219,28 @@ export function useScrubSequence({
        */
       const tick = () => {
         const target = targetRef.current;
-        const next = currentRef.current + (target - currentRef.current) * smoothing;
-        currentRef.current = Math.abs(target - next) < 0.0005 ? target : next;
-        progressRef.current = currentRef.current;
-        rendererRef.current?.draw(currentRef.current);
-        for (const listener of listeners) listener(currentRef.current);
-
-        // Settled: stop drawing until the scroll moves again.
-        if (currentRef.current === target) {
+        const current = currentRef.current;
+        const delta = target - current;
+        
+        // མြန်မာ: smoothing ပိုကြီးရင် animation က scroll နဲ့ ပိုကပ်ပြီး responsive ဖြစ်တယ်
+        // Higher smoothing = tighter scroll tracking, less rubber-band lag
+        const next = current + delta * smoothing;
+        
+        // Stop ticking when settled (within 0.05% of target)
+        if (Math.abs(delta) < 0.0005) {
+          currentRef.current = target;
+          progressRef.current = target;
+          rendererRef.current?.draw(target);
+          for (const listener of listeners) listener(target);
           running = false;
           gsap.ticker.remove(tick);
+          return;
         }
+        
+        currentRef.current = next;
+        progressRef.current = next;
+        rendererRef.current?.draw(next);
+        for (const listener of listeners) listener(next);
       };
 
       const kick = () => {

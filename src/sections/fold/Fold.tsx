@@ -28,7 +28,7 @@ export function Fold() {
         slug="fold"
         alt={ALT}
         pinVh={2.8}
-        smoothing={0.13}
+        smoothing={0.42}
         fit="contain"
         mediaHeight={0.86}
         videoLayout="stacked"
