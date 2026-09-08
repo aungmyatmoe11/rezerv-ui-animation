@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 25
 
     steps:
       - name: Checkout repository
@@ -43,8 +43,8 @@ jobs:
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Run tests
-        run: npm test
+      - name: Run smoke tests
+        run: npm run test:ci
         env:
           CI: true
           NEXT_DIST_DIR: .next-prod

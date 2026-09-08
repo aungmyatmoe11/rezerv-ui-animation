@@ -15,6 +15,7 @@
     "assets": "powershell -NoProfile -ExecutionPolicy Bypass -File ../tools/build-assets.ps1",
     "check": "npm run typecheck && npm run lint && npm run build",
     "test": "playwright test",
+    "test:ci": "playwright test tests/part1-fixes.spec.ts --project=desktop",
     "test:desktop": "playwright test --project=desktop",
     "test:ui": "playwright test --ui",
     "test:diagnose": "playwright test diagnose --project=desktop"

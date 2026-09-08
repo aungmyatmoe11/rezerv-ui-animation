@@ -283,7 +283,8 @@ npx lighthouse https://rezerv-ui-animation.vercel.app/ --form-factor=mobile --th
 **Production:** [https://rezerv-ui-animation.vercel.app](https://rezerv-ui-animation.vercel.app)
 
 Vercel builds from `main` on GitHub. GitHub Actions (`.github/workflows/ci.yml`) runs on push:
-Node **20**, `next build` into `.next-prod`, Playwright Chromium, then `npm test`. Playwright
+Node **20**, `next build` into `.next-prod`, Playwright Chromium, then `npm run test:ci` —
+`part1-fixes` on desktop only, so the gate finishes in minutes. Full suite: `npm test`. Playwright
 starts `next start` from `.next-prod` — a default `.next` build will not boot the test server.
 
 ```bash
@@ -364,5 +365,5 @@ All moving images are original concept renders, not third-party commercial foota
 ## Also in the repo
 
 MIT license, `CONTRIBUTING.md`, `SECURITY.md`, GitHub Actions (`typecheck`, `lint`, `build`,
-test), Playwright against a production build, TypeScript strict, ESLint. No analytics, no
-tracking cookies, no fake consent banner.
+`test:ci` smoke on desktop). Playwright against a production build, TypeScript strict, ESLint.
+No analytics, no tracking cookies, no fake consent banner.
