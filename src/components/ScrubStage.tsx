@@ -136,7 +136,7 @@ export function ScrubStage({
   children,
 }: ScrubStageProps) {
   const { start, count } = playedFrames(slug);
-  const { sectionRef, canvasRef, mode, subscribe } = useScrubSequence({
+  const { sectionRef, canvasRef, mode, failed, subscribe } = useScrubSequence({
     slug,
     frameCount: count,
     startFrame: start,
@@ -147,7 +147,9 @@ export function ScrubStage({
   });
 
   const state = useMemo<ScrubStageState>(() => ({ mode, subscribe }), [mode, subscribe]);
-  const stacked = mode === 'video' && videoLayout === 'stacked';
+  // Stacked layout is the intentional video tier (mobile / reduced-motion).
+  // A mid-session frame 404 must not collapse the pin by switching to it.
+  const stacked = mode === 'video' && videoLayout === 'stacked' && !failed;
 
   /**
    * Drop the holding poster once the canvas owns the picture.

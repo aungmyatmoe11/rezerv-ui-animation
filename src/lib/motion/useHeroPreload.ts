@@ -14,11 +14,17 @@ import { posterSrc, type ClipSlug } from '@/data/media';
  * slow connection genuinely holds the loading screen.
  *
  * Weighted so the poster (which paints first and is the LCP candidate) is worth a
- * quarter of the bar and the video the rest.
+ * quarter of the bar and the video the rest. Pass `waitForFilm=false` on the
+ * static tier and on lite (phone) autoplay so the curtain never waits on the
+ * 4K hero. Phones play `hero-1280.mp4` after unlock.
  */
 const POSTER_WEIGHT = 0.25;
 
-export function useHeroPreload(videoRef: RefObject<HTMLVideoElement | null>, slug: ClipSlug) {
+export function useHeroPreload(
+  videoRef: RefObject<HTMLVideoElement | null>,
+  slug: ClipSlug,
+  waitForFilm = true,
+) {
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -45,8 +51,20 @@ export function useHeroPreload(videoRef: RefObject<HTMLVideoElement | null>, slu
     img.onload = img.onerror = () => {
       posterDone = 1;
       report();
+      // Poster-gated tiers hold on this still. Waiting on the 4K film would
+      // keep the curtain up through a multi-megabyte fetch.
+      if (!waitForFilm) finish();
     };
     img.src = posterSrc(slug);
+    if (img.complete) {
+      posterDone = 1;
+      report();
+      if (!waitForFilm) finish();
+    }
+
+    if (!waitForFilm) return () => {
+      img.onload = img.onerror = null;
+    };
 
     // --- video ---
     const onProgress = () => {
@@ -72,9 +90,9 @@ export function useHeroPreload(videoRef: RefObject<HTMLVideoElement | null>, slu
 
     // Deliberately does NOT touch video.preload or call load(): React owns that
     // attribute and would revert an imperative change on the next render. The
-    // element declares preload="auto", so bytes are already on the way.
-    // A warm cache can be ready before this effect runs, so check once up front
-    // rather than waiting for an event that has already fired.
+    // element declares preload="auto" only while this hook waits on the film
+    // (desktop/tablet autoplay). Lite and static use preload="none". A warm
+    // cache can be ready before this effect runs, so check once up front.
     onProgress();
     if (video.readyState >= 3) onReady();
 
@@ -85,5 +103,5 @@ export function useHeroPreload(videoRef: RefObject<HTMLVideoElement | null>, slu
       video.removeEventListener('canplaythrough', onReady);
       video.removeEventListener('error', onError);
     };
-  }, [videoRef, slug]);
+  }, [videoRef, slug, waitForFilm]);
 }

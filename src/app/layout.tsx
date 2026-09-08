@@ -1,7 +1,10 @@
 import type { Metadata, Viewport } from 'next';
 import { ScrollReset } from '@/components/ScrollReset';
+import { posterSrc } from '@/data/media';
 import { SITE, articleJsonLd, siteJsonLd } from '@/data/seo';
 import '@/styles/global.scss';
+
+const heroPoster = posterSrc('hero');
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
@@ -31,10 +34,10 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/poster/hero.jpg', sizes: 'any' },
-      { url: '/poster/hero.jpg', sizes: '32x32', type: 'image/jpeg' },
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: heroPoster, sizes: '32x32', type: 'image/jpeg' },
     ],
-    apple: [{ url: '/poster/hero.jpg', sizes: '180x180', type: 'image/jpeg' }],
+    apple: [{ url: heroPoster, sizes: '180x180', type: 'image/jpeg' }],
   },
   openGraph: {
     type: 'article',
@@ -85,7 +88,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             carries it is client-rendered, so the request could not start until
             hydration. Declaring it here puts it in the initial HTML, ahead of
             the 3.8MB film it stands in for. */}
-        <link rel="preload" as="image" href="/poster/hero.jpg" fetchPriority="high" />
+        <link rel="preload" as="image" href={heroPoster} fetchPriority="high" />
       </head>
       <body>
         {/* Server-rendered so crawlers see it in the initial HTML rather than

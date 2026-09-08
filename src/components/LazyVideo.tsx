@@ -109,7 +109,6 @@ export function LazyVideo({
       disablePictureInPicture
       aria-hidden={decorative || undefined}
       aria-label={alt}
-      role={decorative ? undefined : 'img'}
     >
       <source src={src} type="video/mp4" />
     </video>

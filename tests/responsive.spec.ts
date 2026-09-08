@@ -69,9 +69,9 @@ test.describe('responsive', () => {
   });
 
   /**
-   * The lite tier's contract: phones play the same films at 1280px, never the
-   * native 2880px files. The hero is the exception — the preloader waits on it,
-   * so it stays the 4K file in every viewport.
+   * The lite tier's contract: phones play every film at 1280px, including the
+   * hero. Desktop and tablet keep native files. A desktop may briefly see the
+   * SSR `hero-1280` snapshot before hydrating onto 4K; that leftover is ignored.
    */
   test('phones fetch the 1280 encodes; wider viewports do not', async ({ page }, testInfo) => {
     test.setTimeout(180_000);
@@ -92,16 +92,26 @@ test.describe('responsive', () => {
     await settle(page);
 
     const suffix = `-${MOBILE_CLIP_WIDTH}.mp4`;
-    const srcs = await page.locator('video source').evaluateAll((els) =>
-      els.map((el) => (el as HTMLSourceElement).getAttribute('src') ?? ''),
-    );
-    const lazySrcs = srcs.filter((s) => !s.endsWith('/hero.mp4'));
+    const srcPaths = (
+      await page.locator('video source').evaluateAll((els) =>
+        els.map((el) => {
+          const src = (el as HTMLSourceElement).getAttribute('src') ?? '';
+          try {
+            return new URL(src, 'http://local').pathname;
+          } catch {
+            return src.split('?')[0];
+          }
+        }),
+      )
+    ).filter((p): p is string => Boolean(p));
 
     if (testInfo.project.name === 'mobile') {
-      expect(lazySrcs.length, srcs.join(', ')).toBeGreaterThan(10);
-      expect(lazySrcs.every((s) => s.endsWith(suffix)), lazySrcs.join(', ')).toBe(true);
+      expect(srcPaths.length, srcPaths.join(', ')).toBeGreaterThan(10);
+      expect(srcPaths.every((p) => p.endsWith(suffix)), srcPaths.join(', ')).toBe(true);
+      expect(srcPaths.some((p) => p.endsWith('/hero-1280.mp4'))).toBe(true);
     } else {
-      expect(lazySrcs.every((s) => !s.endsWith(suffix)), lazySrcs.join(', ')).toBe(true);
+      expect(srcPaths.every((p) => !p.endsWith(suffix)), srcPaths.join(', ')).toBe(true);
+      expect(srcPaths.some((p) => p.endsWith('/hero.mp4'))).toBe(true);
     }
 
     await page.evaluate(async () => {
@@ -123,9 +133,12 @@ test.describe('responsive', () => {
     if (testInfo.project.name === 'mobile') {
       expect(native, unique.join(', ')).toEqual([]);
       expect(mobile.length, unique.join(', ')).toBeGreaterThan(10);
-      expect(unique.some((p) => p.endsWith('/hero.mp4'))).toBe(true);
+      expect(unique.some((p) => p.endsWith('/hero-1280.mp4'))).toBe(true);
+      expect(unique.some((p) => p.endsWith('/hero.mp4'))).toBe(false);
     } else {
-      expect(mobile, unique.join(', ')).toEqual([]);
+      const stray = mobile.filter((p) => !p.endsWith('/hero-1280.mp4'));
+      expect(stray, unique.join(', ')).toEqual([]);
+      expect(unique.some((p) => p.endsWith('/hero.mp4'))).toBe(true);
     }
   });
 

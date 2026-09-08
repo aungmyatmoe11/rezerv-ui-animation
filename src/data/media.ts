@@ -56,7 +56,7 @@ export function playedFrames(slug: ScrubSlug): { start: number; count: number } 
  *
  * These are the desktop/tablet files. The lite tier fetches a 1280-wide sibling
  * (`slug-1280.mp4`) whose aspect ratio matches, so the stacked mobile layout
- * keeps using this table. The hero has no sibling — see `hasMobileClip`.
+ * keeps using this table. Every clip including the hero has that sibling.
  *
  * Heights vary because five clips are cropped to clear a watermark band
  * (docs/ASSET_INVENTORY.md §1). Only the RATIO is consumed, by that stacked
@@ -107,18 +107,14 @@ export function clipAspect(slug: ClipSlug): string {
  * `immutable`, so re-encoding at a different width has to produce a different
  * name — see the cache contract in the README.
  *
- * The hero has no variant, deliberately. Its <video> is in the server-rendered
- * HTML with preload="auto" so the film starts arriving before hydration, which
- * is what lets the preloader gate on real buffering; any variant scheme either
- * delays that fetch until the tier resolves or wastes an aborted request. It is
- * 2.5MB of the old 26.5MB; the other 17 clips are lazy, so they carry the win.
+ * The hero has a 1280 sibling too. On the lite (phone) tier the preloader
+ * opens on the poster (`preload="none"`) and `Hero` plays `hero-1280.mp4`
+ * after the curtain — phones never pull the 4K file. Desktop/tablet still
+ * wait on the native clip buffering so the title card stays sharp.
  */
 export type ClipVariant = 'full' | 'mobile';
 
 export const MOBILE_CLIP_WIDTH = 1280;
-
-/** Every clip except the hero has a `slug-1280.mp4` sibling. */
-export const hasMobileClip = (slug: ClipSlug): boolean => slug !== 'hero';
 
 /**
  * Slug နှင့် ဖိုင်အမည် မတူသော clip များ။
@@ -138,13 +134,10 @@ const CLIP_FILES: Partial<Record<ClipSlug, string>> = {
 
 const clipFile = (slug: ClipSlug): string => CLIP_FILES[slug] ?? slug;
 
-/**
- * The hero has no mobile file. Asking for one must not invent a 404 path —
- * the preloader waits on this URL, and a miss would open the page on a poster.
- */
+/** Native file on `full`; `slug-1280.mp4` on `mobile`. Both exist for every clip. */
 export const videoSrc = (slug: ClipSlug, variant: ClipVariant = 'full') => {
   const file =
-    variant === 'mobile' && hasMobileClip(slug)
+    variant === 'mobile'
       ? `/video/${clipFile(slug)}-${MOBILE_CLIP_WIDTH}.mp4`
       : `/video/${clipFile(slug)}.mp4`;
   return `${file}?v=${MEDIA_REV}`;

@@ -36,8 +36,19 @@ export function UltraTransition() {
       const card = ref.current?.querySelector<HTMLElement>('[data-card]');
       if (!card) return;
 
+      const rest = () => {
+        card.style.removeProperty('opacity');
+        card.style.removeProperty('transform');
+        card.style.willChange = 'auto';
+      };
+
       // Reduced motion and mobile get the calm end state, never a ramp.
-      if (!policy.canPin) return;
+      // Clearing inline props matters when `canPin` flips mid-scroll: the last
+      // onUpdate values would otherwise stick at 0.3 opacity / 0.94 scale.
+      if (!policy.canPin) {
+        rest();
+        return;
+      }
 
       const tween = ScrollTrigger.create({
         trigger: card,
@@ -56,7 +67,7 @@ export function UltraTransition() {
       });
 
       return () => {
-        card.style.willChange = 'auto';
+        rest();
         tween.kill();
       };
     },

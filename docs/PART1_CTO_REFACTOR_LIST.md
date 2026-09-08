@@ -1,5 +1,18 @@
 # Rezerv Part 1 — CTO Refactor & Fix List
 
+> **Superseded 2026-09-08.** Snapshot from 2026-09-07. Do not grade the current tree against this
+> list. The submission README is `README.md`.
+>
+> Ignore these claims here; they no longer match the repo:
+> `NEXT_PUBLIC_SITE_URL` fallback `iphone18-concept.example.com`; README “Lighthouse not yet
+> captured”; preloader 2s / 400ms floor; `--bone-faint` `#55534f`; “keep the blend/quant gate”;
+> hero 4K film gating reduced-motion.
+>
+> The 2026-09-08 QA audit under `docs/qa-audits/` is a **pre-fix** record of eight findings.
+> Those remediations landed after the audit (README alignment, `role="img"` on `<video>`, sensor
+> contrast, versioned poster preload, reduced-motion poster handoff, favicon, UltraTransition
+> teardown, pin-on-fail).
+
 **Project:** `ClaudeCode-Rezerv/part-1` (Next.js + GSAP)  
 **Repo:** `aungmyatmoe11/ALL-INTERVIEW`  
 **Audit date:** 2026-09-07 (Asia/Saigon)  

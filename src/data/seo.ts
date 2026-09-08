@@ -9,6 +9,8 @@
  * named author, plus the site itself.
  */
 
+import { MEDIA_REV } from './media';
+
 const FALLBACK_URL = 'https://rezerv-ui-animation.vercel.app';
 
 /**
@@ -24,7 +26,7 @@ export const SITE = {
     'An unofficial concept reconstruction of the rumoured iPhone 18 Pro and iPhone Ultra, ' +
     'built from public reporting and graded by how confident each claim actually is.',
   author: 'Independent concept project',
-  ogImage: '/poster/hero.jpg',
+  ogImage: `/poster/hero.jpg?v=${MEDIA_REV}`,
   ogAlt:
     'Dark Cherry iPhone 18 Pro concept render resolving into an iPhone 18 Pro title card.',
   published: '2026-09-04',

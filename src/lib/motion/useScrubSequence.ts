@@ -31,6 +31,8 @@ export interface UseScrubSequenceResult {
   sectionRef: React.RefObject<HTMLElement | null>;
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
   mode: ScrubMode;
+  /** True when the sequence could not be used; pin is kept, overlay video plays. */
+  failed: boolean;
   /** 0..1, mirrors the painted position — for syncing captions to the film. */
   progressRef: React.RefObject<number>;
   /**
@@ -205,9 +207,10 @@ export function useScrubSequence({
   useGSAP(
     () => {
       const section = sectionRef.current;
-      // `failed` falls back to a looping video, and the stacked video layout is
-      // not a pinnable box — so that one case genuinely must not pin.
-      if (!section || !policy.canPin || failed) return;
+      // Pin on mount, including after a failed fetch. Switching to the stacked
+      // video box used to kill this trigger and drop 1,620–2,520px of spacer
+      // while the visitor was on the page. Overlay fallback keeps the same box.
+      if (!section || !policy.canPin) return;
 
       const distance = Math.round(pinVh * policy.pinScale * 100);
       let running = false;
@@ -288,7 +291,7 @@ export function useScrubSequence({
     },
     {
       scope: sectionRef,
-      dependencies: [policy.canPin, policy.pinScale, pinVh, smoothing, listeners, failed],
+      dependencies: [policy.canPin, policy.pinScale, pinVh, smoothing, listeners],
     },
   );
 
@@ -298,5 +301,5 @@ export function useScrubSequence({
       ? 'scrub'
       : 'pending';
 
-  return { sectionRef, canvasRef, mode, progressRef, subscribe };
+  return { sectionRef, canvasRef, mode, failed, progressRef, subscribe };
 }

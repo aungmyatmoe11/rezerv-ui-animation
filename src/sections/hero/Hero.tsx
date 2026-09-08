@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { gsap, useGSAP } from '@/lib/motion/gsap';
 import { usePreloadState } from '@/lib/motion/preloadStore';
 import { useMotionPolicy } from '@/lib/motion/motionPolicy';
@@ -38,8 +38,8 @@ const ALT =
  *
  * The clip resolves onto its own "iPhone 18 PRO" title card and simply stops
  * there. No swap to a separate still: the video's own last frame is that same
- * artwork at 1280px, so holding it is sharper than cross-fading to a smaller
- * image, and it costs no extra request.
+ * artwork (4K on desktop/tablet, 1280px on the phone), so holding it is
+ * sharper than cross-fading to a smaller image, and it costs no extra request.
  *
  * That title card IS the visible headline, which is why the <h1> below is
  * visually hidden: rendering the same words again in HTML on top of the film
@@ -50,9 +50,30 @@ export function Hero() {
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const { entranceUnlocked } = usePreloadState();
   const policy = useMotionPolicy();
+  const src = videoSrc(SLUG, policy.clipVariant);
+  // Desktop/tablet autoplay waits on the 4K file. Lite and reduced-motion
+  // open the curtain on the poster; lite then plays hero-1280 after unlock.
+  const waitForFilm = policy.canAutoplay && policy.clipVariant === 'full';
 
-  // The preloader's percentage is this film actually buffering.
-  useHeroPreload(videoRef, SLUG);
+  useHeroPreload(videoRef, SLUG, waitForFilm);
+
+  const appliedSrc = useRef<string | null>(null);
+  useLayoutEffect(() => {
+    const el = videoRef.current;
+    if (!el) return;
+
+    const want = new URL(src, window.location.origin).pathname;
+    const selected = el.currentSrc ? new URL(el.currentSrc).pathname : '';
+    const swapped = appliedSrc.current !== null && appliedSrc.current !== src;
+    appliedSrc.current = src;
+
+    // Phone keeps the SSR 1280 source with preload="none" until play().
+    // Desktop hydrates from that snapshot onto the 4K file — without load()
+    // resource selection keeps the 1280 child.
+    if (swapped || (policy.clipVariant === 'full' && selected !== want)) {
+      el.load();
+    }
+  }, [src, policy.clipVariant]);
 
   // ---- start the film exactly when the loader hands over ------------------
   useEffect(() => {
@@ -126,16 +147,18 @@ export function Hero() {
           poster={posterSrc(SLUG)}
           /* Declarative, never mutated in an effect: React re-applies its own
              attributes on every render, so an imperative preload change is
-             silently reverted. The hero is the LCP candidate and the thing the
-             preloader waits on, so it starts fetching immediately. */
-          preload="auto"
+             silently reverted. Desktop autoplay starts the 4K fetch immediately
+             because the preloader waits on it. Lite and reduced-motion must
+             not: the curtain then opens on the poster. Server snapshot is the
+             lite (autoplay) tier, so the attribute can differ after hydration. */
+          preload={waitForFilm ? 'auto' : 'none'}
           muted
           playsInline
           disablePictureInPicture
-          role="img"
           aria-label={ALT}
+          suppressHydrationWarning
         >
-          <source src={videoSrc(SLUG)} type="video/mp4" />
+          <source src={src} type="video/mp4" />
         </video>
 
         <div ref={overlayRef} className={styles.overlay}>
