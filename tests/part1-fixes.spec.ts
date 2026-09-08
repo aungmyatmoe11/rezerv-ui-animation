@@ -3,9 +3,9 @@ import { MEDIA_REV } from '../src/data/media';
 import { settle } from './helpers/metrics';
 
 /**
- * Locks the Part 1 FIX list (QA-A11Y-001..003, QA-PERF-001, QA-CORRECTNESS-001..003).
+ * Smoke checks for a11y, favicon, hero loader, and pin-on-failed-frames.
  */
-test.describe('part 1 audit fixes', () => {
+test.describe('audit fixes', () => {
   test('named videos do not use role=img', async ({ page }) => {
     await page.goto('/');
     await settle(page);
@@ -91,7 +91,7 @@ test.describe('part 1 audit fixes', () => {
   });
 });
 
-test.describe('part 1 reduced-motion loader', () => {
+test.describe('reduced-motion loader', () => {
   test.beforeEach(async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
   });
@@ -107,7 +107,7 @@ test.describe('part 1 reduced-motion loader', () => {
   });
 });
 
-test.describe('part 1 lite-tier hero', () => {
+test.describe('lite-tier hero', () => {
   test('opens on the poster and never fetches the 4K hero', async ({ page }, testInfo) => {
     test.skip(testInfo.project.name !== 'mobile', 'lite clipVariant is the phone width');
     const fourK: string[] = [];

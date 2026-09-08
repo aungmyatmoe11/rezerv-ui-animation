@@ -22,8 +22,8 @@ export default function TermsPage() {
         <section className={styles.section}>
           <h2 className={styles.subheading}>Overview</h2>
           <p className={styles.body}>
-            This is an <strong>unofficial concept project</strong> created for demonstration
-            purposes. By accessing this site, you acknowledge and agree to these terms.
+            This is an <strong>unofficial concept project</strong>. By accessing this site, you
+            acknowledge and agree to these terms.
           </p>
         </section>
 
@@ -62,12 +62,11 @@ export default function TermsPage() {
           <h2 className={styles.subheading}>Intellectual Property</h2>
           <p className={styles.body}>
             Original design, animation, and code work are the property of the project creator.
-            Device renders and product concepts shown are concept work created for this
-            demonstration.
+            Device renders and product concepts shown are original concept work for this recap.
           </p>
           <p className={styles.body}>
             Apple, iPhone, and related trademarks are the property of Apple Inc. Their use here is
-            for descriptive and demonstrative purposes only.
+            descriptive only — this is not an official product page.
           </p>
         </section>
 

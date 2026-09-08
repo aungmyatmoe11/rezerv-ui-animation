@@ -22,8 +22,8 @@ export default function PrivacyPage() {
         <section className={styles.section}>
           <h2 className={styles.subheading}>Overview</h2>
           <p className={styles.body}>
-            This is an <strong>unofficial concept project</strong> showcasing animation and design
-            work. It does not collect, store, or process any personal data.
+            This is an <strong>unofficial concept project</strong>. It does not collect, store, or
+            process any personal data.
           </p>
         </section>
 

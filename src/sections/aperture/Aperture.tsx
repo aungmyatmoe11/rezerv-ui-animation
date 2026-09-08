@@ -19,7 +19,7 @@ const ALT_IRIS = 'Concept macro of a nine-blade iris opening and closing over a 
  *
  * Both clips have grey backgrounds rather than the library's usual pure black,
  * so they are the one place on the Pro act where a hairline card is right:
- * the spec's own rule is cinematic to full bleed, evidence to contained card,
+ * cinematic clips go full bleed, evidence stays in a contained card,
  * and cover-cropping a grey clip against a black page would show its edges.
  *
  * The iris animation was NOT built — it already exists as `aperture.mp4`. The

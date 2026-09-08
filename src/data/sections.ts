@@ -10,7 +10,7 @@ export interface NavItem {
  * Only sections that actually exist on the page. Extended as each wave lands,
  * so the nav can never point at an anchor that is not there.
  *
- * Wave 2 adds the Pro act: the spec's nav order (§40) is Design, Camera,
+ * Wave 2 adds the Pro act: nav order is Design, Camera,
  * Performance, Battery, then Compare. Ultra, Evidence and Sources arrive with
  * waves 3 and 4.
  *

@@ -2,9 +2,7 @@ import type { MetadataRoute } from 'next';
 import { SITE } from '@/data/seo';
 
 /**
- * Sitemap includes the main concept page plus supporting professional pages
- * (privacy, cookies, terms). In-page anchors are not listed: they are not
- * separate documents, and a sitemap of fragments would be duplicated signal.
+ * Sitemap includes the main page plus privacy, cookies, and terms.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastMod = new Date(SITE.modified);

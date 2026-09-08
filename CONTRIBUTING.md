@@ -1,12 +1,13 @@
 # Contributing
 
-Thank you for your interest in contributing to this project! This is a demonstration/concept project created for a frontend assessment, but improvements and feedback are welcome.
+Thank you for your interest in contributing. This is an unofficial iPhone 18 Pro / iPhone Ultra
+concept recap — animation-heavy, research-based, not an Apple product.
 
 ## Getting Started
 
 ### Prerequisites
 
-- **Node.js** 18+ (20+ recommended)
+- **Node.js** 20+
 - **npm** 9+
 - **Git**
 
@@ -187,4 +188,4 @@ For questions or clarifications, open a [GitHub Discussion](https://github.com/a
 
 ---
 
-**Note:** This is an unofficial concept project demonstrating animation and design work. Not affiliated with Apple Inc.
+**Note:** Unofficial concept recap. Not affiliated with Apple Inc.

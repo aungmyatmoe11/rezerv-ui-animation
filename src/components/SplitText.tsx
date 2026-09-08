@@ -13,10 +13,9 @@ export interface SplitTextProps {
  * Splits a line into per-word spans so type can be animated with transform and
  * opacity only.
  *
- * The obvious alternative — animating letter-spacing, as the content spec
- * suggested — triggers layout on every frame of the hero entrance, which is
- * exactly the "layout thrash" the brief rules out. Each word gets a clipping
- * outer span and a transformed inner span instead.
+ * The obvious alternative — animating letter-spacing — triggers layout on every
+ * frame of the hero entrance. Each word gets a clipping outer span and a
+ * transformed inner span instead.
  */
 export function SplitText({ text, itemAttr = 'data-word', className, style }: SplitTextProps) {
   const words = text.split(' ');

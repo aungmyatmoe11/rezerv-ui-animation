@@ -28,7 +28,7 @@ When reporting a vulnerability, please include:
 
 ### Scope
 
-This project is a demonstration/concept site with:
+This project is a static concept site with:
 - No user accounts or authentication
 - No personal data collection
 - No payment processing

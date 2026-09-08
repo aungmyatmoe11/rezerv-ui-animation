@@ -1,8 +1,7 @@
 @use 'mixins' as *;
 
-// Type scale. Every size is fluid via clamp() so "resize adapts smoothly"
-// (an explicit assessment requirement) is satisfied by the type system itself
-// rather than by breakpoint-stepped font sizes.
+// Type scale. Every size is fluid via clamp() so shrinking the window scales
+// type continuously, not in breakpoint steps.
 
 @mixin t-hero {
   font-size: clamp(3.25rem, 8vw, 8rem);

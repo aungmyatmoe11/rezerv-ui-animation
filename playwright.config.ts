@@ -68,8 +68,8 @@ export default defineConfig({
    * runnable from a clean checkout. Add WebKit deliberately with
    * `npx playwright install webkit` if engine parity ever becomes the question.
    *
-   * The three widths are the assessment's three targets, and they land one on
-   * each side of both motion-tier breakpoints: 1024 (full) and 768 (tablet).
+   * The three widths land one on each side of both motion-tier breakpoints:
+   * 1024 (full) and 768 (tablet).
    */
   projects: [
     {

@@ -1,7 +1,7 @@
 @use 'tokens' as *;
 
 // ---- breakpoints ----------------------------------------------------------
-// Named after the assessment's three required targets.
+// Named for the three layout bands: phone, tablet, desktop.
 @mixin mobile-only   { @media (max-width: #{$bp-tablet - 1px}) { @content; } }
 @mixin tablet-up     { @media (min-width: $bp-tablet)  { @content; } }
 @mixin desktop-up    { @media (min-width: $bp-desktop) { @content; } }
@@ -64,7 +64,7 @@
   @include content-shell;
 }
 
-// Vertical rhythm per the spec doc's layout system (mobile 48-80, tablet
+// Vertical rhythm for the layout system (mobile 48-80, tablet
 // 72-120, desktop 120-220).
 @mixin section-rhythm($scale: 1) {
   padding-block: calc(56px * #{$scale});

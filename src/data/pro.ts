@@ -4,10 +4,10 @@ import type { CompareRow } from '@/components/CompareTable';
 /**
  * Copy and figures for the Pro act (sections 03–11).
  *
- * Kept out of the components so the wording can be reviewed against the
- * content spec in one place, and so every number on the page is a named
- * constant rather than a literal buried in JSX. Each claim carries the grade
- * the spec assigns it; nothing here is asserted harder than the reporting is.
+ * Kept out of the components so copy can be reviewed in one place, and so
+ * every number on the page is a named constant rather than a literal buried
+ * in JSX. Each claim carries a confidence grade; nothing here is asserted
+ * harder than the reporting is.
  */
 
 // ---- 03 Design --------------------------------------------------------------

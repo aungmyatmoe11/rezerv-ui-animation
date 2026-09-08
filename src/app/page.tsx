@@ -28,11 +28,11 @@ const ProVsUltra = dynamic(() => import('@/sections/compare-ultra/ProVsUltra').t
 const Ending = dynamic(() => import('@/sections/ending/Ending').then(m => ({ default: m.Ending })), { ssr: true });
 
 /**
- * The whole product is one page — no routing, per the brief.
+ * The whole product is one page.
  *
  * Three acts and a close, all built on the same primitives: ScrubStage for the
- * six scroll-scrubbed films, FeatureFilm/LazyVideo for every other clip, and
- * Section for the one reveal batch. See ../docs/SECTION_MAP.md.
+ * eight scroll-scrubbed films, FeatureFilm/LazyVideo for every other clip, and
+ * Section for the one reveal batch.
  *
  *   01–02  the opening: preloader, hero film, colours
  *   03–11  the Pro act

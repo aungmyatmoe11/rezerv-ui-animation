@@ -2,8 +2,7 @@ import type { MetadataRoute } from 'next';
 import { SITE } from '@/data/seo';
 
 /**
- * Everything here is public and indexable: it is one page with no private
- * routes and no user data.
+ * Everything here is public and indexable: one page, no gated routes, no user data.
  *
  * AI crawlers are deliberately NOT blocked. This is an original concept project
  * whose whole argument is that it labels its own uncertainty, and there is no

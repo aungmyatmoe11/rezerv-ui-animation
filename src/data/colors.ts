@@ -17,7 +17,7 @@ export interface Finish {
 
 /**
  * Colour values are SAMPLED from the actual device renders (see
- * docs/ASSET_INVENTORY.md §1.2). The original content spec guessed these, and
+ * docs/ASSET_INVENTORY.md §1.2). An earlier colour list guessed these, and
  * was materially wrong — it listed Sky Blue as #B6CEE3, a pale tint, where the
  * render is a mid blue at #6785B6.
  *

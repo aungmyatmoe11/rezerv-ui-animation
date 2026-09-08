@@ -84,9 +84,7 @@ function fillFrameHoles(
  * Loads a JPEG frame sequence and reports real progress.
  *
  * This is what the preloader's percentage actually counts — it is not a
- * decorative timer. Slow networks therefore genuinely hold the loading screen,
- * which is the assessment's "slow asset loading should be covered by the
- * loading state" edge case.
+ * decorative timer. Slow networks therefore genuinely hold the loading screen.
  *
  * A single 404 no longer rejects the whole set: missing slots are filled from
  * the nearest loaded neighbour so the canvas can still paint. Only a total miss

@@ -15,9 +15,9 @@ import styles from './ProVsUltra.module.scss';
  * repeated, corroborated reporting, and the Ultra column is not. Ending on the
  * spec sheet instead would imply the two are equally knowable.
  *
- * The trade-off cards above it exist because the spec is explicit that the
- * foldable's compromises must not be buried: two cameras rather than three, no
- * Face ID, and flagship silicon in a chassis that cannot really cool it.
+ * The trade-off cards above it exist because the foldable's compromises must
+ * not be buried: two cameras rather than three, no Face ID, and flagship
+ * silicon in a chassis that cannot really cool it.
  */
 export function ProVsUltra() {
   return (

@@ -156,34 +156,6 @@ the evidence map). `lib/motion/scrollTo.ts` re-measures every frame.
 
 ---
 
-## What this does not take from the assessment brief
-
-The take-home is an animation challenge on a reference NFT landing page (any three of its slides,
-GSAP, optional Lenis, SCSS, load / scroll / hover / resize). This repo keeps the craft and drops
-the theme.
-
-**Not used**
-
-- The reference site’s **NFT artwork and branding**. The brief allows an asset swap; this page is
-  an iPhone recap built from independent concept film, leaked stills, and reporting — not a
-  marketplace demo.
-- **Stopping at three slides.** The three archetypes (loader, hero, collection/scrub) are here;
-  the rest of the recap reuses those same primitives through Pro, Ultra, and sources.
-- **Lenis** (listed as optional).
-- **Framer Motion, Three.js, WebGL**, and extra animation utility packs.
-- **`<video>.currentTime` scrubbing** as the scroll engine.
-- **`letter-spacing` headline motion** from the content spec (layout thrash).
-- **Native smooth scrolling** for nav jumps (wrong with pins).
-- A **shop, cart, checkout, or auth** flow. This is editorial, not commerce. No Product schema,
-  ratings, or offers — structured data that described an unannounced phone as a product would be
-  invented.
-
-**Kept from that craft list, without turning the README into a rubric:** one page, GSAP +
-ScrollTrigger, SCSS tokens, transform/opacity motion, lazy media, desktop / tablet / mobile
-behaviour change, and `prefers-reduced-motion`.
-
----
-
 ## Design
 
 Vertical cinema with an editorial overlay: rumour as product. Every claim has a confidence grade;
@@ -267,7 +239,9 @@ desktop scroll **36.67 MB**; repeat visit **0** revalidations (was 742 when `pub
 
 Desktop is `--preset=desktop`. Mobile 94 is `--form-factor=mobile` with `throttling-method=provided` (no extra Slow 4G). Accessibility, Best Practices and SEO are **100** on both.
 
-Lighthouse’s default **mobile Slow 4G + 4× CPU** preset is a lab stress test, not a visitor score: **68** Perf after the lite poster-gate (was 52 on the previous live build). LCP there is still the designed 2.4s curtain plus CPU throttle. Do not submit 68 as the live number — cite **99 / 100 / 100 / 100** desktop and **94** mobile above.
+Lighthouse’s default **mobile Slow 4G + 4× CPU** preset is a lab stress test, not a visitor
+score: **68** Perf here because of the designed 2.4s curtain plus CPU throttle. The live numbers
+to quote are **99 / 100 / 100 / 100** desktop and **94** mobile above.
 
 After a new Vercel deploy, re-run:
 
