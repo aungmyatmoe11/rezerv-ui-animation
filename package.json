@@ -2,7 +2,10 @@
   "name": "iphone-18-pro-ultra-concept",
   "version": "1.0.0",
   "private": true,
-  "description": "Rezerv Frontend Assessment \u2014 Part 1. Animation-heavy single page: an unofficial iPhone 18 Pro / iPhone Ultra concept reconstruction.",
+  "description": "Unofficial iPhone 18 Pro / iPhone Ultra concept recap — animation-heavy single page.",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
