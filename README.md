@@ -256,21 +256,35 @@ Pipeline delivery (production build, 5 Mbps / 40 ms): first load before open **4
 desktop scroll **36.67 MB**; repeat visit **0** revalidations (was 742 when `public/` was
 `max-age=0`).
 
-**Lighthouse.** Quote scores only from
-[https://rezerv-ui-animation.vercel.app](https://rezerv-ui-animation.vercel.app) — that is the
-submission host. Older JSON under `docs/live-lighthouse/` was captured on a different Vercel
-project and is not this origin. Throttled localhost traces in `docs/lighthouse-*.report.*` are a
-Slow 4G + 4× CPU stress test, not a visitor score.
+**Lighthouse** — captured **2026-09-08** against
+[https://rezerv-ui-animation.vercel.app](https://rezerv-ui-animation.vercel.app)
+(Lighthouse 13.4.1). Reports: `docs/live-lighthouse/`.
 
-On the phone, LCP is the hero. Lite now opens on the poster and plays `hero-1280.mp4` after the
-curtain; the designed 2.4s / 1.1s loader floors still sit in that metric. TBT on a 4× CPU is GSAP
-plus the Pro act on first paint.
+| Run | Perf | A11y | BP | SEO | LCP | TBT | CLS |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| **Live desktop** | **99** | **100** | **100** | **100** | 0.9s | 0ms | 0 |
+| **Live mobile** (this machine’s network, mobile viewport) | **94** | **100** | **100** | **100** | 2.4s | 30ms | 0 |
+
+Desktop is `--preset=desktop`. Mobile 94 is `--form-factor=mobile` with `throttling-method=provided` (no extra Slow 4G). Accessibility, Best Practices and SEO are **100** on both.
+
+Lighthouse’s default **mobile Slow 4G + 4× CPU** preset is a lab stress test, not a visitor score: **68** Perf after the lite poster-gate (was 52 on the previous live build). LCP there is still the designed 2.4s curtain plus CPU throttle. Do not submit 68 as the live number — cite **99 / 100 / 100 / 100** desktop and **94** mobile above.
+
+After a new Vercel deploy, re-run:
+
+```bash
+npx lighthouse https://rezerv-ui-animation.vercel.app/ --preset=desktop --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=docs/live-lighthouse/desktop
+npx lighthouse https://rezerv-ui-animation.vercel.app/ --form-factor=mobile --throttling-method=provided --screenEmulation.mobile --only-categories=performance,accessibility,best-practices,seo --output=json --output-path=docs/live-lighthouse/mobile-provided
+```
 
 ---
 
 ## Deployment
 
 **Production:** [https://rezerv-ui-animation.vercel.app](https://rezerv-ui-animation.vercel.app)
+
+Vercel builds from `main` on GitHub. GitHub Actions (`.github/workflows/ci.yml`) runs on push:
+Node **20**, `next build` into `.next-prod`, Playwright Chromium, then `npm test`. Playwright
+starts `next start` from `.next-prod` — a default `.next` build will not boot the test server.
 
 ```bash
 NEXT_PUBLIC_SITE_URL=https://rezerv-ui-animation.vercel.app npm run build
@@ -344,8 +358,6 @@ All moving images are original concept renders, not third-party commercial foota
   gradients. Drop-in re-exports would fix that.
 - ~20 sections still risk scroll fatigue. Some film overlays go dark-on-dark. Ending is denser
   than the Ultra act.
-- Named videos no longer use `role="img"` in this tree; **redeploy** before the live origin
-  matches. Quote Lighthouse only from https://rezerv-ui-animation.vercel.app after that deploy.
 
 ---
 
