@@ -27,6 +27,41 @@ tagline *Surprise and shine.*) so the recap and the livestream sit on the same s
 
 ---
 
+## Reference and scope
+
+A reinterpretation of the motion at **[nft.fluffyhugs.io](https://nft.fluffyhugs.io)** — its
+transitions, not its artwork. The subject was swapped for an iPhone concept; the animation
+problems are the same ones.
+
+The reference is a **seven-slide WebGL deck**: three.js scenes stacked at a single origin,
+cross-faded as a hijacked wheel drives an index, behind a preloader that fades out. Its document
+never scrolls — `scrollHeight` equals the viewport.
+
+Three of those slides are the ones this page had to answer:
+
+| Reference slide | Here |
+|---|---|
+| Loading screen | The preload curtain — real `buffered` progress, not a timer |
+| Hero | **01 Hero** — one-shot film holding on its baked title card |
+| Content / collection | **02 Colours** — pinned scroll-scrub with a live finish picker |
+
+The other seventeen sections extend those same four techniques rather than introducing new ones;
+the techniques are the point, not the count.
+
+**One deliberate divergence: native scroll, not a hijacked deck.** Cross-fading stacked WebGL
+scenes reads well on a desktop trackpad and badly everywhere else — hijacking the wheel breaks the
+scrollbar, find-in-page and keyboard paging, and has no honest answer for
+`prefers-reduced-motion`. This page keeps the browser's own scroll and buys the same continuity
+with pinned scrubs, which degrade to looping video on a phone and to nothing under reduced motion.
+Frame sequences on a 2D canvas were chosen over WebGL for the same reason: the content is
+photographic, so a texture pipeline would spend bytes and battery rendering stills a canvas
+already paints in 6.9 ms.
+
+`/` is the page. `/privacy`, `/cookies` and `/terms` exist only because the site is publicly
+deployed and embeds a third-party stream; they carry no motion and are not part of the work.
+
+---
+
 ## Setup
 
 ```bash
@@ -153,6 +188,17 @@ The preloader percentage is the hero’s own `buffered` ranges on desktop/tablet
 the phone and under `prefers-reduced-motion` it finishes from the poster. Two escape hatches: 8s
 cap, and the handoff is a React state change rather than a GSAP callback (rAF dies in a
 backgrounded tab).
+
+### Hover and pointer states
+
+Every interactive surface answers the pointer: nav capsules, the back-to-top ring, colour and
+finish swatches, comparison-table rows, confidence bars, and the design callout cards. Movement is
+`transform` only — a 2–4 px lift — with colour and border carrying the rest.
+
+All of it sits behind `@include hover-motion`, which is
+`@media (hover: hover) and (pointer: fine)`. A touch device never inherits a hover transform it
+cannot leave, so a tapped card does not stay lifted. `:active` compresses to `scale(0.97)` so a
+press reads on touch as well.
 
 ### Motion by viewport
 
@@ -372,6 +418,34 @@ All moving images are original concept renders, not third-party commercial foota
   footer.
 - Figures baked into three clips (`Up to 15% Faster`, `48MP`, `4,288mah`) are labelled, not
   hidden. The film may show a number the copy refuses to assert.
+
+---
+
+## Assumptions
+
+Where the direction was open, these were the calls — each one is reversible, and each is the
+reason something in this repo looks the way it does.
+
+- **The reference's subject is not part of the brief; its motion is.** So the NFT collection
+  became an iPhone concept. Animal illustrations do not scrub — a rotating device does, and it
+  gives the frame sequences something to actually say.
+- **Motion fidelity means the same vocabulary, not the same mechanism.** Preloader, entrance
+  reveal, scroll-driven scrub, pin, hover, resize — matched. Scroll hijacking and WebGL —
+  deliberately not, for the reasons in *Reference and scope*.
+- **Three sections is a floor, not a ceiling.** The three required moments are the curtain, the
+  hero and a content section; the rest exist because a motion system is only proven when the same
+  four techniques carry twenty sections without a fifth primitive appearing.
+- **A visitor's network is not the studio's.** Media is treated as the expensive part: phones get
+  1280 px encodes and zero frame bytes, everything lazy waits for its section, and the curtain
+  reports real buffering rather than counting to 100.
+- **Rumour has to be labelled as rumour.** Every claim carries a confidence grade and the page
+  says *unofficial* in frame, not only in the footer — a concept page that reads as an
+  announcement is a product problem, not a legal footnote.
+- **Reduced motion means no motion, not less.** Under `prefers-reduced-motion` there is no scrub,
+  no pin and no autoplay; the page becomes a document. Degrading to "gentler animation" would
+  still move for a visitor who asked it not to.
+- The audience is on modern evergreen browsers, so `ResizeObserver`, `position: sticky` and
+  `IntersectionObserver` are assumed available.
 
 ---
 
