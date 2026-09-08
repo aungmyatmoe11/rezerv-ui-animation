@@ -36,14 +36,13 @@ npm run dev
 
 ```bash
 npm run check   # typecheck, lint, production build
+npm test        # Playwright, 138 tests on three viewports
 ```
 
-Media in `public/` **is committed** — clone and run. To regenerate from the read-only source
-library (ffmpeg on PATH):
-
-```bash
-npm run assets
-```
+Media in `public/` **is committed** — clone and run; nothing is fetched at build time. The films
+and frame sequences are derived from a read-only source library that is not part of this repo, so
+they cannot be rebuilt from a clone. The one step that does ship is `tools/encode-lite-videos.sh`,
+which produces the 1280 px mobile encodes from that library (needs `ffmpeg` on PATH).
 
 ---
 
@@ -78,6 +77,41 @@ a 2.4s count-chase plus a 1.1s brand beat (1.2s / 0.7s on repeat). It caps at 8s
 | 20 | **Ending and sources** | Timeline, citations, Apple Event embed |
 
 Supporting routes: `/privacy`, `/cookies`, `/terms`, custom 404.
+
+---
+
+## How the code is organised
+
+One route, twenty sections, and a motion layer that none of the sections own.
+
+```
+src/lib/motion/   the engine — everything scroll- or frame-related lives here
+src/components/   reusable shells: ScrubStage, LazyVideo, FeatureFilm, SplitText, Preloader
+src/sections/     one folder per section (20), each a component plus its SCSS module
+src/data/         content and configuration: copy, media manifest, confidence grades, finishes
+src/styles/       tokens, mixins, type scale
+src/app/          the route, metadata, robots, sitemap, legal pages
+```
+
+**Start in `src/lib/motion`.** Ten files, and every decision in the next section is implemented in
+one of them.
+
+| File | What it owns |
+|---|---|
+| `motionPolicy.ts` | The viewport tiers — which behaviours are on at which width, and under reduced motion. Sections ask this instead of reading a media query themselves |
+| `scrollState.ts` | **One** scroll subscription for the whole page; sections read from it rather than adding listeners |
+| `useScrubSequence.ts` | The scrub loop: scroll position → frame index → paint, and the pin around it |
+| `frameLoader.ts` · `frameRenderer.ts` | Fetching a JPEG set, and painting one frame with the repaint gating described below |
+| `useHeroPreload.ts` · `preloadStore.ts` | Real hero buffering progress, published to the preloader UI |
+| `useSectionReveal.ts` | The one reveal pattern every section uses (`ScrollTrigger.batch`) |
+| `scrollTo.ts` | In-page jumps that re-measure every frame, because pins change document height mid-flight |
+| `gsap.ts` | The single place GSAP and ScrollTrigger are registered |
+
+**A section is a recipe, not a bespoke build.** Each of the twenty is one of four shapes —
+full-bleed film + overlay, pinned scrub + callouts, interactive lab + copy, or DOM editorial — and
+reaches for the same shells. `src/sections/camera-sensor/` is representative: a component, its
+SCSS module, and a callouts file. No section registers its own ScrollTrigger or reads the viewport
+directly; that is what keeps twenty sections from becoming twenty motion implementations.
 
 ---
 
@@ -237,11 +271,8 @@ desktop scroll **36.67 MB**; repeat visit **0** revalidations (was 742 when `pub
 | **Live desktop** | **99** | **100** | **100** | **100** | 0.9s | 0ms | 0 |
 | **Live mobile** (this machine’s network, mobile viewport) | **94** | **100** | **100** | **100** | 2.4s | 30ms | 0 |
 
-Desktop is `--preset=desktop`. Mobile 94 is `--form-factor=mobile` with `throttling-method=provided` (no extra Slow 4G). Accessibility, Best Practices and SEO are **100** on both.
-
-Lighthouse’s default **mobile Slow 4G + 4× CPU** preset is a lab stress test, not a visitor
-score: **68** Perf here because of the designed 2.4s curtain plus CPU throttle. The live numbers
-to quote are **99 / 100 / 100 / 100** desktop and **94** mobile above.
+Desktop is `--preset=desktop`; mobile is `--form-factor=mobile` with
+`throttling-method=provided`. Accessibility, Best Practices and SEO are **100** on both.
 
 After a new Vercel deploy, re-run:
 
@@ -306,6 +337,31 @@ After deploy:
 
 ---
 
+## Testing
+
+138 Playwright tests in 7 spec files, run on three viewports — desktop 1440×900, tablet 834×1112,
+mobile 390×844 — all Chromium, against a production build (`.next-prod`).
+
+They assert what a visitor would notice, not implementation detail:
+
+| Spec | What it holds down |
+|---|---|
+| `scroll` | Document height never changes while scrolling; frame pacing holds through the pins; a long nav jump lands on target instead of travelling through the page; reload starts at the top, hash or no hash |
+| `responsive` | Phones fetch the 1280 encodes and wider viewports do not; nothing scrolls sideways; the video tier never invites a visitor to scroll-scrub; `will-change` is promoted only while a stage is pinned |
+| `nav` | Items in scroll order, never more than one highlighted, keyboard operable, and the address bar never gains a hash |
+| `sections` | The thickness band feathers and opens; fold captions never share a cell; Ultra finishes keep their treatment and their picker |
+| `aperture` | The photograph stops down at f/4; switching scenes leaves exactly one plate visible |
+| `part1-fixes` | Regression pins: no `role="img"` on named videos, poster preload shares `MEDIA_REV`, callout contrast ≥ 4.5:1, a missing frame set keeps its pin spacer, reduced motion opens on the poster |
+
+`npm test` runs all three projects. CI runs `test:ci` — the regression spec on desktop only — so
+the gate finishes in minutes; the full matrix is a local step before a release.
+
+**Not covered:** other engines (three viewports on one engine was the better trade for a page
+whose risks are layout and scroll, not DOM APIs), and no visual-regression snapshots — the films
+change more often than the layout, so snapshots would mostly encode churn.
+
+---
+
 ## Asset provenance
 
 All moving images are original concept renders, not third-party commercial footage.
@@ -336,8 +392,9 @@ All moving images are original concept renders, not third-party commercial foota
 
 ---
 
-## Also in the repo
+## License
 
-MIT license, `CONTRIBUTING.md`, `SECURITY.md`, GitHub Actions (`typecheck`, `lint`, `build`,
-`test:ci` smoke on desktop). Playwright against a production build, TypeScript strict, ESLint.
-No analytics, no tracking cookies, no fake consent banner.
+[MIT](LICENSE) © Aung Myat Moe. The concept renders are original work; see *Asset provenance*.
+
+`CONTRIBUTING.md` and `SECURITY.md` are in the repo. No analytics, no tracking cookies, and no
+consent banner that does nothing.
