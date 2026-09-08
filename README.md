@@ -482,6 +482,28 @@ reason something in this repo looks the way it does.
 - ~20 sections still risk scroll fatigue. Some film overlays go dark-on-dark. Ending is denser
   than the Ultra act.
 
+### The media is the ceiling, not the pipeline
+
+Everything above about the delivery layer — the tiers, the caching, the scrub cost, the frame
+gating — is finished work and would not change. What limits how good this page *looks* is the
+source material it was built from: a fixed, read-only library of concept renders, cut and graded
+by someone else for another purpose, with no option to reshoot a take. Working within that is why
+some of the limitations above exist at all.
+
+With footage produced for this page, the same pipeline would return:
+
+| Given | The pipeline would deliver |
+|---|---|
+| Higher-bitrate masters of the two 0.6 Mbps clips | The macroblocking on dark gradients disappears — a re-encode, no code |
+| Longer, steadier takes of the rotations | Denser frame sequences (the current sets are 48–120 frames), so the scrub reads continuous instead of stepped at slow scroll speeds |
+| Clean plates without baked-in figures or watermarks | No cropping around watermarks, and no numbers on screen that the copy then has to decline to assert |
+| A purpose-shot hero in portrait | A cover-cropped 3:4 hero on phones instead of a letterboxed `contain`, because the title card would be composed for it |
+| One 1200×630 render | A correct Open Graph card rather than a 1920×1080 poster standing in |
+
+None of that is blocked on engineering, and none of it is a rewrite — each row is an asset swap
+into paths the build already reads. Given a proper shoot and the time to grade and cut it, the
+visual ceiling of this page is considerably higher than what is deployed.
+
 ---
 
 ## License
