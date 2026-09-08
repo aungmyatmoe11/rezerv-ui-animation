@@ -57,6 +57,24 @@ Frame sequences on a 2D canvas were chosen over WebGL for the same reason: the c
 photographic, so a texture pipeline would spend bytes and battery rendering stills a canvas
 already paints in 6.9 ms.
 
+### Design influences
+
+The reference above set the brief. These set the taste, and each was studied for one thing rather
+than borrowed wholesale.
+
+| Studied | What was taken from it | Where it shows here |
+|---|---|---|
+| [Apple iPhone 17 Pro](https://www.apple.com/iphone-17-pro/) | Information architecture for a hardware story: hero → design → finishes → camera → performance → battery → comparison → technical detail | The section order, and the decision to end on comparison and sources rather than a call to action |
+| [Apple Vision Pro](https://www.apple.com/apple-vision-pro/) | Keeping one product visually dominant while the copy around it changes | The pinned scrubs: the plate holds, the callouts arrive and leave |
+| [Apple AirPods Pro](https://www.apple.com/airpods-pro/) | Short headline plus one close-up doing the explaining | Section heads are one line; the film carries the argument |
+| [Apple MacBook Pro](https://www.apple.com/macbook-pro/) | Performance presented as a claim with a number attached, not a spec table | The A20 section and *Pro vs Pro Max* |
+| [F1 Keyboard](https://keyboard.framer.media/) | A product page paced as a film — chapters instead of a scroll of blocks | The three-act structure and the Ultra transition between them |
+| [GSAP ScrollTrigger](https://gsap.com/docs/v3/Plugins/ScrollTrigger/) · [image-sequence scrub](https://gsap.com/docs/v3/HelperFunctions/helpers/imageSequenceScrub/) | The documented pin-and-scrub model, and the canvas frame-sequence pattern | `useScrubSequence` — hand-written rather than the helper, because overlays had to scrub off the *painted* frame and the loader had to survive a partial set |
+
+Apple's product pages were read for structure and pacing only. No markup, asset, stylesheet or
+copy is reproduced from them, this page is not affiliated with Apple, and the device renders are
+original concept work — see *Asset provenance*.
+
 `/` is the page. `/privacy`, `/cookies` and `/terms` exist only because the site is publicly
 deployed and embeds a third-party stream; they carry no motion and are not part of the work.
 
