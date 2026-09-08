@@ -258,7 +258,7 @@ desktop scroll **36.67 MB**; repeat visit **0** revalidations (was 742 when `pub
 
 **Lighthouse** — captured **2026-09-08** against
 [https://rezerv-ui-animation.vercel.app](https://rezerv-ui-animation.vercel.app)
-(Lighthouse 13.4.1). Reports: `docs/live-lighthouse/`.
+(Lighthouse 13.4.1). Raw JSON/HTML dumps stay **local** under `docs/` (not on GitHub).
 
 | Run | Perf | A11y | BP | SEO | LCP | TBT | CLS |
 |---|---:|---:|---:|---:|---:|---:|---:|
