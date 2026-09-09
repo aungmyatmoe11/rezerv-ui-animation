@@ -30,19 +30,26 @@ export function SiteFooter() {
             </a>
           </li>
         </ul>
+        {/* `prefetch={false}` on all three: the default prefetch fires as soon
+            as the footer scrolls into view and pulls each legal route's CSS
+            chunk with `rel="preload"`. Nobody reaches the bottom of a 40,000px
+            page to read the cookie notice, so those three requests went unused
+            and the console said so — one "preloaded but not used within a few
+            seconds" per link, every load. The pages are a few KB; they can be
+            fetched when someone actually clicks. */}
         <ul className={styles.legalLinks}>
           <li>
-            <Link href="/privacy" className={styles.legalLink}>
+            <Link href="/privacy" className={styles.legalLink} prefetch={false}>
               Privacy Policy
             </Link>
           </li>
           <li>
-            <Link href="/cookies" className={styles.legalLink}>
+            <Link href="/cookies" className={styles.legalLink} prefetch={false}>
               Cookie Notice
             </Link>
           </li>
           <li>
-            <Link href="/terms" className={styles.legalLink}>
+            <Link href="/terms" className={styles.legalLink} prefetch={false}>
               Terms of Use
             </Link>
           </li>

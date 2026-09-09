@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { gsap, useGSAP } from '@/lib/motion/gsap';
-import { preloadStore, usePreloadState } from '@/lib/motion/preloadStore';
-import { useMotionPolicy } from '@/lib/motion/motionPolicy';
+import { preloadStore, usePreloadState, type PreloadPhase } from '@/lib/motion/preloadStore';
+import { useMotionPolicy, type MotionTier } from '@/lib/motion/motionPolicy';
 import styles from './Preloader.module.scss';
 
 /**
@@ -34,35 +34,50 @@ function visitPace(): 'first' | 'repeat' {
   return repeat ? 'repeat' : 'first';
 }
 
-export function Preloader() {
-  const { phase, loaded, total } = usePreloadState();
-  const policy = useMotionPolicy();
+/**
+ * The curtain, split from the state that outlives it.
+ *
+ * This used to be one component that rendered its own markup and then returned
+ * `null` once the exit finished. Setting that flag re-rendered the *same*
+ * component with its elements gone, and because `dismissed` sat in the `useGSAP`
+ * dependency arrays, the hooks re-ran a beat later against a `scope` ref that
+ * was now null. That is the console full of `Invalid scope` and `GSAP target
+ * .Preloader_brandWord not found` on every load: a selector string in a context
+ * with no scope resolves against the whole document, matches nothing, and says
+ * so once per target.
+ *
+ * The animated tree is its own component now. Dismissing unmounts it, so GSAP's
+ * own cleanup reverts the contexts and nothing re-runs behind it.
+ */
+function Curtain({
+  phase,
+  pct,
+  settled,
+  pace,
+  tier,
+  onDismiss,
+}: {
+  phase: PreloadPhase;
+  pct: number;
+  settled: boolean;
+  pace: 'first' | 'repeat';
+  tier: MotionTier;
+  onDismiss: () => void;
+}) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const countRef = useRef<HTMLSpanElement | null>(null);
   const meterRef = useRef<HTMLSpanElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const displayed = useRef(0);
-  const [pace] = useState(visitPace);
-  const [dismissed, setDismissed] = useState(false);
   const [brandReady, setBrandReady] = useState(false);
   const [barComplete, setBarComplete] = useState(false);
 
-  const pct = total > 0 ? Math.round((loaded / total) * 100) : 0;
-  // 'failed' still opens the page — the video fallback carries the section.
-  const settled = phase === 'ready' || phase === 'failed';
   const canExit = settled && brandReady && barComplete;
 
   useEffect(() => {
     const brandMs = pace === 'repeat' ? BRAND_REPEAT_MS : BRAND_FIRST_MS;
     const brand = window.setTimeout(() => setBrandReady(true), brandMs);
-    const max = window.setTimeout(() => {
-      preloadStore.unlockEntrance();
-      setDismissed(true);
-    }, MAX_VISIBLE_MS);
-    return () => {
-      window.clearTimeout(brand);
-      window.clearTimeout(max);
-    };
+    return () => window.clearTimeout(brand);
   }, [pace]);
 
   // Hand off as soon as the assets are ready, independent of the exit animation.
@@ -74,14 +89,6 @@ export function Preloader() {
   useEffect(() => {
     if (canExit) preloadStore.unlockEntrance();
   }, [canExit]);
-
-  // Scroll stays locked until the entrance timeline owns frame 0.
-  useEffect(() => {
-    document.body.dataset.scrollLocked = dismissed ? 'false' : 'true';
-    return () => {
-      document.body.dataset.scrollLocked = 'false';
-    };
-  }, [dismissed]);
 
   // ---- displayed progress: chase, never snap --------------------------------
   useGSAP(
@@ -102,7 +109,7 @@ export function Preloader() {
         trackEl?.setAttribute('aria-valuenow', String(rounded));
       };
 
-      if (policy.tier === 'static') {
+      if (tier === 'static') {
         write(target);
         if (settled) setBarComplete(true);
         return;
@@ -131,13 +138,13 @@ export function Preloader() {
 
       return () => tween.kill();
     },
-    { scope: rootRef, dependencies: [pct, settled, policy.tier, pace] },
+    { scope: rootRef, dependencies: [pct, settled, tier, pace] },
   );
 
   // ---- entrance: the loader is itself a designed moment -------------------
   useGSAP(
     () => {
-      if (policy.tier === 'static') return;
+      if (tier === 'static') return;
       gsap
         .timeline({ defaults: { ease: 'power3.out' } })
         .fromTo(
@@ -152,23 +159,23 @@ export function Preloader() {
           '-=0.5',
         );
     },
-    { scope: rootRef, dependencies: [policy.tier] },
+    { scope: rootRef, dependencies: [tier] },
   );
 
   // ---- exit ----------------------------------------------------------------
   useGSAP(
     () => {
-      if (!canExit || dismissed) return;
+      if (!canExit) return;
       const root = rootRef.current;
       if (!root) return;
 
-      if (policy.tier === 'static') {
-        setDismissed(true);
+      if (tier === 'static') {
+        onDismiss();
         return;
       }
 
       gsap
-        .timeline({ delay: 0.14, onComplete: () => setDismissed(true) })
+        .timeline({ delay: 0.14, onComplete: onDismiss })
         .to(`.${styles.meter}`, { scaleX: 1, duration: 0.34, ease: 'power2.inOut' })
         .to(
           [`.${styles.readout}`, `.${styles.eyebrow}`],
@@ -181,10 +188,8 @@ export function Preloader() {
         // from the bottom edge instead of ghosting through a fade.
         .to(root, { yPercent: -100, duration: 0.72, ease: 'power3.inOut' }, '-=0.15');
     },
-    { scope: rootRef, dependencies: [canExit, dismissed, policy.tier] },
+    { scope: rootRef, dependencies: [canExit, tier] },
   );
-
-  if (dismissed) return null;
 
   return (
     <div ref={rootRef} className={styles.root} data-phase={phase}>
@@ -219,5 +224,49 @@ export function Preloader() {
         </p>
       </div>
     </div>
+  );
+}
+
+export function Preloader() {
+  const { phase, loaded, total } = usePreloadState();
+  const policy = useMotionPolicy();
+  const [pace] = useState(visitPace);
+  const [dismissed, setDismissed] = useState(false);
+
+  const pct = total > 0 ? Math.round((loaded / total) * 100) : 0;
+  // 'failed' still opens the page — the video fallback carries the section.
+  const settled = phase === 'ready' || phase === 'failed';
+
+  const dismiss = useCallback(() => setDismissed(true), []);
+
+  // The ceiling lives out here with the flag it sets, so it keeps counting even
+  // if the curtain's own timeline never gets a frame.
+  useEffect(() => {
+    const max = window.setTimeout(() => {
+      preloadStore.unlockEntrance();
+      setDismissed(true);
+    }, MAX_VISIBLE_MS);
+    return () => window.clearTimeout(max);
+  }, []);
+
+  // Scroll stays locked until the entrance timeline owns frame 0.
+  useEffect(() => {
+    document.body.dataset.scrollLocked = dismissed ? 'false' : 'true';
+    return () => {
+      document.body.dataset.scrollLocked = 'false';
+    };
+  }, [dismissed]);
+
+  if (dismissed) return null;
+
+  return (
+    <Curtain
+      phase={phase}
+      pct={pct}
+      settled={settled}
+      pace={pace}
+      tier={policy.tier}
+      onDismiss={dismiss}
+    />
   );
 }

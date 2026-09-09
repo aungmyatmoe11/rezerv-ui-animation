@@ -205,16 +205,19 @@ test.describe('responsive', () => {
     expect(overlapX, 'wordmark and sections capsule overlap horizontally').toBeLessThanOrEqual(0);
     expect(overlapY > 0, 'capsules should share a row').toBe(true);
     expect(b!.x + b!.width).toBeLessThanOrEqual(page.viewportSize()!.width + 1);
-    expect(b!.height, 'overflow menu must not inflate the capsule').toBeLessThan(72);
+    expect(b!.height, 'the sections capsule must stay one row tall').toBeLessThan(72);
 
-    await page.getByRole('button', { name: 'More sections' }).click();
-    const menu = page.locator('#nav-overflow');
-    await expect(menu).toBeVisible();
-    await expect(menu.getByRole('link', { name: 'Sources', exact: true })).toBeVisible();
+    // The last section is reachable by scrolling the capsule sideways — no
+    // popover, and the capsule itself does not grow to reach it.
+    const sources = navLink(page, 'Sources');
+    await sources.scrollIntoViewIfNeeded();
+    await expect(sources).toBeVisible();
+    const after = await links.boundingBox();
+    expect(after!.width).toBeCloseTo(b!.width, 0);
   });
 
   test('the sections capsule hugs its items instead of filling the row', async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name === 'mobile', 'compact items already fill the phone row');
+    test.skip(testInfo.project.name !== 'desktop', 'below 1024 the capsule is the scroll track');
     await page.goto('/');
     await settle(page);
     await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.5));
@@ -227,15 +230,46 @@ test.describe('responsive', () => {
       page.viewportSize()!.width * 0.62,
     );
 
-    const more = page.getByRole('button', { name: 'More sections' });
-    if (testInfo.project.name === 'tablet') {
-      await expect(more).toBeVisible();
-      await more.click();
-      await expect(page.locator('#nav-overflow').getByRole('link', { name: 'Sources', exact: true })).toBeVisible();
-    } else {
-      await expect(more).toBeHidden();
-      await expect(navLink(page, 'Sources')).toBeVisible();
-    }
+    // All nine fit at this width, so nothing is parked out of sight.
+    await expect(navLink(page, 'Sources')).toBeVisible();
+  });
+
+  /**
+   * Below 1024 every section stays in the one list and the capsule scrolls
+   * sideways. The bar used to promote three labels and hide the other six
+   * behind a `⋯` menu; this pins down that they are all still in the bar and
+   * that carrying them costs the capsule no extra width or height.
+   */
+  test('the compact bar scrolls sideways instead of folding into a menu', async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name === 'desktop', 'the desktop bar shows every item outright');
+    await page.goto('/');
+    await settle(page);
+    await page.evaluate(() => window.scrollTo(0, window.innerHeight * 1.5));
+    await page.waitForTimeout(500);
+
+    await expect(page.getByRole('button', { name: 'More sections' })).toHaveCount(0);
+
+    const inBar = page
+      .locator('header')
+      .first()
+      .locator('nav[aria-label="Sections"] ul a[data-nav-id]');
+    await expect(inBar).toHaveCount(9);
+
+    // The list is wider than the capsule that carries it: it scrolls.
+    const scrolls = await page.evaluate(() => {
+      const scroller = document.querySelector('nav[aria-label="Sections"] > div') as HTMLElement;
+      const list = scroller.querySelector('ul') as HTMLElement;
+      return list.scrollWidth > scroller.clientWidth + 1;
+    });
+    expect(scrolls, 'the compact list should overflow its capsule').toBe(true);
+
+    const last = navLink(page, 'Sources');
+    await last.scrollIntoViewIfNeeded();
+    await expect(last).toBeVisible();
+
+    const capsule = await page.locator('nav[aria-label="Sections"]').boundingBox();
+    expect(capsule!.height, 'the capsule must stay one row tall').toBeLessThan(72);
+    expect(capsule!.x + capsule!.width).toBeLessThanOrEqual(page.viewportSize()!.width + 1);
   });
 
   test('the video tier does not prompt visitors to scroll-scrub', async ({ page }, testInfo) => {

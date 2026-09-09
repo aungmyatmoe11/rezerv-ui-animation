@@ -207,21 +207,17 @@ export function navLink(page: Page, label: string): Locator {
 }
 
 /**
- * Click a section in the site nav, opening the compact overflow when the label
- * is not in the visible bar (phone and tablet, below 1024px).
+ * Click a section in the site nav. Every label is in the one list at every
+ * width, but below 1024 it may be parked outside the capsule's scroll window,
+ * so it is scrolled into view before the click.
  */
 export async function clickNav(page: Page, label: string): Promise<void> {
-  const inBar = page
+  const link = page
     .locator('header')
     .first()
     .locator('nav[aria-label="Sections"] ul')
     .getByRole('link', { name: label, exact: true });
 
-  if (await inBar.isVisible()) {
-    await inBar.click();
-    return;
-  }
-
-  await page.getByRole('button', { name: 'More sections' }).click();
-  await page.locator('#nav-overflow').getByRole('link', { name: label, exact: true }).click();
+  await link.scrollIntoViewIfNeeded();
+  await link.click();
 }

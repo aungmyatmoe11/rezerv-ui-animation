@@ -2,8 +2,6 @@
 export interface NavItem {
   id: string;
   label: string;
-  /** High items stay in the compact bar (<1024); normal items live in overflow. */
-  priority: 'high' | 'normal';
 }
 
 /**
@@ -14,22 +12,21 @@ export interface NavItem {
  * Performance, Battery, then Compare. Ultra, Evidence and Sources arrive with
  * waves 3 and 4.
  *
- * Compact nav (<1024): `priority: 'high'` stays in the bar; `normal` collapses
- * into the overflow menu. Three high items is what actually fits beside the
- * wordmark on a phone, and it keeps the tablet capsule from stretching into a
- * hollow bar. The previous bar kept all nine in the scroller, so the sections
- * capsule grew past the wordmark on mobile and spanned the leftover row on tablet.
+ * Every item is in the bar at every width. The compact layout used to promote
+ * three of them and fold the rest behind a `⋯` menu, which hid two thirds of the
+ * page behind a popover on the devices with the least patience for one; below
+ * 1024 the capsule is a horizontal scroller instead.
  */
 export const NAV_ITEMS: readonly NavItem[] = [
-  { id: 'colors', label: 'Colors', priority: 'high' },
-  { id: 'design', label: 'Design', priority: 'high' },
-  { id: 'camera', label: 'Camera', priority: 'high' },
-  { id: 'performance', label: 'Performance', priority: 'normal' },
-  { id: 'battery', label: 'Battery', priority: 'normal' },
-  { id: 'ultra', label: 'Ultra', priority: 'normal' },
-  { id: 'compare-ultra', label: 'Compare', priority: 'normal' },
-  { id: 'evidence', label: 'Evidence', priority: 'normal' },
-  { id: 'sources', label: 'Sources', priority: 'normal' },
+  { id: 'colors', label: 'Colors' },
+  { id: 'design', label: 'Design' },
+  { id: 'camera', label: 'Camera' },
+  { id: 'performance', label: 'Performance' },
+  { id: 'battery', label: 'Battery' },
+  { id: 'ultra', label: 'Ultra' },
+  { id: 'compare-ultra', label: 'Compare' },
+  { id: 'evidence', label: 'Evidence' },
+  { id: 'sources', label: 'Sources' },
 ] as const;
 
 export const DISCLAIMER =

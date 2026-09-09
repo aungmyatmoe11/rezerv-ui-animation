@@ -120,8 +120,10 @@
 }
 
 /* ---- sections ------------------------------------------------------------- */
-/* Hug the items. `flex: 1` stretched this capsule across the leftover row, so
-   on tablet a handful of labels sat in a hollow glass bar over the page. */
+/* Hug the items on desktop, where all nine fit. `flex: 1` stretched this capsule
+   across the leftover row, so on tablet a handful of labels sat in a hollow
+   glass bar over the page. Below 1024 the same capsule is the scroll track for
+   the whole list, so there it takes the row that is left beside the wordmark. */
 .links {
   @include capsule;
   position: relative;
@@ -129,12 +131,20 @@
   width: max-content;
   max-width: 100%;
   min-width: 0;
-  padding: 5px;
-  overflow: visible;
+  overflow: hidden;
+
+  @include compact-nav {
+    flex: 1 1 auto;
+    width: auto;
+  }
 }
 
 .scroller {
   min-width: 0;
+  /* The capsule's inset lives here rather than on `.links`: this is the element
+     that clips, so a focused link's 3px outline needs the room on this side of
+     it. */
+  padding: 5px;
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scrollbar-width: none;
@@ -142,9 +152,11 @@
 
   &::-webkit-scrollbar { display: none; }
 
-  /* Fade the ends only where the three compact labels can still overflow. */
-  @include mobile-only {
+  /* The list runs past both ends of the capsule below 1024, so it says so:
+     labels dissolve into the edge instead of being cut off at it. */
+  @include compact-nav {
     mask-image: linear-gradient(90deg, transparent, #000 18px, #000 calc(100% - 18px), transparent);
+    scroll-padding-inline: 18px;
   }
 
   @include desktop-up { overflow: visible; }
@@ -192,121 +204,6 @@
   &:focus-visible { @include focus-ring; }
 }
 
-/* ---- compact nav (<1024) ------------------------------------------------- */
-.highPriority { /* Always in the bar. */ }
-
-.normalPriority {
-  @include compact-nav { display: none; }
-}
-
-.mobileOnly {
-  @include desktop-up { display: none; }
-}
-
-.moreButton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
-  padding: 7px 13px;
-  border-radius: 999px;
-  color: var(--bone-faint);
-  background: transparent;
-  transition:
-    color var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out),
-    transform var(--dur-hover) var(--ease-out);
-
-  @include hover-motion {
-    &:hover {
-      color: var(--bone);
-      background: rgba(237, 234, 228, 0.06);
-    }
-  }
-
-  &:active { transform: scale(0.97); }
-
-  &[aria-expanded='true'],
-  &[data-active='true'] {
-    color: var(--bone);
-    background: rgba(237, 234, 228, 0.08);
-  }
-}
-
-.moreIcon {
-  font-size: 1.125rem;
-  line-height: 1;
-  letter-spacing: 0.1em;
-}
-
-/* Grows out of the corner the `⋯` button sits in, rather than appearing from
-   nowhere in the middle of itself. Resting state is `visibility: hidden` so the
-   closed menu is never painted and its links stay out of the tab order — the
-   same arrangement #scroll-veil uses, and for the same reason: `display: none`
-   would give the opacity tween no starting value to leave from. */
-.overflowMenu {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  min-width: 140px;
-  padding: 6px;
-  @include capsule;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  z-index: 100;
-
-  opacity: 0;
-  visibility: hidden;
-  transform: scale(0.96);
-  transform-origin: top right;
-  transition:
-    opacity var(--dur-fast) var(--ease-out),
-    transform var(--dur-fast) var(--ease-out),
-    visibility 0s linear var(--dur-fast);
-
-  @include desktop-up { display: none; }
-
-  &[data-open='true'] {
-    opacity: 1;
-    visibility: visible;
-    transform: none;
-    transition:
-      opacity var(--dur-fast) var(--ease-out),
-      transform var(--dur-fast) var(--ease-out),
-      visibility 0s;
-  }
-}
-
-.overflowLink {
-  display: block;
-  padding: 10px 14px;
-  border-radius: 8px;
-  @include t-mono;
-  text-transform: none;
-  color: var(--bone-faint);
-  background: transparent;
-  transition:
-    color var(--dur-fast) var(--ease-out),
-    background-color var(--dur-fast) var(--ease-out),
-    transform var(--dur-hover) var(--ease-out);
-
-  @include hover-motion {
-    &:hover {
-      color: var(--bone);
-      background: rgba(237, 234, 228, 0.06);
-    }
-  }
-
-  &:active { transform: scale(0.97); }
-
-  &[data-active='true'] {
-    color: var(--bone);
-    background: rgba(237, 234, 228, 0.1);
-  }
-}
-
 /* ---- page progress -------------------------------------------------------- */
 /* A single hairline along the very top of the viewport. It sits outside the
    capsules on purpose: page progress is about the page, not about the nav. */
@@ -324,16 +221,11 @@
 /* ---- reduced motion ------------------------------------------------------- */
 /* global.scss ကတိုချုံ့ပေးသည်မှာ duration သာဖြစ်ပြီး ရွေ့လျားမှုကို component
    အလိုက် ဖယ်ရသည် — ဤဖိုင်သည် နောက်ဆုံးအထိ ကျန်နေခဲ့သည့်တစ်ခုဖြစ်သည်။
-   Nav နှင့် menu တို့သည် ပေါ်လာ/ပျောက်သွားဆဲဖြစ်ပြီး ခရီးမသွားတော့ပါ။ */
+   Nav သည် ပေါ်လာ/ပျောက်သွားဆဲဖြစ်ပြီး ခရီးမသွားတော့ပါ။ */
 @include motion-reduce {
   .nav,
   .nav[data-visible='true'] { transform: none; }
 
   .wordmark,
-  .link,
-  .moreButton,
-  .overflowLink { transform: none; }
-
-  .overflowMenu,
-  .overflowMenu[data-open='true'] { transform: none; }
+  .link { transform: none; }
 }

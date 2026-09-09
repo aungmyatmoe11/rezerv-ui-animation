@@ -124,6 +124,5 @@ export const UI_COPY = {
   loadingLabel: 'Loading the iPhone 18 Pro sequence',
   unofficialBadge: 'Unofficial concept',
   navLabel: 'Sections',
-  moreMenu: 'More sections',
   footerDisclaimer: 'Unofficial concept project. Not affiliated with, sponsored by, or endorsed by Apple Inc. All visuals are independent concept renders.',
 } as const;

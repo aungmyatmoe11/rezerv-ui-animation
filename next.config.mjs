@@ -30,9 +30,15 @@ const SECURITY_HEADERS = [
   // is a commitment about a domain this project does not own yet. Add it once
   // the real origin is known and every subdomain is HTTPS.
   { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains' },
+  // `browsing-topics=()` used to be in this list. Chromium builds without the
+  // Topics API — which is most of them outside Chrome — log
+  // "Unrecognized feature: 'browsing-topics'" on every page load for a
+  // directive that does nothing there, and the site has no ads and no
+  // third-party script for Topics to inform in the builds that do support it.
+  // A console warning on every load was the larger cost.
   {
     key: 'Permissions-Policy',
-    value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()',
+    value: 'camera=(), microphone=(), geolocation=()',
   },
 ];
 
