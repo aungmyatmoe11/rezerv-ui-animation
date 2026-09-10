@@ -20,8 +20,8 @@ export const FRAME_COUNTS = {
   'camera-sensor': 104,
   'a20-pro': 120,
   'pro-vs-promax': 48,
-  'ultra-hero': 100,
-  'ultra-colors': 64,
+  'duo-hero': 100,
+  'duo-colors': 64,
   fold: 120,
 } as const;
 
@@ -30,7 +30,7 @@ export const FRAME_COUNTS = {
  * does not change its URL, so a returning tab keeps the old bytes. Bump this
  * when Display (or any) sequence is regenerated locally.
  */
-export const MEDIA_REV = 'd2560b';
+export const MEDIA_REV = 'c4f9b2';
 
 /**
  * ဖိုင်များထဲမှ ဘယ်ဖရိမ်ကစပြီး ဖွင့်မလဲ (0-based)။
@@ -59,9 +59,11 @@ export function playedFrames(slug: ScrubSlug): { start: number; count: number } 
  * keeps using this table. Every clip including the hero has that sibling.
  *
  * Heights vary because five clips are cropped to clear a watermark band
- * (docs/ASSET_INVENTORY.md §1). Only the RATIO is consumed, by that stacked
- * layout, where a film is shown at its own aspect instead of being cover-cropped
- * into a portrait viewport.
+ * (docs/ASSET_INVENTORY.md §1). `duo-transition` plays `rotate.mp4`: a 16:9
+ * unfold cut (1920×1080) from the YouTube Duo plate, not the 2:1 Duo-colours
+ * turn. Only the RATIO is consumed, by that stacked layout, where a film is
+ * shown at its own aspect instead of being cover-cropped into a portrait
+ * viewport.
  */
 export const CLIP_SIZE = {
   hero: [3840, 2160],
@@ -76,12 +78,12 @@ export const CLIP_SIZE = {
   'a20-pro': [2880, 1440],
   'c2-modem': [2880, 1440],
   battery: [2880, 1208],
-  'ultra-transition': [2880, 1440],
-  'ultra-hero': [2880, 1440],
+  'duo-transition': [1920, 1080],
+  'duo-hero': [2880, 1440],
   fold: [2880, 1440],
   thickness: [2880, 1208],
-  'ultra-touch': [2880, 1440],
-  'ultra-colors': [2880, 1440],
+  'duo-touch': [2880, 1440],
+  'duo-colors': [2880, 1440],
 } as const satisfies Record<string, readonly [number, number]>;
 
 export type ClipSlug = keyof typeof CLIP_SIZE;
@@ -91,6 +93,17 @@ export type ScrubSlug = Extract<ClipSlug, keyof typeof FRAME_COUNTS>;
 export function clipAspect(slug: ClipSlug): string {
   const [w, h] = CLIP_SIZE[slug];
   return `${w} / ${h}`;
+}
+
+/**
+ * The same ratio as a bare number, for CSS that has to size a clip against the
+ * VIEWPORT HEIGHT rather than its container's width. `aspect-ratio` alone
+ * cannot do that: with a definite width it derives the height, and a
+ * `max-height` then crops rather than narrowing the box.
+ */
+export function clipRatio(slug: ClipSlug): number {
+  const [w, h] = CLIP_SIZE[slug];
+  return w / h;
 }
 
 /**
@@ -123,6 +136,12 @@ export const MOBILE_CLIP_WIDTH = 1280;
  * unique 3.25s (ဖုန်းသုံးလုံး → 6.9″ panel) ကို ဖြတ်ထားသည်။ Colors ရှေ့ပိုင်း
  * နှင့် 48MP camera အမြီး မပါ။
  *
+ * `duo-transition` ၏ delivery ဖိုင်သည် `rotate` — YouTube Duo 1080p မှ
+ * 1.00s–13.00s cut (12s၊ အသံမပါ)။ Intro၊ Duo title၊ လက်ထဲ ဖွင့်ပြ အထိ။
+ * Slug `duo-transition` နှင့် ဖိုင်အမည် `rotate` ကို ထိန်းထားသည်: tests နှင့်
+ * immutable `/video` cache contract က ဒီ URL ကို မျှော်လင့်သည်။ Fold
+ * section က `fold.mp4` ကို သီးသန့် scrub အဖြစ် ဆက်သုံးသည်။
+ *
  * ဖိုင်အမည်အသစ်ဖြစ်ရသည်မှာ မဖြစ်မနေလိုအပ်ချက်ဖြစ်သည်: /video သည် `immutable`
  * ဖြင့် serve လုပ်ထားသဖြင့် အမည်ဟောင်းကို အကြောင်းအရာအသစ်ဖြင့်အစားထိုးလျှင်
  * ပြန်လာသောဧည့်သည်သည် clip ဟောင်းကိုပင် ဆက်ရနေမည် — width ကို ဖိုင်အမည်တွင်
@@ -130,6 +149,7 @@ export const MOBILE_CLIP_WIDTH = 1280;
  */
 const CLIP_FILES: Partial<Record<ClipSlug, string>> = {
   display: 'display-panel',
+  'duo-transition': 'rotate',
 };
 
 const clipFile = (slug: ClipSlug): string => CLIP_FILES[slug] ?? slug;

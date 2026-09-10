@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { MOBILE_CLIP_WIDTH } from '../src/data/media';
 import { settle } from './helpers/metrics';
 
 /** Scroll a heading into view and let its section settle. */
@@ -154,9 +155,50 @@ test.describe('fold captions', () => {
     const bothLit = mid.every((r) => r.opacity > 0.35);
     expect(bothLit, `double-exposure at the swap: ${JSON.stringify(mid)}`).toBe(false);
   });
+
+  test('the open caption sits below the inner display', async ({ page }, testInfo) => {
+    test.setTimeout(150_000);
+    test.skip(testInfo.project.name === 'mobile', 'stacked under the clip, not over it');
+
+    await page.goto('/');
+    await settle(page);
+
+    const caption = page.getByText('One device. Two states.');
+    await caption.scrollIntoViewIfNeeded();
+    const section = page.locator('section').filter({ hasText: 'One device. Two states.' });
+    await section.evaluate((el) => {
+      const spacer = (el.parentElement?.classList.contains('pin-spacer')
+        ? el.parentElement
+        : el) as HTMLElement;
+      spacer.scrollIntoView({ block: 'start' });
+    });
+    const span = await section.evaluate((el) => {
+      const spacer = (el.parentElement?.classList.contains('pin-spacer')
+        ? el.parentElement
+        : el) as HTMLElement;
+      return spacer.offsetHeight;
+    });
+    await page.evaluate((y) => window.scrollBy(0, y), Math.round(span * 0.88));
+    await page.waitForTimeout(500);
+
+    const gap = await section.evaluate((root) => {
+      const canvas = root.querySelector('canvas');
+      const copy = root.querySelector('[data-state="open"]');
+      if (!canvas || !copy) return null;
+      const picY = Number.parseFloat(canvas.style.getPropertyValue('--pic-y')) || 0;
+      const picH = Number.parseFloat(canvas.style.getPropertyValue('--pic-h')) || 0;
+      const cr = canvas.getBoundingClientRect();
+      const pictureBottom = cr.top + picY + picH;
+      const textTop = copy.getBoundingClientRect().top;
+      return textTop - pictureBottom;
+    });
+
+    expect(gap, 'open caption or canvas missing').not.toBeNull();
+    expect(gap!, `caption overlaps the picture by ${-gap!}px`).toBeGreaterThanOrEqual(-8);
+  });
 });
 
-test.describe('ultra finishes', () => {
+test.describe('duo finishes', () => {
   test('the film edges are feathered against the page', async ({ page }, testInfo) => {
     test.setTimeout(150_000);
     test.skip(testInfo.project.name === 'mobile', 'no canvas on the video tier');
@@ -232,5 +274,95 @@ test.describe('ultra finishes', () => {
     await expect(page.getByRole('radio', { name: 'Indigo' })).toBeChecked();
 
     await expect(page.getByRole('heading', { name: 'Indigo' })).toBeVisible();
+  });
+});
+
+test.describe('duo naming', () => {
+  test('the page never prints the retired product name', async ({ page }) => {
+    test.setTimeout(120_000);
+    await page.goto('/');
+    await settle(page);
+    const body = await page.locator('body').innerText();
+    expect(body).not.toMatch(/iPhone Ultra/i);
+  });
+
+  test('the act-break film is the rotate plate', async ({ page }, testInfo) => {
+    test.setTimeout(120_000);
+    await page.goto('/');
+    await settle(page);
+
+    await page.getByText('But Pro may not be the top of the line anymore.').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(600);
+
+    const src = await page
+      .locator('p')
+      .filter({ hasText: 'But Pro may not be the top of the line anymore.' })
+      .locator('xpath=following::video[1]/source')
+      .getAttribute('src');
+
+    expect(src, src ?? 'missing source').toBeTruthy();
+    if (testInfo.project.name === 'mobile') {
+      expect(src).toContain(`/video/rotate-${MOBILE_CLIP_WIDTH}.mp4`);
+    } else {
+      expect(src).toMatch(/\/video\/rotate\.mp4/);
+      expect(src).not.toContain(`rotate-${MOBILE_CLIP_WIDTH}.mp4`);
+    }
+  });
+
+  test('the act-break card fits the viewport and plays the 12s cut', async ({ page }) => {
+    test.setTimeout(120_000);
+    await page.goto('/');
+    await settle(page);
+
+    const lead = page.getByText('But Pro may not be the top of the line anymore.');
+    const follow = page.getByText('A new form factor is coming into focus.');
+    await lead.scrollIntoViewIfNeeded();
+    await expect(lead).toBeVisible();
+    await expect(follow).toBeVisible();
+
+    const section = lead.locator('xpath=ancestor::section[1]');
+    const video = section.locator('video');
+    await expect(video).toBeVisible();
+
+    const viewport = page.viewportSize()!;
+    const metrics = await section.evaluate((root, viewW) => {
+      const stage = root.querySelector('[data-stage]');
+      const film = root.querySelector('video');
+      if (!stage || !film) return null;
+      const sr = stage.getBoundingClientRect();
+      const lines = [...root.querySelectorAll('p')].map((p) => ({
+        overflow: p.scrollWidth - p.clientWidth > 1,
+        opacity: getComputedStyle(p).opacity,
+      }));
+      return {
+        stageW: sr.width,
+        stageH: sr.height,
+        stageX: sr.x,
+        aspect: sr.width / sr.height,
+        overflowX: document.documentElement.scrollWidth > viewW + 1,
+        lineOverflow: lines.some((l) => l.overflow),
+        duration: (film as HTMLVideoElement).duration,
+        opacity: getComputedStyle(stage).opacity,
+      };
+    }, viewport.width);
+
+    expect(metrics, 'act-break stage missing').toBeTruthy();
+    expect(metrics!.stageX).toBeGreaterThanOrEqual(-1);
+    expect(metrics!.stageX + metrics!.stageW).toBeLessThanOrEqual(viewport.width + 1);
+    expect(metrics!.stageW).toBeLessThanOrEqual(viewport.width);
+    expect(metrics!.aspect).toBeGreaterThan(1.7);
+    expect(metrics!.aspect).toBeLessThan(1.86);
+    expect(metrics!.overflowX, 'act-break pushed the page wider than the viewport').toBe(false);
+    expect(metrics!.lineOverflow, 'act-break headline overflowed its box').toBe(false);
+
+    await expect
+      .poll(async () => {
+        await lead.scrollIntoViewIfNeeded();
+        return video.evaluate((el) => (el as HTMLVideoElement).duration);
+      })
+      .toBeGreaterThan(11);
+    await expect
+      .poll(async () => video.evaluate((el) => (el as HTMLVideoElement).duration))
+      .toBeLessThan(13);
   });
 });

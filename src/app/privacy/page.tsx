@@ -4,7 +4,7 @@ import styles from './privacy.module.scss';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
-  description: 'Privacy policy for the iPhone 18 Pro & Ultra concept site.',
+  description: 'Privacy policy for the iPhone 18 Pro & Duo concept site.',
   alternates: { canonical: '/privacy' },
 };
 

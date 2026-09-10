@@ -5,7 +5,7 @@ import { ConfidenceBadge } from '@/components/ConfidenceBadge';
 import { ScrubStage, useScrubTimeline } from '@/components/ScrubStage';
 import { Section } from '@/components/Section';
 import { SectionHead } from '@/components/SectionHead';
-import { CREASE, FOLD_STATES } from '@/data/ultra';
+import { CREASE, FOLD_STATES } from '@/data/duo';
 import styles from './Fold.module.scss';
 
 const ALT =
@@ -30,7 +30,8 @@ export function Fold() {
         pinVh={2.8}
         smoothing={0.13}
         fit="contain"
-        mediaHeight={0.86}
+        mediaHeight={0.68}
+        mediaAlign="start"
         videoLayout="stacked"
         hint="Scroll to open · scroll up to refold"
       >

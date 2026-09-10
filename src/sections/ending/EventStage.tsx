@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useMotionPolicy } from '@/lib/motion/motionPolicy';
-import { APPLE_EVENT } from '@/data/ultra';
+import { APPLE_EVENT } from '@/data/duo';
 import { EventTheatre } from './EventTheatre';
 import styles from './EventStage.module.scss';
 

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { gsap, useGSAP } from '@/lib/motion/gsap';
 import { useMotionPolicy } from '@/lib/motion/motionPolicy';
-import { APPLE_EVENT } from '@/data/ultra';
+import { APPLE_EVENT } from '@/data/duo';
 import styles from './EventTheatre.module.scss';
 
 /**

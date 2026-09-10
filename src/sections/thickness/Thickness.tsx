@@ -7,7 +7,7 @@ import { Section } from '@/components/Section';
 import { SectionHead } from '@/components/SectionHead';
 import { gsap, useGSAP } from '@/lib/motion/gsap';
 import { useMotionPolicy } from '@/lib/motion/motionPolicy';
-import { THICKNESS } from '@/data/ultra';
+import { THICKNESS } from '@/data/duo';
 import styles from './Thickness.module.scss';
 
 const ALT =

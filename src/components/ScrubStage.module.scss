@@ -21,6 +21,11 @@
   transform: translateY(-50%);
 }
 
+.section[data-media-align='start']:not([data-layout='stacked']) .media {
+  top: clamp(52px, 9vh, 80px);
+  transform: none;
+}
+
 .canvas,
 .fallback,
 .holding {
@@ -34,7 +39,7 @@
  * Feather the film into the page.
  *
  * A `contain` frame lands as a rectangle on pure black, and on the brighter
- * clips its edges are plainly visible as hard seams — worst on the Ultra
+ * clips its edges are plainly visible as hard seams — worst on the Duo
  * finishes, where a silver body runs right up to the left edge and the dark one
  * is sliced clean off at the right. The renders were never composed to be cut at
  * those points; they were composed to sit on black.

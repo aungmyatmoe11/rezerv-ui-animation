@@ -6,7 +6,7 @@ import { useMotionPolicy } from '@/lib/motion/motionPolicy';
 import { ConfidenceBadge } from '@/components/ConfidenceBadge';
 import { Section } from '@/components/Section';
 import { SectionHead } from '@/components/SectionHead';
-import { CONFIDENCE_MAP } from '@/data/ultra';
+import { CONFIDENCE_MAP } from '@/data/duo';
 import styles from './ConfidenceMap.module.scss';
 
 /**

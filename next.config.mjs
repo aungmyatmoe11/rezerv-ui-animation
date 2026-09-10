@@ -63,7 +63,7 @@ const nextConfig = {
     // The colour PNGs ship untouched; next/image derives these formats at build time.
     formats: ['image/avif', 'image/webp'],
     // Required from Next 16; declared now so the build stays warning-free.
-    qualities: [82],
+    qualities: [82, 90],
   },
 
   /**

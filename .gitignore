@@ -12,3 +12,8 @@ next-env.d.ts
 
 # Working notes, QA audits, and Lighthouse dumps stay on this machine.
 docs/
+
+# Local encode probes, Playwright CLI dumps — not delivery assets.
+output/
+.playwright-cli/
+.playwright-mcp/

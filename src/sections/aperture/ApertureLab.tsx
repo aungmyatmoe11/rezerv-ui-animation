@@ -108,7 +108,7 @@ const EMPTY_NODES: LiveNodes = { plates: [], subjects: [], veil: null, focus: nu
  * 18px blur တစ်ခုအောက်တွင်ဖြစ်သည်။ ဤ page ၏ တစ်ခုတည်းသော continuous gesture
  * ဖြစ်၍ frame budget အရေးအကြီးဆုံးနေရာလည်းဖြစ်သည်။
  *
- * ယခု drag သည် DOM သို့တိုက်ရိုက်ရေးပြီး (scrollState နှင့် UltraTransition တို့
+ * ယခု drag သည် DOM သို့တိုက်ရိုက်ရေးပြီး (scrollState နှင့် DuoTransition တို့
  * လုပ်သည့်နည်းအတိုင်း)၊ pointer တင်လိုက်မှသာ React state သို့ commit လုပ်သည်။
  * React state သည် slider value, preset ၏ pressed state နှင့် screen reader
  * ဖတ်သော live region တို့အတွက် ကျန်ရှိနေဆဲဖြစ်သည် — ၎င်းတို့သည် အတည်ပြုပြီးသား
@@ -408,7 +408,7 @@ export function ApertureLab() {
                 alt=""
                 fill
                 sizes={SIZES}
-                quality={82}
+                quality={90}
                 priority={plate.id === 'interior'}
                 draggable={false}
               />
@@ -420,7 +420,7 @@ export function ApertureLab() {
                 alt={plate.id === scene.id ? plate.alt : ''}
                 fill
                 sizes={SIZES}
-                quality={82}
+                quality={90}
                 priority={plate.id === 'interior'}
                 draggable={false}
               />

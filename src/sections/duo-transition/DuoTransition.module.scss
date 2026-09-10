@@ -1,0 +1,43 @@
+/* Act break: two lines and a 16:9 unfold get a full viewport to breathe.
+   The pause between the sentences is the point of the section. */
+.wrap {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: clamp(28px, 5vh, 64px);
+  min-height: 88svh;
+  text-align: center;
+
+  @include tablet-up { gap: clamp(36px, 6vh, 88px); }
+}
+
+.line {
+  @include t-sub;
+  font-size: clamp(1.5rem, 3.6vw, 2.75rem);
+  color: var(--bone);
+  max-width: 20ch;
+  text-wrap: balance;
+}
+
+.lineLate { color: var(--bone-dim); }
+
+/* White studio plate on a black page. A border is the frame; no drop shadow
+   (ghost-card). Radius matches other film boxes. Opacity 1 is the visible
+   default so the card is never gated on a class. GSAP ramps autoAlpha on
+   desktop; reduced-motion leaves this rule in charge. */
+.stage {
+  /* 100% of the content shell, not 94vw: vw ignores page gutters and overflowed
+     a 375px phone (24px padding + 94vw > 375). */
+  width: min(100%, 840px, calc(42svh * var(--clip-ratio, 1.7778)));
+  overflow: clip;
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  background: var(--ink-raised);
+  opacity: 1;
+
+  @include desktop-up {
+    width: min(100%, 920px, calc(44svh * var(--clip-ratio, 1.7778)));
+  }
+
+  @include motion-reduce { opacity: 1; }
+}

@@ -4,7 +4,7 @@ import { ConfidenceBadge } from '@/components/ConfidenceBadge';
 import { Section } from '@/components/Section';
 import { SectionHead } from '@/components/SectionHead';
 import { scrollToTop } from '@/lib/motion/scrollTo';
-import { ENDING, SOURCE_TIMELINE, SOURCES } from '@/data/ultra';
+import { ENDING, SOURCE_TIMELINE, SOURCES } from '@/data/duo';
 import { EventStage } from './EventStage';
 import styles from './Ending.module.scss';
 

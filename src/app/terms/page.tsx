@@ -4,7 +4,7 @@ import styles from './terms.module.scss';
 
 export const metadata: Metadata = {
   title: 'Terms of Use',
-  description: 'Terms of use for the iPhone 18 Pro & Ultra concept site.',
+  description: 'Terms of use for the iPhone 18 Pro & Duo concept site.',
   alternates: { canonical: '/terms' },
 };
 

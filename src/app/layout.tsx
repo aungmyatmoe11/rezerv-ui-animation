@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   creator: SITE.author,
   keywords: [
     'iPhone 18 Pro concept',
-    'iPhone Ultra concept',
+    'iPhone Duo concept',
     'iPhone Fold',
     'Dark Cherry',
     'A20 Pro',

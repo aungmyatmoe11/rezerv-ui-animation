@@ -23,7 +23,7 @@ export const SITE = {
   name: 'iPhone 18 Pro — The Rumor, Reconstructed',
   title: 'iPhone 18 Pro — The Rumor, Reconstructed',
   description:
-    'An unofficial concept reconstruction of the rumoured iPhone 18 Pro and iPhone Ultra, ' +
+    'An unofficial concept reconstruction of the rumoured iPhone 18 Pro and iPhone Duo, ' +
     'built from public reporting and graded by how confident each claim actually is.',
   author: 'Independent concept project',
   ogImage: `/poster/hero.jpg?v=${MEDIA_REV}`,
@@ -69,7 +69,7 @@ export function articleJsonLd() {
     // unconfirmed reporting, not an announcement.
     about: [
       { '@type': 'Thing', name: 'iPhone 18 Pro' },
-      { '@type': 'Thing', name: 'iPhone Ultra' },
+      { '@type': 'Thing', name: 'iPhone Duo' },
     ],
     disambiguatingDescription:
       'Unofficial concept project. Not affiliated with, sponsored by, or endorsed by Apple Inc. ' +

@@ -41,8 +41,8 @@ test.describe('nav', () => {
       'camera',
       'performance',
       'battery',
-      'ultra',
-      'compare-ultra',
+      'duo',
+      'compare-duo',
       'evidence',
       'sources',
     ];
@@ -76,7 +76,7 @@ test.describe('nav', () => {
     });
     await page.waitForTimeout(600);
 
-    const ids = ['colors', 'design', 'camera', 'performance', 'battery', 'ultra', 'evidence', 'sources'];
+    const ids = ['colors', 'design', 'camera', 'performance', 'battery', 'duo', 'evidence', 'sources'];
 
     for (const id of ids) {
       const top = await sectionTop(page, id);

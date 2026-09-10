@@ -190,8 +190,8 @@ export function Hero() {
                   &#8595;
                 </span>
               </a>
-              <a className={styles.ctaGhost} href="#ultra" data-line onClick={onJump('ultra')}>
-                Discover iPhone Ultra
+              <a className={styles.ctaGhost} href="#duo" data-line onClick={onJump('duo')}>
+                Discover iPhone Duo
               </a>
             </div>
           </div>

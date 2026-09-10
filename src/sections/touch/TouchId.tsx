@@ -20,7 +20,7 @@ const STEPS = ['Finger', 'Side button', 'Unlock'] as const;
 export function TouchId() {
   return (
     <FeatureFilm
-      slug="ultra-touch"
+      slug="duo-touch"
       alt={ALT}
       height="full"
       place="bottom-start"

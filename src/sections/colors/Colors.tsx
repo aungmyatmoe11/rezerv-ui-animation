@@ -91,7 +91,7 @@ export function Colors() {
                 width={941}
                 height={1672}
                 sizes="(max-width: 767px) 70vw, (max-width: 1023px) 44vw, 32vw"
-                quality={82}
+                quality={90}
                 data-active={finish.id === active.id}
               />
             ))}

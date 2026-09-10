@@ -66,8 +66,8 @@ export const SECTION_COPY = {
     title: 'Pro and Pro Max.',
     lede: 'Two sizes, otherwise identical cameras, performance and battery per inch.',
   },
-  ultra: {
-    eyebrow: 'iPhone Ultra',
+  duo: {
+    eyebrow: 'iPhone Duo',
     title: 'The foldable.',
     lede: 'A clamshell fold rumoured for 2026. Closed: 5.5″. Open: 7.8″. Thinner than the current Pro, potentially the thinnest iPhone ever made.',
   },
@@ -80,23 +80,23 @@ export const SECTION_COPY = {
     eyebrow: 'Thinness',
     title: 'Under 7 mm. Thinner than any Pro.',
     lede: 'Achieving this while housing a fold mechanism and dual batteries would be a materials and engineering achievement.',
-    alt: 'Side profile concept render showing the iPhone Ultra thinness, under 7 mm, thinner than the current iPhone Pro.',
+    alt: 'Side profile concept render showing the iPhone Duo thinness, under 7 mm, thinner than the current iPhone Pro.',
   },
   touchId: {
     eyebrow: 'Touch ID',
     title: 'Return of Touch ID. Under-display.',
     lede: 'Face ID when open. Touch ID when closed. Dual biometrics for the first time in iPhone.',
-    alt: 'Close-up concept showing under-display Touch ID on the iPhone Ultra cover display.',
+    alt: 'Close-up concept showing under-display Touch ID on the iPhone Duo cover display.',
   },
-  ultraColors: {
-    eyebrow: 'Ultra Finishes',
-    title: 'Silver, Graphite.',
+  duoColors: {
+    eyebrow: 'Duo Finishes',
+    title: 'Silver, Indigo.',
     lede: 'Two finish options measured from early concept renders. A restrained palette for a premium device.',
   },
-  compareUltra: {
-    eyebrow: 'Pro vs Ultra',
+  compareDuo: {
+    eyebrow: 'Pro vs Duo',
     title: 'Different visions.',
-    lede: 'Pro is power and camera in a traditional form. Ultra is portability and screen area via the fold.',
+    lede: 'Pro is power and camera in a traditional form. Duo is portability and screen area via the fold.',
   },
   confidence: {
     eyebrow: 'Evidence',
@@ -113,7 +113,7 @@ export const SECTION_COPY = {
 // Hero copy
 export const HERO_COPY = {
   eyebrow: 'Unofficial concept — September 2026',
-  subtitle: 'iPhone 18 Pro and Ultra. The rumour, reconstructed.',
+  subtitle: 'iPhone 18 Pro and Duo. The rumour, reconstructed.',
   alt: 'Dark Cherry iPhone 18 Pro concept render resolving into an iPhone 18 Pro title card.',
 } as const;
 

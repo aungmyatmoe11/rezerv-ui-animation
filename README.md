@@ -2,7 +2,7 @@
 
 **Live:** [https://rezerv-ui-animation.vercel.app](https://rezerv-ui-animation.vercel.app)
 
-An unofficial concept recap of the rumoured **iPhone 18 Pro** and **iPhone Ultra**, built as one
+An unofficial concept recap of the rumoured **iPhone 18 Pro** and **iPhone Duo**, built as one
 animation-heavy landing page.
 
 > **Not an Apple product.** Not affiliated with, sponsored by, or endorsed by Apple Inc.
@@ -15,7 +15,7 @@ animation-heavy landing page.
 
 Apple’s **Surprise and Shine** event is on **Wednesday, 9 September 2026** (10:00 AM PT). The
 rumour mill for that keynote is the iPhone 18 Pro / Pro Max refresh and Apple’s first foldable,
-widely discussed as **iPhone Ultra**.
+widely discussed as **iPhone Duo**.
 
 This repo is a **pre-event recap**: pull the leaked films and stills, the reporting, and the
 confidence of each claim into one vertical page so the hardware story can be *watched* instead of
@@ -68,7 +68,7 @@ than borrowed wholesale.
 | [Apple Vision Pro](https://www.apple.com/apple-vision-pro/) | Keeping one product visually dominant while the copy around it changes | The pinned scrubs: the plate holds, the callouts arrive and leave |
 | [Apple AirPods Pro](https://www.apple.com/airpods-pro/) | Short headline plus one close-up doing the explaining | Section heads are one line; the film carries the argument |
 | [Apple MacBook Pro](https://www.apple.com/macbook-pro/) | Performance presented as a claim with a number attached, not a spec table | The A20 section and *Pro vs Pro Max* |
-| [F1 Keyboard](https://keyboard.framer.media/) | A product page paced as a film — chapters instead of a scroll of blocks | The three-act structure and the Ultra transition between them |
+| [F1 Keyboard](https://keyboard.framer.media/) | A product page paced as a film — chapters instead of a scroll of blocks | The three-act structure and the Duo transition between them |
 | [GSAP ScrollTrigger](https://gsap.com/docs/v3/Plugins/ScrollTrigger/) · [image-sequence scrub](https://gsap.com/docs/v3/HelperFunctions/helpers/imageSequenceScrub/) | The documented pin-and-scrub model, and the canvas frame-sequence pattern | `useScrubSequence` — hand-written rather than the helper, because overlays had to scrub off the *painted* frame and the loader had to survive a partial set |
 
 Apple's product pages were read for structure and pacing only. No markup, asset, stylesheet or
@@ -119,13 +119,13 @@ a 2.4s count-chase plus a 1.1s brand beat (1.2s / 0.7s on repeat). It caps at 8s
 | 09 | **Connectivity** | Contained film + C1 / C1X / C2 lineage cards |
 | 10 | **Battery** | Contained film beside the argument |
 | 11 | **Pro vs Pro Max** | Pinned scrub, 48 frames, plus a comparison table |
-| 12 | **Ultra transition** | The only bright clip — bordered card, never full-bleed |
-| 13 | **Ultra hero** | Pinned scrub, 100 frames; wireframe resolves, spec cards land on the film |
+| 12 | **Duo transition** | `rotate.mp4` 12s cut, 00:01–00:13 (white studio, 16:9 card, contain-fit) |
+| 13 | **Duo hero** | Pinned scrub, 100 frames; wireframe resolves, spec cards land on the film |
 | 14 | **Fold** | Pinned scrub, 120 frames; 5.5″ closed → 7.8″ open, caption swaps at the midpoint |
 | 15 | **Thickness** | Full-bleed film |
 | 16 | **Touch ID** | Full-bleed film |
-| 17 | **Ultra colours** | Pinned scrub, 64 frames + two-option picker |
-| 18 | **Pro vs Ultra** | DOM comparison |
+| 17 | **Duo colours** | Pinned scrub, 64 frames + two-option picker |
+| 18 | **Pro vs Duo** | DOM comparison |
 | 19 | **Confidence map** | Eight bars of how much each claim can actually carry |
 | 20 | **Ending and sources** | Timeline, citations, Apple Event embed |
 
@@ -179,7 +179,7 @@ tablet wait on the 4K file buffering. On a phone the curtain opens on the **post
 `hero-1280.mp4` plays after unlock.
 
 **2. Canvas frame-sequence scrub** — eight of them: colours, display, camera sensor, A20 Pro,
-Pro vs Pro Max, Ultra hero, fold, Ultra colours. Scroll picks a JPEG and paints it; scroll-up
+Pro vs Pro Max, Duo hero, fold, Duo colours. Scroll picks a JPEG and paints it; scroll-up
 walks the index back, so the film reverses.
 
 - **Nearest frame.** One still per paint. Cross-dissolving adjacent frames stacked two poses on a
@@ -304,7 +304,7 @@ are `immutable` — change content, change the filename (`MEDIA_REV` or a new na
 |---|---|
 | 18 H.264 clips, native, CRF 24 | 26.5 MB. Hero is 3840×2160 / 2.5 MB. Lazy clips wait until the section is near |
 | 18 H.264 clips, 1280 px, same CRF | 7.6 MB including `hero-1280.mp4` (0.37 MB). Phone / lite tier. SSIM 0.995 vs native (battery) |
-| 8 frame sequences (668 frames) | ~23 MB, lazy on approach, **never on mobile**. Display is 56×2560; the other seven are 1600 px |
+| 8 frame sequences (668 frames) | lazy on approach, **never on mobile**. All eight sequences are 2560 px wide |
 | 18 posters, 1920 px | 0.9 MB — the eager stills |
 | 4 device PNGs | 5.6 MB, `next/image` as AVIF/WebP |
 
@@ -316,7 +316,7 @@ are `immutable` — change content, change the filename (`MEDIA_REV` or a new na
 | Tablet 834×1112 | ~36.7 MB | 8 | 10 |
 | Desktop 1440×900 | ~36.7 MB | 8 | 10 |
 
-First Load JS ~190 kB for `/` (103 kB shared), GSAP included. Ultra act + ending are
+First Load JS ~190 kB for `/` (103 kB shared), GSAP included. Duo act + ending are
 `next/dynamic()`.
 
 **Scrub cost** (camera-sensor, 104 frames, 2880×1440, 11.9 MB, scripted pin): median 6.9 ms,
@@ -389,7 +389,9 @@ After deploy:
 
 ## Accessibility
 
-- Ultra’s white clip stays in a bordered card (WCAG 2.3.1 flash risk if it went full-viewport).
+- The Duo act break carries no flash risk: its clip is lit content on black, and the encode fades
+  in and out of black so the loop seam does not jump (mean luminance delta 0.5/255, was 61.3).
+  The bordered card that used to contain a full-frame white clip went with that clip.
 - Preloader is `role="progressbar"` with live `aria-valuenow`.
 - Colour pickers are native radio groups.
 - Confidence is never colour alone.
@@ -413,7 +415,7 @@ They assert what a visitor would notice, not implementation detail:
 | `scroll` | Document height never changes while scrolling; frame pacing holds through the pins; a long nav jump lands on target instead of travelling through the page; reload starts at the top, hash or no hash |
 | `responsive` | Phones fetch the 1280 encodes and wider viewports do not; nothing scrolls sideways; the video tier never invites a visitor to scroll-scrub; `will-change` is promoted only while a stage is pinned |
 | `nav` | Items in scroll order, never more than one highlighted, keyboard operable, and the address bar never gains a hash |
-| `sections` | The thickness band feathers and opens; fold captions never share a cell; Ultra finishes keep their treatment and their picker |
+| `sections` | The thickness band feathers and opens; fold captions never share a cell; Duo finishes keep their treatment and their picker |
 | `aperture` | The photograph stops down at f/4; switching scenes leaves exactly one plate visible |
 | `part1-fixes` | Regression pins: no `role="img"` on named videos, poster preload shares `MEDIA_REV`, callout contrast ≥ 4.5:1, a missing frame set keeps its pin spacer, reduced motion opens on the poster |
 
@@ -430,7 +432,9 @@ change more often than the layout, so snapshots would mostly encode churn.
 
 All moving images are original concept renders, not third-party commercial footage.
 
-- Watermarks cropped off five clips; frame-grabs at those timestamps to confirm no residue.
+- Watermarks cropped off six clips; frame-grabs at those timestamps to confirm no residue.
+  Side-cropped plates keep the caption and logo level with the open display; a bottom crop
+  would take the dock row with it.
 - Apple logos on the device bodies stay — they cannot be removed without destroying the plate.
   The page discloses: unofficial badge on the hero, concept label in the nav, disclaimer in the
   footer.
@@ -480,7 +484,7 @@ reason something in this repo looks the way it does.
 - Two source clips (`design`, camera zoom) are 0.6 Mbps and show mild macroblocking on dark
   gradients. Drop-in re-exports would fix that.
 - ~20 sections still risk scroll fatigue. Some film overlays go dark-on-dark. Ending is denser
-  than the Ultra act.
+  than the Duo act.
 
 ### The media is the ceiling, not the pipeline
 

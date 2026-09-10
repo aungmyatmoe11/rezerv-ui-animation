@@ -1,8 +1,8 @@
 {
-  "name": "iphone-18-pro-ultra-concept",
+  "name": "iphone-18-pro-duo-concept",
   "version": "1.0.0",
   "private": true,
-  "description": "Unofficial iPhone 18 Pro / iPhone Ultra concept recap — animation-heavy single page.",
+  "description": "Unofficial iPhone 18 Pro / iPhone Duo concept recap — animation-heavy single page.",
   "engines": {
     "node": ">=20"
   },

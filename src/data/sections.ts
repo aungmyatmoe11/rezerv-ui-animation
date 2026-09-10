@@ -9,7 +9,7 @@ export interface NavItem {
  * so the nav can never point at an anchor that is not there.
  *
  * Wave 2 adds the Pro act: nav order is Design, Camera,
- * Performance, Battery, then Compare. Ultra, Evidence and Sources arrive with
+ * Performance, Battery, then Compare. Duo, Evidence and Sources arrive with
  * waves 3 and 4.
  *
  * Every item is in the bar at every width. The compact layout used to promote
@@ -23,8 +23,8 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { id: 'camera', label: 'Camera' },
   { id: 'performance', label: 'Performance' },
   { id: 'battery', label: 'Battery' },
-  { id: 'ultra', label: 'Ultra' },
-  { id: 'compare-ultra', label: 'Compare' },
+  { id: 'duo', label: 'Duo' },
+  { id: 'compare-duo', label: 'Compare' },
   { id: 'evidence', label: 'Evidence' },
   { id: 'sources', label: 'Sources' },
 ] as const;

@@ -4,7 +4,7 @@ import styles from './cookies.module.scss';
 
 export const metadata: Metadata = {
   title: 'Cookie Notice',
-  description: 'Cookie policy for the iPhone 18 Pro & Ultra concept site.',
+  description: 'Cookie policy for the iPhone 18 Pro & Duo concept site.',
   alternates: { canonical: '/cookies' },
 };
 

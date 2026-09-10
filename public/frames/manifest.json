@@ -5,7 +5,7 @@
     "pro-vs-promax":  {
                           "frames":  48
                       },
-    "ultra-hero":  {
+    "duo-hero":  {
                        "frames":  100
                    },
     "display":  {
@@ -20,7 +20,7 @@
     "camera-sensor":  {
                           "frames":  104
                       },
-    "ultra-colors":  {
+    "duo-colors":  {
                          "frames":  64
                      }
 }

@@ -2,24 +2,44 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: clamp(96px, 16vh, 168px);
+  bottom: clamp(48px, 8.5vh, 76px);
   display: grid;
   justify-items: center;
   gap: 12px;
+  isolation: isolate;
   @include content-shell;
   text-align: center;
+
+  /* Keep type off the open inner display. A local veil covers any leftover
+     overlap; the film itself is parked in the top of the stage so this band
+     is mostly page black. */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -28px -12% -12px;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse 78% 88% at 50% 78%,
+      rgba(0, 0, 0, 0.82) 0%,
+      rgba(0, 0, 0, 0.4) 48%,
+      transparent 74%
+    );
+  }
 
   /* Stacked video tier: normal flow under the clip, both states shown at once
      because there is no scroll position to swap them with. */
   &[data-mode='video'] {
     position: static;
     padding-block: 28px 8px;
+
+    &::before { display: none; }
   }
 }
 
 .eyebrow {
   @include t-eyebrow;
-  color: var(--bone-faint);
+  color: var(--bone-dim);
 }
 
 /* The two states occupy the same cell so the swap is a crossfade in place,

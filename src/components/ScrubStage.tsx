@@ -100,6 +100,14 @@ export interface ScrubStageProps {
    */
   mediaHeight?: number;
   /**
+   * Where the inset film sits in the pinned stage.
+   *
+   * `center` is the default product-shot framing. `start` parks the film under
+   * the nav so the letterbox below can hold a caption that must not sit on the
+   * picture — Fold's open home-screen is too bright for white type.
+   */
+  mediaAlign?: 'center' | 'start';
+  /**
    * How the video tier lays out. 'overlay' keeps the viewport-height stage with
    * the content over the clip; 'stacked' shows the clip at its own aspect ratio
    * with the content in normal flow beneath it — for overlays that carry real
@@ -130,6 +138,7 @@ export function ScrubStage({
   smoothing,
   fit = 'cover',
   mediaHeight = 1,
+  mediaAlign = 'center',
   videoLayout = 'overlay',
   hint,
   className,
@@ -176,6 +185,7 @@ export function ScrubStage({
       className={`${styles.section} ${className ?? ''}`}
       data-mode={mode}
       data-fit={fit}
+      data-media-align={mediaAlign}
       data-layout={stacked ? 'stacked' : 'overlay'}
     >
       <div

@@ -2,6 +2,9 @@
 # Generate mobile lite video encodes (≤1280w) from source library.
 # 
 # B6 requirement: Mobile tier receives smaller encodes selected by motionPolicy.
+# Live delivery is `public/video/{slug}-1280.mp4` (see videoSrc). This script's
+# `public/video/lite/` output is not fetched by the app.
+
 # This script reads from the source library and outputs to public/video/lite/
 # 
 # Prerequisites:
@@ -59,10 +62,18 @@ CLIPS=(
   "aperture"
   "c2-modem"
   "battery"
-  "ultra-transition"
   "thickness"
-  "ultra-touch"
+  "duo-touch"
 )
+
+# duo-transition is not in that list because its delivery file is `rotate`
+# (CLIP_FILES in src/data/media.ts), served as public/video/rotate.mp4 and
+# public/video/rotate-1280.mp4. Encode the phone sibling from the native plate:
+#
+#   ffmpeg -i public/video/rotate.mp4 \
+#     -vf "scale='min(1280,iw)':-2" \
+#     -c:v libx264 -crf 22 -preset slow -profile:v high -pix_fmt yuv420p \
+#     -movflags +faststart -an public/video/rotate-1280.mp4
 
 encode_clip() {
   local slug=$1

@@ -45,13 +45,12 @@ export function createFrameRenderer(
   const ctx = canvas.getContext('2d', { alpha: false });
   if (!ctx) throw new Error('2D context unavailable');
 
-  // Frames are native resolution (2880px) while the canvas backing store is the
-  // CSS width times DPR, so every draw is a 2x downscale or more. High-quality
-  // resampling of an image that large, twice per paint, was costing 14.5ms per
-  // frame in the camera-sensor scrub. 'low' uses a cheaper filter that is
-  // indistinguishable when minifying, which is the only thing we ever do here.
+  // Frames are native resolution (often 2560–2880px) while the canvas backing
+  // store is CSS width times DPR, so every draw is a downscale. 'medium' is
+  // the sharpness/cost midpoint: 'high' cost 14.5ms per paint on the
+  // camera-sensor scrub; 'low' read soft on retina after the 2560 sequences.
   ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = 'low';
+  ctx.imageSmoothingQuality = 'medium';
 
   const count = frames.images.length;
   const lastIndex = Math.max(1, count - 1);
@@ -103,17 +102,11 @@ export function createFrameRenderer(
     /**
      * Never build a backing store the source cannot fill.
      *
-     * The frames are 1600px wide. On a 1440px stage at DPR 2 the old cap gave a
-     * 2880px backing store, into which `cover`/`contain` then drew the frame at
-     * roughly 3600px — a 2.25x upscale of a 1600px JPEG. That is ~13 megapixels
-     * of fill spent inventing detail that is not in the source, and it was the
-     * largest single cost on the page: measured median frame time through the
-     * pinned run was 50ms, i.e. 20fps.
-     *
-     * Capping the ratio at the point where the frame lands 1:1 removes the
-     * upscale entirely. Nothing is lost — there is no detail above native
-     * resolution to lose — and the fill drops by about 3x. The floor of 1 keeps
-     * a genuinely oversized stage from dropping below CSS resolution.
+     * Older sequences were 1600px wide. On a 1440px stage at DPR 2 the old cap
+     * gave a 2880px backing store, into which `cover`/`contain` then drew the
+     * frame at roughly 3600px — a 2.25x upscale of a 1600px JPEG. Capping the
+     * ratio at 1:1 removes that upscale. The floor of 1 keeps a genuinely
+     * oversized stage from dropping below CSS resolution.
      */
     const fitScale =
       fit === 'contain'

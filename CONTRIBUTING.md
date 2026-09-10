@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for your interest in contributing. This is an unofficial iPhone 18 Pro / iPhone Ultra
+Thank you for your interest in contributing. This is an unofficial iPhone 18 Pro / iPhone Duo
 concept recap — animation-heavy, research-based, not an Apple product.
 
 ## Getting Started
